@@ -10,3 +10,7 @@ If you want to say thank you and/or support the active development of [Durudex](
 
 ## ⚠️ License
 Copyright © 2021 [Durudex](https://github.com/Durudex). Released under the [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html) license.
+
+#### Third-party library licenses
++ [fiber](https://github.com/gofiber/fiber/blob/master/LICENSE)
++ [zerolog](https://github.com/rs/zerolog/blob/master/LICENSE)
