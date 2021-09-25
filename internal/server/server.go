@@ -18,6 +18,7 @@
 package server
 
 import (
+	"github.com/Durudex/durudex-gateway/internal/config"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -27,9 +28,11 @@ type Server struct {
 }
 
 // Creating a new server.
-func NewServer() *Server {
+func NewServer(cfg *config.Config) *Server {
 	return &Server{
-		httpApp: fiber.New(fiber.Config{}),
+		httpApp: fiber.New(fiber.Config{
+			AppName: cfg.HTTP.AppName,
+		}),
 	}
 }
 

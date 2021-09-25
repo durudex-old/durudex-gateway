@@ -19,7 +19,9 @@ package main
 
 import "github.com/Durudex/durudex-gateway/internal/gateway"
 
+const configPath = "configs/main"
+
 // The main function that running the gateway application.
 func main() {
-	gateway.Run()
+	gateway.Run(configPath)
 }

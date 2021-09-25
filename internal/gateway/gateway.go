@@ -18,16 +18,33 @@
 package gateway
 
 import (
+	"os"
+	"os/signal"
+	"syscall"
+
+	"github.com/Durudex/durudex-gateway/internal/config"
 	"github.com/Durudex/durudex-gateway/internal/server"
 	"github.com/rs/zerolog/log"
 )
 
 // Run durudex gateway application.
-func Run() {
+func Run(configPath string) {
+	// Initialize config.
+	cfg := config.Init(configPath)
+
 	// Create and run server.
-	srv := server.NewServer()
+	srv := server.NewServer(cfg)
 	go func() {
-		srv.Run(":8080")
-		log.Debug().Msg("Durudex Gateway started!")
+		srv.Run(cfg.HTTP.Addr)
 	}()
+
+	// Quit in application.
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	// Stoping server.
+	srv.Stop()
+
+	log.Info().Msg("Durudex Gateway stoping!")
 }
