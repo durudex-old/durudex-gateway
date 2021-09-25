@@ -17,5 +17,17 @@
 
 package gateway
 
+import (
+	"github.com/Durudex/durudex-gateway/internal/server"
+	"github.com/rs/zerolog/log"
+)
+
 // Run durudex gateway application.
-func Run() {}
+func Run() {
+	// Create and run server.
+	srv := server.NewServer()
+	go func() {
+		srv.Run(":8080")
+		log.Debug().Msg("Durudex Gateway started!")
+	}()
+}

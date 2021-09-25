@@ -17,5 +17,9 @@
 
 package main
 
+import "github.com/Durudex/durudex-gateway/internal/gateway"
+
 // The main function that running the gateway application.
-func main() {}
+func main() {
+	gateway.Run()
+}
