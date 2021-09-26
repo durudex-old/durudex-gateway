@@ -16,3 +16,4 @@ Copyright © 2021 [Durudex](https://github.com/Durudex). Released under the [GNU
 + [zerolog](https://github.com/rs/zerolog/blob/master/LICENSE)
 + [viper](https://github.com/spf13/viper/blob/master/LICENSE)
 + [gqlgen](https://github.com/99designs/gqlgen/blob/master/LICENSE)
++ [adaptor](https://github.com/gofiber/adaptor/blob/master/LICENSE)

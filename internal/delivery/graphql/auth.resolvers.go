@@ -26,15 +26,15 @@ import (
 
 type mutationResolver struct{ *Resolver }
 
-// Mutation resolver
+// Mutation resolver.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
-// Sign Up resolver
+// Sign Up resolver.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error) {
 	return &model.SignUp{}, nil
 }
 
-// Sign In resolver
+// Sign In resolver.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error) {
 	return &model.SignIn{}, nil
 }
