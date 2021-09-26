@@ -9,6 +9,8 @@ require (
 	github.com/rs/zerolog v1.25.0
 	github.com/spf13/viper v1.9.0
 	github.com/vektah/gqlparser/v2 v2.2.0
+	google.golang.org/grpc v1.41.0
+	google.golang.org/protobuf v1.27.1
 )
 
 require (
@@ -16,6 +18,7 @@ require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gofiber/utils v0.1.2 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -31,8 +34,10 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.30.0 // indirect
 	github.com/valyala/tcplisten v1.0.0 // indirect
+	golang.org/x/net v0.0.0-20210924151903-3ad01bbaa167 // indirect
 	golang.org/x/sys v0.0.0-20210925032602-92d5a993a665 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/text v0.3.7 // indirect
+	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0 // indirect
 	gopkg.in/ini.v1 v1.63.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

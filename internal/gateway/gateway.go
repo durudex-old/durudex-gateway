@@ -24,6 +24,7 @@ import (
 
 	"github.com/Durudex/durudex-gateway/internal/config"
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
 	"github.com/Durudex/durudex-gateway/internal/delivery/http"
 	"github.com/Durudex/durudex-gateway/internal/server"
 	"github.com/Durudex/durudex-gateway/internal/service"
@@ -36,7 +37,8 @@ func Run(configPath string) {
 	cfg := config.Init(configPath)
 
 	// Service, Handlers
-	service := service.NewService()
+	grpcHandler := grpc.NewGRPCHandler()
+	service := service.NewService(grpcHandler)
 	graphqlHandler := graphql.NewGraphQLHandler(service)
 	httpHandler := http.NewHTTPHandler(graphqlHandler)
 
