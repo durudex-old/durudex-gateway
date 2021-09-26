@@ -15,17 +15,11 @@
 	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package graphql
+package service
 
-import "github.com/Durudex/durudex-gateway/internal/service"
+type AuthService struct{}
 
-type Resolver struct {
-	service *service.Service
-}
-
-// Creating a new resolver
-func NewResolver(service *service.Service) *Resolver {
-	return &Resolver{
-		service: service,
-	}
+// Creating a new auth service.
+func NewAuthService() *AuthService {
+	return &AuthService{}
 }

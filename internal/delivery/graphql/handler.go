@@ -23,15 +23,20 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
+	"github.com/Durudex/durudex-gateway/internal/service"
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
-type Handler struct{}
+type Handler struct {
+	service *service.Service
+}
 
 // Creating a new graphql handler.
-func NewGraphQLHandler() *Handler {
-	return &Handler{}
+func NewGraphQLHandler(service *service.Service) *Handler {
+	return &Handler{
+		service: service,
+	}
 }
 
 // Defining the graphql handler.
@@ -39,7 +44,7 @@ func (h *Handler) graphqlHandler() http.HandlerFunc {
 	// NewExecutableSchema and Config are in the generate.go file.
 	// Resolver is in the resolver.go file.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
-		Resolvers: &Resolver{},
+		Resolvers: NewResolver(h.service),
 	}))
 
 	return func(w http.ResponseWriter, r *http.Request) {
