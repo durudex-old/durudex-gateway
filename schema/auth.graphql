@@ -13,13 +13,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-.DEFAULT_GOAL := run
+extend type Mutation {
+  signUp(input: SignUpInput!): SignUp
+  signIn(input: SignInInput!): SignIn
+}
 
-build:
-	go mod download && go build -o .bin/gateway.exe ./cmd/gateway/main.go
+input SignUpInput {
+  username: String!
+  name: String!
+  email: String!
+  password: String!
+  birthday: Time!
+  sex: Int32!
+}
 
-run:
-	go run ./cmd/gateway/main.go
+type SignUp {
+  id: UInt64!
+}
 
-gqlgen:
-	go get -d github.com/99designs/gqlgen && go run github.com/99designs/gqlgen generate --config ./gqlgen.yml
+input SignInInput {
+  username: String!
+  password: String!
+}
+
+type SignIn {
+  token: String!
+}

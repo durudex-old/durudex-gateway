@@ -13,13 +13,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-.DEFAULT_GOAL := run
+schema {
+  mutation: Mutation
+}
 
-build:
-	go mod download && go build -o .bin/gateway.exe ./cmd/gateway/main.go
+type Mutation
 
-run:
-	go run ./cmd/gateway/main.go
-
-gqlgen:
-	go get -d github.com/99designs/gqlgen && go run github.com/99designs/gqlgen generate --config ./gqlgen.yml
+scalar Int32
+scalar UInt64
+scalar Time

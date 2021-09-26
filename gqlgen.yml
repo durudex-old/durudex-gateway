@@ -1,0 +1,52 @@
+# Copyright © 2021 Durudex
+
+# This file is part of Durudex: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# Durudex is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with Durudex. If not, see <https://www.gnu.org/licenses/>.
+
+schema:
+  - schema/*.graphql
+
+exec:
+  filename: internal/delivery/graphql/generated/generated.go
+  package: generated
+
+model:
+  filename: internal/delivery/graphql/model/models_gen.go
+  package: model
+
+# resolver:
+#   layout: follow-schema
+#   dir: internal/delivery/graphql
+#   package: graphql
+
+autobind:
+  - "github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int32:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  UInt64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Uint64
