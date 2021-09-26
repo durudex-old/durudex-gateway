@@ -1,6 +1,8 @@
+![Discord](https://img.shields.io/discord/882288646517035028?label=%F0%9F%92%AC%20discord)
+
 # ⚡️ Durudex Gateway
 
-### ⚙️ Prerequisites
+### 💡 Prerequisites
 + [Go 1.17](https://golang.org/)
 + [grpc](https://grpc.io/docs/languages/go/quickstart/)
 
@@ -8,6 +10,13 @@
 If you want to say thank you and/or support the active development of [Durudex](https://github.com/Durudex):
 1) Add a [GitHub Star](https://github.com/Durudex/durudex-gateway/stargazers) to the project.
 2) Join the [Discord Server](https://discord.gg/4qcXbeVehZ).
+
+## ⚙️ Build & Run
+Create an `.env` file in the root directory and add the following values ​​from `.env.example`:
+```env
+SERVICE_AUTH_ADDRESS=
+```
+Use `make run` to build&run project.
 
 ## ⚠️ License
 Copyright © 2021 [Durudex](https://github.com/Durudex). Released under the [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html) license.
