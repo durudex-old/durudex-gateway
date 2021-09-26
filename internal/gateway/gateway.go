@@ -23,7 +23,10 @@ import (
 	"syscall"
 
 	"github.com/Durudex/durudex-gateway/internal/config"
+	"github.com/Durudex/durudex-gateway/internal/delivery/graphql"
+	"github.com/Durudex/durudex-gateway/internal/delivery/http"
 	"github.com/Durudex/durudex-gateway/internal/server"
+	"github.com/Durudex/durudex-gateway/internal/service"
 	"github.com/rs/zerolog/log"
 )
 
@@ -32,8 +35,13 @@ func Run(configPath string) {
 	// Initialize config.
 	cfg := config.Init(configPath)
 
+	// Service, Handlers
+	service := service.NewService()
+	graphqlHandler := graphql.NewGraphQLHandler(service)
+	httpHandler := http.NewHTTPHandler(graphqlHandler)
+
 	// Create and run server.
-	srv := server.NewServer(cfg)
+	srv := server.NewServer(cfg, httpHandler)
 	go func() {
 		srv.Run(cfg.HTTP.Addr)
 	}()

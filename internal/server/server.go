@@ -19,26 +19,32 @@ package server
 
 import (
 	"github.com/Durudex/durudex-gateway/internal/config"
+	"github.com/Durudex/durudex-gateway/internal/delivery/http"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
 
 type Server struct {
-	httpApp *fiber.App
+	httpApp     *fiber.App
+	httpHandler *http.Handler
 }
 
 // Creating a new server.
-func NewServer(cfg *config.Config) *Server {
+func NewServer(cfg *config.Config, httpHandler *http.Handler) *Server {
 	return &Server{
 		httpApp: fiber.New(fiber.Config{
 			AppName: cfg.HTTP.AppName,
 		}),
+		httpHandler: httpHandler,
 	}
 }
 
 // Run the server at the specified address.
 func (s *Server) Run(addr string) {
 	log.Debug().Msg("Running server...")
+
+	// Initialize http routes.
+	s.httpHandler.InitRoutes(s.httpApp)
 
 	if err := s.httpApp.Listen(addr); err != nil {
 		log.Fatal().Msgf("error running http application: %s", err.Error())
