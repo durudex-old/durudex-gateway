@@ -18,7 +18,7 @@
 build:
 	go mod download && go build -o .bin/gateway.exe ./cmd/gateway/main.go
 
-run:
+run: build
 	go run ./cmd/gateway/main.go
 
 gqlgen:
