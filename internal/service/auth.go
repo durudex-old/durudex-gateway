@@ -17,7 +17,12 @@
 
 package service
 
-import "github.com/Durudex/durudex-gateway/internal/delivery/grpc"
+import (
+	"context"
+
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
+	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+)
 
 type AuthService struct {
 	grpcHandler *grpc.Handler
@@ -28,4 +33,15 @@ func NewAuthService(grpcHandler *grpc.Handler) *AuthService {
 	return &AuthService{
 		grpcHandler: grpcHandler,
 	}
+}
+
+// Sign Up user.
+func (s *AuthService) SignUp(ctx context.Context, input *pb.UserSignUpRequest) (uint64, error) {
+	// Get for auth service.
+	id, err := s.grpcHandler.Auth.SignUp(ctx, input)
+	if err != nil {
+		return 0, err
+	}
+
+	return id.Id, err
 }

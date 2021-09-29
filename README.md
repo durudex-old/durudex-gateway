@@ -1,15 +1,15 @@
 <div align="center">
     <a href="https://discord.gg/4qcXbeVehZ">
-        <img alt="GitHub license" src="https://img.shields.io/discord/882288646517035028?label=%F0%9F%92%AC%20discord">
+        <img alt="Discord" src="https://img.shields.io/discord/882288646517035028?label=%F0%9F%92%AC%20discord">
     </a>
     <a href="https://github.com/Durudex/durudex-gateway/blob/main/COPYING">
-        <img alt="GitHub license" src="https://img.shields.io/github/license/Durudex/durudex-gateway?label=%F0%9F%93%95%20license">
+        <img alt="License" src="https://img.shields.io/github/license/Durudex/durudex-gateway?label=%F0%9F%93%95%20license">
     </a>
     <a href="https://github.com/Durudex/durudex-gateway/stargazers">
-    <img alt="GitHub license" src="https://img.shields.io/github/stars/Durudex/durudex-gateway?label=%E2%AD%90%20stars&logo=sdf">
+    <img alt="GitHub Stars" src="https://img.shields.io/github/stars/Durudex/durudex-gateway?label=%E2%AD%90%20stars&logo=sdf">
     </a>
     <a href="https://github.com/Durudex/durudex-gateway/network">
-        <img alt="GitHub license" src="https://img.shields.io/github/forks/Durudex/durudex-gateway?label=%F0%9F%93%81%20forks">
+        <img alt="GitHub Forks" src="https://img.shields.io/github/forks/Durudex/durudex-gateway?label=%F0%9F%93%81%20forks">
     </a>
 </div>
 

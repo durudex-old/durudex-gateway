@@ -17,9 +17,16 @@
 
 package service
 
-import "github.com/Durudex/durudex-gateway/internal/delivery/grpc"
+import (
+	"context"
 
-type Auth interface{}
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
+	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+)
+
+type Auth interface {
+	SignUp(ctx context.Context, input *pb.UserSignUpRequest) (uint64, error)
+}
 
 type Service struct {
 	Auth

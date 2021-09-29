@@ -22,6 +22,8 @@ import (
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
+	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type mutationResolver struct{ *Resolver }
@@ -31,7 +33,21 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 
 // Sign Up resolver.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error) {
-	return &model.SignUp{}, nil
+	// Get for auth service.
+	user := pb.UserSignUpRequest{
+		Username: input.Username,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
+		Birthday: timestamppb.New(input.Birthday),
+		Sex:      input.Sex,
+	}
+	id, err := r.service.Auth.SignUp(ctx, &user)
+	if err != nil {
+		return &model.SignUp{}, err
+	}
+
+	return &model.SignUp{ID: id}, nil
 }
 
 // Sign In resolver.

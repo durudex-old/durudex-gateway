@@ -18,21 +18,35 @@
 package config
 
 import (
+	"os"
 	"strings"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
+// Default variables.
+const (
+	defaultHTTPAddr    = ":8000"
+	defaultHTTPAppName = "durudex-gateway"
+)
+
 type (
 	Config struct {
-		HTTP HTTPConfig
+		HTTP    HTTPConfig
+		Service ServiceConfig
 	}
 
 	// HTTP config variables.
 	HTTPConfig struct {
-		Addr    string `mapstructure:"addr"`
+		// HTTP server address.
+		Addr string `mapstructure:"addr"`
+		// HTTP application name.
 		AppName string `mapstructure:"appName"`
+	}
+
+	ServiceConfig struct {
+		AuthAddr string
 	}
 )
 
@@ -47,6 +61,9 @@ func Init(configPath string) *Config {
 	// Unmarshal config keys.
 	unmarshal(&cfg)
 
+	// Set env configurations.
+	setFromEnv(&cfg)
+
 	return &cfg
 }
 
@@ -60,8 +77,12 @@ func parseConfigFile(configPath string) {
 	viper.AddConfigPath(path[0]) // folder
 	viper.SetConfigName(path[1]) // file
 
-	// Read config file
+	// Read config file.
 	if err := viper.ReadInConfig(); err != nil {
+		// Set default variables.
+		viper.SetDefault("http.addr", defaultHTTPAddr)
+		viper.SetDefault("http.appName", defaultHTTPAppName)
+
 		log.Error().Msgf("error parsing config file: %s", err.Error())
 	}
 }
@@ -74,4 +95,9 @@ func unmarshal(cfg *Config) {
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
 		log.Error().Msgf("error unmarshal http keys: %s", err.Error())
 	}
+}
+
+// Seting environment variables from .env file.
+func setFromEnv(cfg *Config) {
+	cfg.Service.AuthAddr = os.Getenv("SERVICE_AUTH_ADDR")
 }

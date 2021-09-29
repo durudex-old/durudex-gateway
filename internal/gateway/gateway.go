@@ -37,7 +37,7 @@ func Run(configPath string) {
 	cfg := config.Init(configPath)
 
 	// Service, Handlers
-	grpcHandler := grpc.NewGRPCHandler()
+	grpcHandler := grpc.NewGRPCHandler(cfg)
 	service := service.NewService(grpcHandler)
 	graphqlHandler := graphql.NewGraphQLHandler(service)
 	httpHandler := http.NewHTTPHandler(graphqlHandler)

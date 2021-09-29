@@ -18,8 +18,7 @@
 package grpc
 
 import (
-	"os"
-
+	"github.com/Durudex/durudex-gateway/internal/config"
 	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
@@ -30,8 +29,8 @@ type Handler struct {
 }
 
 // Creating a new grpc handler.
-func NewGRPCHandler() *Handler {
-	authServiceConn := ConnectToService(os.Getenv("SERVICE_AUTH_ADDRESS"))
+func NewGRPCHandler(cfg *config.Config) *Handler {
+	authServiceConn := ConnectToService(cfg.Service.AuthAddr)
 
 	return &Handler{
 		Auth: pb.NewAuthServiceClient(authServiceConn),
