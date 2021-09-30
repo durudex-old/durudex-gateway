@@ -43,15 +43,22 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		SignIn func(childComplexity int, input model.SignInInput) int
-		SignUp func(childComplexity int, input model.SignUpInput) int
+		RefreshTokens func(childComplexity int, input model.RefreshTokensInput) int
+		SignIn        func(childComplexity int, input model.SignInInput) int
+		SignUp        func(childComplexity int, input model.SignUpInput) int
 	}
 
 	Query struct {
 	}
 
+	RefreshTokens struct {
+		AccessToken  func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
+	}
+
 	SignIn struct {
-		Token func(childComplexity int) int
+		AccessToken  func(childComplexity int) int
+		RefreshToken func(childComplexity int) int
 	}
 
 	SignUp struct {
@@ -62,6 +69,7 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error)
+	RefreshTokens(ctx context.Context, input model.RefreshTokensInput) (*model.RefreshTokens, error)
 }
 
 type executableSchema struct {
@@ -78,6 +86,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.refreshTokens":
+		if e.complexity.Mutation.RefreshTokens == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_refreshTokens_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RefreshTokens(childComplexity, args["input"].(model.RefreshTokensInput)), true
 
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
@@ -103,12 +123,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.SignUp(childComplexity, args["input"].(model.SignUpInput)), true
 
-	case "SignIn.token":
-		if e.complexity.SignIn.Token == nil {
+	case "RefreshTokens.accessToken":
+		if e.complexity.RefreshTokens.AccessToken == nil {
 			break
 		}
 
-		return e.complexity.SignIn.Token(childComplexity), true
+		return e.complexity.RefreshTokens.AccessToken(childComplexity), true
+
+	case "RefreshTokens.refreshToken":
+		if e.complexity.RefreshTokens.RefreshToken == nil {
+			break
+		}
+
+		return e.complexity.RefreshTokens.RefreshToken(childComplexity), true
+
+	case "SignIn.accessToken":
+		if e.complexity.SignIn.AccessToken == nil {
+			break
+		}
+
+		return e.complexity.SignIn.AccessToken(childComplexity), true
+
+	case "SignIn.refreshToken":
+		if e.complexity.SignIn.RefreshToken == nil {
+			break
+		}
+
+		return e.complexity.SignIn.RefreshToken(childComplexity), true
 
 	case "SignUp.id":
 		if e.complexity.SignUp.ID == nil {
@@ -197,8 +238,9 @@ var sources = []*ast.Source{
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 extend type Mutation {
-  signUp(input: SignUpInput!): SignUp
-  signIn(input: SignInInput!): SignIn
+  signUp(input: SignUpInput!): SignUp!
+  signIn(input: SignInInput!): SignIn!
+  refreshTokens(input: RefreshTokensInput!): RefreshTokens!
 }
 
 input SignUpInput {
@@ -220,7 +262,17 @@ input SignInInput {
 }
 
 type SignIn {
-  token: String!
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RefreshTokensInput {
+  refreshToken: String!
+}
+
+type RefreshTokens {
+  accessToken: String!
+  refreshToken: String!
 }
 `, BuiltIn: false},
 	{Name: "schema/schema.graphql", Input: `# Copyright © 2021 Durudex
@@ -254,6 +306,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) field_Mutation_refreshTokens_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.RefreshTokensInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -370,11 +437,14 @@ func (ec *executionContext) _Mutation_signUp(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.SignUp)
 	fc.Result = res
-	return ec.marshalOSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx, field.Selections, res)
+	return ec.marshalNSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -409,11 +479,56 @@ func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
 	res := resTmp.(*model.SignIn)
 	fc.Result = res
-	return ec.marshalOSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx, field.Selections, res)
+	return ec.marshalNSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_refreshTokens_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RefreshTokens(rctx, args["input"].(model.RefreshTokensInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.RefreshTokens)
+	fc.Result = res
+	return ec.marshalNRefreshTokens2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -487,7 +602,77 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _SignIn_token(ctx context.Context, field graphql.CollectedField, obj *model.SignIn) (ret graphql.Marshaler) {
+func (ec *executionContext) _RefreshTokens_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.RefreshTokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RefreshTokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AccessToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _RefreshTokens_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.RefreshTokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "RefreshTokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RefreshToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SignIn_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.SignIn) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -505,7 +690,42 @@ func (ec *executionContext) _SignIn_token(ctx context.Context, field graphql.Col
 	ctx = graphql.WithFieldContext(ctx, fc)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Token, nil
+		return obj.AccessToken, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _SignIn_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.SignIn) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "SignIn",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RefreshToken, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1679,6 +1899,29 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context, obj interface{}) (model.RefreshTokensInput, error) {
+	var it model.RefreshTokensInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "refreshToken":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
+			it.RefreshToken, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj interface{}) (model.SignInInput, error) {
 	var it model.SignInInput
 	asMap := map[string]interface{}{}
@@ -1798,8 +2041,19 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "signUp":
 			out.Values[i] = ec._Mutation_signUp(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		case "signIn":
 			out.Values[i] = ec._Mutation_signIn(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refreshTokens":
+			out.Values[i] = ec._Mutation_refreshTokens(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1841,6 +2095,38 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var refreshTokensImplementors = []string{"RefreshTokens"}
+
+func (ec *executionContext) _RefreshTokens(ctx context.Context, sel ast.SelectionSet, obj *model.RefreshTokens) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, refreshTokensImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RefreshTokens")
+		case "accessToken":
+			out.Values[i] = ec._RefreshTokens_accessToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refreshToken":
+			out.Values[i] = ec._RefreshTokens_refreshToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
 var signInImplementors = []string{"SignIn"}
 
 func (ec *executionContext) _SignIn(ctx context.Context, sel ast.SelectionSet, obj *model.SignIn) graphql.Marshaler {
@@ -1852,8 +2138,13 @@ func (ec *executionContext) _SignIn(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("SignIn")
-		case "token":
-			out.Values[i] = ec._SignIn_token(ctx, field, obj)
+		case "accessToken":
+			out.Values[i] = ec._SignIn_accessToken(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refreshToken":
+			out.Values[i] = ec._SignIn_refreshToken(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2175,9 +2466,56 @@ func (ec *executionContext) marshalNInt322int32(ctx context.Context, sel ast.Sel
 	return res
 }
 
+func (ec *executionContext) marshalNRefreshTokens2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v model.RefreshTokens) graphql.Marshaler {
+	return ec._RefreshTokens(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNRefreshTokens2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v *model.RefreshTokens) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._RefreshTokens(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRefreshTokensInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx context.Context, v interface{}) (model.RefreshTokensInput, error) {
+	res, err := ec.unmarshalInputRefreshTokensInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSignIn2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v model.SignIn) graphql.Marshaler {
+	return ec._SignIn(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v *model.SignIn) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SignIn(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
 	res, err := ec.unmarshalInputSignInInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNSignUp2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v model.SignUp) graphql.Marshaler {
+	return ec._SignUp(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v *model.SignUp) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	return ec._SignUp(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNSignUpInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx context.Context, v interface{}) (model.SignUpInput, error) {
@@ -2509,20 +2847,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 		return graphql.Null
 	}
 	return graphql.MarshalBoolean(*v)
-}
-
-func (ec *executionContext) marshalOSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v *model.SignIn) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SignIn(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalOSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v *model.SignUp) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._SignUp(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

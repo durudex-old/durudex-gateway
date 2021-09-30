@@ -14,8 +14,9 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 extend type Mutation {
-  signUp(input: SignUpInput!): SignUp
-  signIn(input: SignInInput!): SignIn
+  signUp(input: SignUpInput!): SignUp!
+  signIn(input: SignInInput!): SignIn!
+  refreshTokens(input: RefreshTokensInput!): RefreshTokens!
 }
 
 input SignUpInput {
@@ -37,5 +38,15 @@ input SignInInput {
 }
 
 type SignIn {
-  token: String!
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RefreshTokensInput {
+  refreshToken: String!
+}
+
+type RefreshTokens {
+  accessToken: String!
+  refreshToken: String!
 }

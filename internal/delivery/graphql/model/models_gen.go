@@ -6,8 +6,18 @@ import (
 	"time"
 )
 
+type RefreshTokens struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
+
+type RefreshTokensInput struct {
+	RefreshToken string `json:"refreshToken"`
+}
+
 type SignIn struct {
-	Token string `json:"token"`
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
 }
 
 type SignInInput struct {

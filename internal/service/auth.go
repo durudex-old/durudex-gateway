@@ -45,3 +45,31 @@ func (s *AuthService) SignUp(ctx context.Context, input *pb.UserSignUpRequest) (
 
 	return id.Id, err
 }
+
+// Sign In user.
+func (s *AuthService) SignIn(ctx context.Context, input *pb.UserSignInRequest) (Tokens, error) {
+	// Get for auth service.
+	tokens, err := s.grpcHandler.Auth.SignIn(ctx, input)
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	return Tokens{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}, nil
+}
+
+// Refresh user auth tokens.
+func (s *AuthService) RefreshTokens(ctx context.Context, input *pb.UserRefreshTokensRequest) (Tokens, error) {
+	// Get for auth service.
+	tokens, err := s.grpcHandler.Auth.RefreshTokens(ctx, input)
+	if err != nil {
+		return Tokens{}, err
+	}
+
+	return Tokens{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}, nil
+}

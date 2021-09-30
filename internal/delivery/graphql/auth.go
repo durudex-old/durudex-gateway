@@ -33,7 +33,7 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 
 // Sign Up resolver.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error) {
-	// Get for auth service.
+	// Sign Up user for auth service.
 	user := pb.UserSignUpRequest{
 		Username: input.Username,
 		Name:     input.Name,
@@ -52,5 +52,35 @@ func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) 
 
 // Sign In resolver.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error) {
-	return &model.SignIn{}, nil
+	// Sign In user for auth service.
+	user := pb.UserSignInRequest{
+		Username: input.Username,
+		Password: input.Password,
+	}
+	tokens, err := r.service.Auth.SignIn(ctx, &user)
+	if err != nil {
+		return &model.SignIn{}, err
+	}
+
+	return &model.SignIn{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}, nil
+}
+
+// Refresh user auth tokens.
+func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.RefreshTokensInput) (*model.RefreshTokens, error) {
+	// Refresh auth token for auth service.
+	refreshToken := pb.UserRefreshTokensRequest{
+		RefreshToken: input.RefreshToken,
+	}
+	tokens, err := r.service.Auth.RefreshTokens(ctx, &refreshToken)
+	if err != nil {
+		return &model.RefreshTokens{}, err
+	}
+
+	return &model.RefreshTokens{
+		AccessToken:  tokens.AccessToken,
+		RefreshToken: tokens.RefreshToken,
+	}, nil
 }

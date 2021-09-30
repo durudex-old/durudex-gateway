@@ -42,7 +42,7 @@ func ConnectToService(address string) *grpc.ClientConn {
 	log.Debug().Msgf("Connecting to %s service", address)
 
 	// Connecting to service.
-	conn, err := grpc.Dial(address)
+	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
 		log.Error().Msgf("error connecting to service: %s", err.Error())
 	}

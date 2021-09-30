@@ -24,8 +24,15 @@ import (
 	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
 )
 
+type Tokens struct {
+	AccessToken  string
+	RefreshToken string
+}
+
 type Auth interface {
 	SignUp(ctx context.Context, input *pb.UserSignUpRequest) (uint64, error)
+	SignIn(ctx context.Context, input *pb.UserSignInRequest) (Tokens, error)
+	RefreshTokens(ctx context.Context, input *pb.UserRefreshTokensRequest) (Tokens, error)
 }
 
 type Service struct {

@@ -26,7 +26,7 @@ The Durudex gateway combines all durudex services so that it can be used through
 ## ⚙️ Build & Run
 Create an `.env` file in the root directory and add the following values ​​from `.env.example`:
 ```env
-SERVICE_AUTH_ADDRESS=
+SERVICE_AUTH_ADDR=
 ```
 Use `make run` to build&run project.
 
