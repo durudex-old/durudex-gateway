@@ -14,5 +14,10 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 http:
-  addr: :8000
+  host: localhost
+  port: 8000
   appName: durudex-gateway
+
+service:
+  auth:
+    certPath: cert/authservice-cert.pem

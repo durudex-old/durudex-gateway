@@ -15,10 +15,13 @@
 
 .DEFAULT_GOAL := run
 
-build:
-	go mod download && go build -o .bin/gateway.exe ./cmd/gateway/main.go
+download:
+	go mod download
 
-run: build
+build: download
+	go build -o .bin/gateway.exe ./cmd/gateway/main.go
+
+run: download
 	go run ./cmd/gateway/main.go
 
 gqlgen:

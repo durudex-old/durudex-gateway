@@ -28,7 +28,7 @@ Create an `.env` file in the root directory and add the following values ​​f
 ```env
 SERVICE_AUTH_ADDR=
 ```
-Use `make run` to build&run project.
+Use `make run` to run and `make build` to build project.
 
 ## 👍 Contribute
 If you want to say thank you and/or support the active development of [Durudex](https://github.com/Durudex):

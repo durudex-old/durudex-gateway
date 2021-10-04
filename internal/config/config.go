@@ -27,7 +27,7 @@ import (
 
 // Default variables.
 const (
-	defaultHTTPAddr    = ":8000"
+	defaultHTTPPort    = "8000"
 	defaultHTTPAppName = "durudex-gateway"
 )
 
@@ -39,14 +39,19 @@ type (
 
 	// HTTP config variables.
 	HTTPConfig struct {
-		// HTTP server address.
-		Addr string `mapstructure:"addr"`
-		// HTTP application name.
+		// Server host.
+		Host string `mapstructure:"host"`
+		// Server port.
+		Port string `mapstructure:"port"`
+		// Server name.
 		AppName string `mapstructure:"appName"`
 	}
 
 	ServiceConfig struct {
-		AuthAddr string
+		Auth struct {
+			Addr     string
+			CertPath string `mapstructure:"certPath"`
+		}
 	}
 )
 
@@ -80,7 +85,7 @@ func parseConfigFile(configPath string) {
 	// Read config file.
 	if err := viper.ReadInConfig(); err != nil {
 		// Set default variables.
-		viper.SetDefault("http.addr", defaultHTTPAddr)
+		viper.SetDefault("http.addr", defaultHTTPPort)
 		viper.SetDefault("http.appName", defaultHTTPAppName)
 
 		log.Error().Msgf("error parsing config file: %s", err.Error())
@@ -95,9 +100,13 @@ func unmarshal(cfg *Config) {
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
 		log.Error().Msgf("error unmarshal http keys: %s", err.Error())
 	}
+	// Unmarshal auth service keys.
+	if err := viper.UnmarshalKey("service", &cfg.Service); err != nil {
+		log.Error().Msgf("error unmarshal auth service keys: %s", err.Error())
+	}
 }
 
 // Seting environment variables from .env file.
 func setFromEnv(cfg *Config) {
-	cfg.Service.AuthAddr = os.Getenv("SERVICE_AUTH_ADDR")
+	cfg.Service.Auth.Addr = os.Getenv("SERVICE_AUTH_ADDR")
 }

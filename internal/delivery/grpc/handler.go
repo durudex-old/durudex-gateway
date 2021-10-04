@@ -22,6 +22,7 @@ import (
 	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type Handler struct {
@@ -30,7 +31,7 @@ type Handler struct {
 
 // Creating a new grpc handler.
 func NewGRPCHandler(cfg *config.Config) *Handler {
-	authServiceConn := ConnectToService(cfg.Service.AuthAddr)
+	authServiceConn := ConnectToService(cfg.Service.Auth.Addr, cfg.Service.Auth.CertPath)
 
 	return &Handler{
 		Auth: pb.NewAuthServiceClient(authServiceConn),
@@ -38,14 +39,24 @@ func NewGRPCHandler(cfg *config.Config) *Handler {
 }
 
 // Connecting to service.
-func ConnectToService(address string) *grpc.ClientConn {
+func ConnectToService(address, certPath string) *grpc.ClientConn {
 	log.Debug().Msgf("Connecting to %s service", address)
 
 	// Connecting to service.
-	conn, err := grpc.Dial(address, grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.Dial(address, grpc.WithTransportCredentials(NewGRPCCreds(certPath)))
 	if err != nil {
 		log.Error().Msgf("error connecting to service: %s", err.Error())
 	}
 
 	return conn
+}
+
+// New server TLS from file.
+func NewGRPCCreds(certPath string) credentials.TransportCredentials {
+	creds, err := credentials.NewClientTLSFromFile(certPath, "")
+	if err != nil {
+		log.Fatal().Msgf("error creating a new server TLS from file: %s", err.Error())
+	}
+
+	return creds
 }

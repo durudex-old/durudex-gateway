@@ -45,7 +45,8 @@ func Run(configPath string) {
 	// Create and run server.
 	srv := server.NewServer(cfg, httpHandler)
 	go func() {
-		srv.Run(cfg.HTTP.Addr)
+		addr := cfg.HTTP.Host + ":" + cfg.HTTP.Port
+		srv.Run(addr)
 	}()
 
 	// Quit in application.

@@ -15,6 +15,7 @@
 
 # Local files
 .bin/
+*.pem
 
 # Environments
 .env
