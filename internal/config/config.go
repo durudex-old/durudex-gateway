@@ -34,6 +34,7 @@ const (
 type (
 	Config struct {
 		HTTP    HTTPConfig
+		GRPC    GRPCConfig
 		Service ServiceConfig
 	}
 
@@ -47,10 +48,18 @@ type (
 		AppName string `mapstructure:"appName"`
 	}
 
+	// GRPC config variables.
+	GRPCConfig struct {
+		// Transport Layer Security.
+		TLS bool `mapstructure:"tls"`
+	}
+
+	// Service config varibles.
 	ServiceConfig struct {
+		// Auth service variables.
 		Auth struct {
-			Addr     string
-			CertPath string `mapstructure:"certPath"`
+			// Auth service address.
+			Addr string
 		}
 	}
 )
@@ -100,9 +109,9 @@ func unmarshal(cfg *Config) {
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
 		log.Error().Msgf("error unmarshal http keys: %s", err.Error())
 	}
-	// Unmarshal auth service keys.
-	if err := viper.UnmarshalKey("service", &cfg.Service); err != nil {
-		log.Error().Msgf("error unmarshal auth service keys: %s", err.Error())
+	// Unmarshal grpc keys.
+	if err := viper.UnmarshalKey("grpc", &cfg.GRPC); err != nil {
+		log.Error().Msgf("error unmarshal grpc keys: %s", err.Error())
 	}
 }
 

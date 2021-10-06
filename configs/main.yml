@@ -18,6 +18,5 @@ http:
   port: 8000
   appName: durudex-gateway
 
-service:
-  auth:
-    certPath: cert/authservice-cert.pem
+grpc:
+  tls: true
