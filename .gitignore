@@ -15,7 +15,9 @@
 
 # Local files
 .bin/
-*.pem
+*.crt
+*.key
+*.csr
 
 # Environments
 .env

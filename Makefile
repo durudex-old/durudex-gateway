@@ -25,8 +25,13 @@ run: download
 	go run ./cmd/gateway/main.go
 
 gqlgen:
-	go get -d github.com/99designs/gqlgen && go run github.com/99designs/gqlgen generate --config ./gqlgen.yml
+	go get -d github.com/99designs/gqlgen
+	go run github.com/99designs/gqlgen generate --config ./gqlgen.yml
+	go mod tidy
 
 protoc:
 	protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. \
 	--go-grpc_opt=paths=source_relative internal/delivery/grpc/protobuf/*.proto
+
+certs:
+	cert/generate.sh
