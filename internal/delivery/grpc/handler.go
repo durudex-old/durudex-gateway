@@ -31,9 +31,9 @@ import (
 )
 
 const (
-	CACertFile     = "cert/ca.crt"
-	clientCertFile = "cert/client.crt"
-	clientKeyFile  = "cert/client.key"
+	CACertFile     = "cert/rootCA.pem"
+	clientCertFile = "cert/client-cert.pem"
+	clientKeyFile  = "cert/client-key.pem"
 )
 
 type Handler struct {
@@ -77,13 +77,13 @@ func ConnectToService(address string, transportOption grpc.DialOption) *grpc.Cli
 // Loading TLS credentials.
 func LoadTLSCredentials() (credentials.TransportCredentials, error) {
 	// Load certificate od the CA who signed server's certificate.
-	pemServerCA, err := ioutil.ReadFile(CACertFile)
+	pemCA, err := ioutil.ReadFile(CACertFile)
 	if err != nil {
 		return nil, err
 	}
 
 	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(pemServerCA) {
+	if !certPool.AppendCertsFromPEM(pemCA) {
 		return nil, errors.New("error to add server CA's certificate")
 	}
 

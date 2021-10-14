@@ -16,84 +16,26 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 cd cert/
-rm *.crt *.csr *.key
 
-echo "Wrire CA password:"
-read password
+export CAROOT="./"
 
-echo "Generate CA key..."
-openssl genrsa -des3 \
-  -passout pass:"$password" \
-  -out ca.key 4096
+if [ -f './rootCA.pem' ]; then
+  echo "Delete old CA and certificates..."
+  mkcert -uninstall
+  rm *.pem
+fi
 
-echo "Generate CA certificate..."
-openssl req -x509 -new -nodes -sha256 \
-  -passin pass:"$password" \
-  -days 365 \
-  -config ca.conf \
-  -key ca.key \
-  -out ca.crt
+echo "Install new CA..."
+mkcert -install
 
-echo "Wrire Auth Service password:"
-read password
+echo "Create Auth Service certificate...."
+mkcert \
+  -cert-file authservice-cert.pem \
+  -key-file authservice-key.pem \
+  authservice.durudex.local
 
-echo "Generate auth service key..."
-openssl genrsa -des3 \
-  -passout pass:"$password" \
-  -out authservice.key 4096
-
-echo "Generate authservice signing request..."
-openssl req -new \
-  -passin pass:"$password" \
-  -config authservice.conf \
-  -key authservice.key \
-  -out authservice.csr
-
-echo "Self-sign authservice certificate..."
-openssl x509 -req \
-  -passin pass:"$password" \
-  -days 365 \
-  -in authservice.csr \
-  -extensions 'req_ext' \
-  -CA ca.crt \
-  -CAkey ca.key \
-  -set_serial 01 \
-  -out authservice.crt
-
-echo "Remove passphrase from authservice key..."
-openssl rsa \
-  -passin pass:"$password" \
-  -in authservice.key \
-  -out authservice.key
-
-echo "Wrire Client password:"
-read password
-
-echo "Generate client key..."
-openssl genrsa -des3 \
-  -passout pass:"$password" \
-  -out client.key 4096
-
-echo "Generate client signing request..."
-openssl req -new \
-  -passin pass:"$password" \
-  -config client.conf \
-  -key client.key \
-  -out client.csr
-
-echo "Self-sign client certificate..."
-openssl x509 -req \
-  -passin pass:"$password" \
-  -days 365 \
-  -in client.csr \
-  -extensions 'req_ext' \
-  -CA ca.crt \
-  -CAkey ca.key \
-  -set_serial 01 \
-  -out client.crt
-
-echo "Remove passphrase from client key..."
-openssl rsa \
-  -passin pass:"$password" \
-  -in client.key \
-  -out client.key
+echo "Create Client certificate...."
+mkcert -client \
+  -cert-file client-cert.pem \
+  -key-file client-key.pem \
+  localhost 127.0.0.1

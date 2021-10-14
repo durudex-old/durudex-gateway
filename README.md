@@ -22,9 +22,11 @@ The Durudex gateway combines all durudex services so that it can be used through
 ### 💡 Prerequisites
 + [Go 1.17](https://golang.org/)
 + [grpc](https://grpc.io/docs/languages/go/quickstart/)
++ [mkcert](https://github.com/FiloSottile/mkcert)
 
 ## ⚙️ Build & Run
-Create an `.env` file in the root directory and add the following values ​​from `.env.example`:
+1) Generate certificates, information can be found at [cert/README.md](cert/README.md)
+2) Create an `.env` file in the root directory and add the following values ​​from `.env.example`:
 ```env
 SERVICE_AUTH_ADDR=
 ```
