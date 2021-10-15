@@ -39,6 +39,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	UserAuth func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -295,6 +296,8 @@ schema {
 }
 
 type Mutation
+
+directive @userAuth on FIELD_DEFINITION
 
 scalar Int32
 scalar UInt64

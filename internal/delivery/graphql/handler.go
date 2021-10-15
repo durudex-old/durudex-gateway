@@ -22,6 +22,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/Durudex/durudex-auth-service/pkg/auth"
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
 	"github.com/Durudex/durudex-gateway/internal/service"
 	"github.com/gofiber/adaptor/v2"
@@ -30,12 +31,14 @@ import (
 
 type Handler struct {
 	service *service.Service
+	auth    *auth.Manager
 }
 
 // Creating a new graphql handler.
-func NewGraphQLHandler(service *service.Service) *Handler {
+func NewGraphQLHandler(service *service.Service, auth *auth.Manager) *Handler {
 	return &Handler{
 		service: service,
+		auth:    auth,
 	}
 }
 
@@ -43,9 +46,12 @@ func NewGraphQLHandler(service *service.Service) *Handler {
 func (h *Handler) graphqlHandler() http.HandlerFunc {
 	// NewExecutableSchema and Config are in the generate.go file.
 	// Resolver is in the resolver.go file.
-	handler := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+	config := generated.Config{
 		Resolvers: NewResolver(h.service),
-	}))
+	}
+	config.Directives.UserAuth = h.userAuth
+
+	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		handler.ServeHTTP(w, r)
@@ -63,6 +69,7 @@ func (h *Handler) playgroundHandler() http.HandlerFunc {
 
 // Initialize graphql routes.
 func (h *Handler) InitRoutes(router fiber.Router) {
+	router.Use(h.authMiddleware)
 	router.Post("/query", adaptor.HTTPHandlerFunc(h.graphqlHandler()))
 	router.Get("/", adaptor.HTTPHandlerFunc(h.playgroundHandler()))
 }

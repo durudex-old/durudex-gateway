@@ -36,6 +36,7 @@ type (
 		HTTP    HTTPConfig
 		GRPC    GRPCConfig
 		Service ServiceConfig
+		Auth    AuthConfig
 	}
 
 	// HTTP config variables.
@@ -61,6 +62,12 @@ type (
 			// Auth service address.
 			Addr string
 		}
+	}
+
+	// Auth config variables.
+	AuthConfig struct {
+		// Signing auth key.
+		SigningKey string
 	}
 )
 
@@ -117,5 +124,6 @@ func unmarshal(cfg *Config) {
 
 // Seting environment variables from .env file.
 func setFromEnv(cfg *Config) {
+	cfg.Auth.SigningKey = os.Getenv("AUTH_SIGNING_KEY")
 	cfg.Service.Auth.Addr = os.Getenv("SERVICE_AUTH_ADDR")
 }

@@ -22,6 +22,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/Durudex/durudex-auth-service/pkg/auth"
 	"github.com/Durudex/durudex-gateway/internal/config"
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql"
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
@@ -36,10 +37,15 @@ func Run(configPath string) {
 	// Initialize config.
 	cfg := config.Init(configPath)
 
+	// Managers
+	auth := auth.NewAuthManager(auth.JWTConfig{
+		SigningKey: cfg.Auth.SigningKey,
+	})
+
 	// Service, Handlers
 	grpcHandler := grpc.NewGRPCHandler(cfg)
 	service := service.NewService(grpcHandler)
-	graphqlHandler := graphql.NewGraphQLHandler(service)
+	graphqlHandler := graphql.NewGraphQLHandler(service, auth)
 	httpHandler := http.NewHTTPHandler(graphqlHandler)
 
 	// Create and run server.

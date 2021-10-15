@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/99designs/gqlgen v0.14.0
+	github.com/Durudex/durudex-auth-service v0.0.0-20211014193909-477c9c873026
 	github.com/gofiber/adaptor/v2 v2.1.12
 	github.com/gofiber/fiber/v2 v2.19.0
 	github.com/rs/zerolog v1.25.0
@@ -18,6 +19,7 @@ require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gofiber/utils v0.1.2 // indirect
+	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
