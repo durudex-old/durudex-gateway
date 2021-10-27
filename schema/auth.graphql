@@ -16,6 +16,8 @@
 extend type Mutation {
   signUp(input: SignUpInput!): SignUp!
   signIn(input: SignInInput!): SignIn!
+  verify(input: VerifyInput!): Status! @userAuth
+  getVerifyCode(input: GetVerifyCodeInput!): Status! @userAuth
   refreshTokens(input: RefreshTokensInput!): RefreshTokens!
 }
 
@@ -40,6 +42,16 @@ input SignInInput {
 type SignIn {
   accessToken: String!
   refreshToken: String!
+}
+
+input VerifyInput {
+  id: UInt64!
+  code: Int32!
+}
+
+input GetVerifyCodeInput {
+  email: String!
+  name: String!
 }
 
 input RefreshTokensInput {

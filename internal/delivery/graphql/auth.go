@@ -84,3 +84,11 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.Refres
 		RefreshToken: tokens.RefreshToken,
 	}, nil
 }
+
+func (r *mutationResolver) Verify(ctx context.Context, input model.VerifyInput) (*model.Status, error) {
+	return &model.Status{}, nil
+}
+
+func (r *mutationResolver) GetVerifyCode(ctx context.Context, input model.GetVerifyCodeInput) (*model.Status, error) {
+	return &model.Status{}, nil
+}

@@ -6,6 +6,11 @@ import (
 	"time"
 )
 
+type GetVerifyCodeInput struct {
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
 type RefreshTokens struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`
@@ -36,4 +41,13 @@ type SignUpInput struct {
 	Password string    `json:"password"`
 	Birthday time.Time `json:"birthday"`
 	Sex      int32     `json:"sex"`
+}
+
+type Status struct {
+	Status bool `json:"status"`
+}
+
+type VerifyInput struct {
+	ID   uint64 `json:"id"`
+	Code int32  `json:"code"`
 }

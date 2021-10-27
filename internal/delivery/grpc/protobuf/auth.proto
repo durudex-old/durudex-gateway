@@ -24,6 +24,8 @@ import "google/protobuf/timestamp.proto";
 service AuthService {
   rpc SignUp (UserSignUpRequest) returns (UserSignUpResponse);
   rpc SignIn (UserSignInRequest) returns (UserSignInResponse);
+  rpc Verify(VerifyRequest) returns (Status);
+  rpc GetVerifyCode(GetVerifyCodeRequest) returns (Status);
   rpc RefreshTokens (UserRefreshTokensRequest) returns (UserRefreshTokensResponse);
 }
 
@@ -57,4 +59,18 @@ message UserRefreshTokensRequest {
 message UserRefreshTokensResponse {
   string accessToken = 1;
   string refreshToken = 2;
+}
+
+message VerifyRequest {
+  uint64 id = 1;
+  int32 code = 2;
+}
+
+message Status {
+  bool status = 1;
+}
+
+message GetVerifyCodeRequest {
+  string email = 1;
+  string name = 2;
 }

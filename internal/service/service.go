@@ -32,6 +32,8 @@ type Tokens struct {
 type Auth interface {
 	SignUp(ctx context.Context, input *pb.UserSignUpRequest) (uint64, error)
 	SignIn(ctx context.Context, input *pb.UserSignInRequest) (Tokens, error)
+	Verify(context.Context, *pb.VerifyRequest) (bool, error)
+	GetVerifyCode(context.Context, *pb.GetVerifyCodeRequest) (bool, error)
 	RefreshTokens(ctx context.Context, input *pb.UserRefreshTokensRequest) (Tokens, error)
 }
 
