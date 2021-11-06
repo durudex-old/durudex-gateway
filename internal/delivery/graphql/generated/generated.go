@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"strconv"
 	"sync"
 	"time"
@@ -280,8 +281,8 @@ var sources = []*ast.Source{
 extend type Mutation {
   signUp(input: SignUpInput!): SignUp!
   signIn(input: SignInInput!): SignIn!
-  verify(input: VerifyInput!): Status!
-  getVerifyCode(input: GetVerifyCodeInput!): Status!
+  verify(input: VerifyInput!): Status! @userAuth
+  getVerifyCode(input: GetVerifyCodeInput!): Status! @userAuth
   refreshTokens(input: RefreshTokensInput!): RefreshTokens!
 }
 
@@ -601,8 +602,28 @@ func (ec *executionContext) _Mutation_verify(ctx context.Context, field graphql.
 	}
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Verify(rctx, args["input"].(model.VerifyInput))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().Verify(rctx, args["input"].(model.VerifyInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.UserAuth == nil {
+				return nil, errors.New("directive userAuth is not implemented")
+			}
+			return ec.directives.UserAuth(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Status); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/Durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -643,8 +664,28 @@ func (ec *executionContext) _Mutation_getVerifyCode(ctx context.Context, field g
 	}
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().GetVerifyCode(rctx, args["input"].(model.GetVerifyCodeInput))
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().GetVerifyCode(rctx, args["input"].(model.GetVerifyCodeInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.UserAuth == nil {
+				return nil, errors.New("directive userAuth is not implemented")
+			}
+			return ec.directives.UserAuth(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Status); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/Durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

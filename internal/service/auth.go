@@ -36,7 +36,7 @@ func NewAuthService(grpcHandler *grpc.Handler) *AuthService {
 }
 
 // Sign Up user.
-func (s *AuthService) SignUp(ctx context.Context, input *pb.UserSignUpRequest) (uint64, error) {
+func (s *AuthService) SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error) {
 	// Get for auth service.
 	id, err := s.grpcHandler.Auth.SignUp(ctx, input)
 	if err != nil {
@@ -47,7 +47,7 @@ func (s *AuthService) SignUp(ctx context.Context, input *pb.UserSignUpRequest) (
 }
 
 // Sign In user.
-func (s *AuthService) SignIn(ctx context.Context, input *pb.UserSignInRequest) (Tokens, error) {
+func (s *AuthService) SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error) {
 	// Get for auth service.
 	tokens, err := s.grpcHandler.Auth.SignIn(ctx, input)
 	if err != nil {
@@ -61,7 +61,7 @@ func (s *AuthService) SignIn(ctx context.Context, input *pb.UserSignInRequest) (
 }
 
 // Refresh user auth tokens.
-func (s *AuthService) RefreshTokens(ctx context.Context, input *pb.UserRefreshTokensRequest) (Tokens, error) {
+func (s *AuthService) RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error) {
 	// Get for auth service.
 	tokens, err := s.grpcHandler.Auth.RefreshTokens(ctx, input)
 	if err != nil {

@@ -34,7 +34,7 @@ func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResol
 // Sign Up resolver.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error) {
 	// Sign Up user for auth service.
-	user := pb.UserSignUpRequest{
+	user := pb.SignUpRequest{
 		Username: input.Username,
 		Name:     input.Name,
 		Email:    input.Email,
@@ -53,7 +53,7 @@ func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) 
 // Sign In resolver.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error) {
 	// Sign In user for auth service.
-	user := pb.UserSignInRequest{
+	user := pb.SignInRequest{
 		Username: input.Username,
 		Password: input.Password,
 	}
@@ -71,7 +71,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 // Refresh user auth tokens.
 func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.RefreshTokensInput) (*model.RefreshTokens, error) {
 	// Refresh auth token for auth service.
-	refreshToken := pb.UserRefreshTokensRequest{
+	refreshToken := pb.RefreshTokensRequest{
 		RefreshToken: input.RefreshToken,
 	}
 	tokens, err := r.service.Auth.RefreshTokens(ctx, &refreshToken)

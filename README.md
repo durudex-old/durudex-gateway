@@ -28,7 +28,8 @@ The Durudex gateway combines all durudex services so that it can be used through
 1) Generate certificates, information can be found at [cert/README.md](cert/README.md)
 2) Create an `.env` file in the root directory and add the following values ​​from `.env.example`:
 ```env
-SERVICE_AUTH_ADDR=
+# Auth signing key, the same key as in auth service.
+AUTH_SIGNING_KEY=
 ```
 Use `make run` to run and `make build` to build project.
 

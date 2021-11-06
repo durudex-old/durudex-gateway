@@ -30,11 +30,11 @@ type Tokens struct {
 }
 
 type Auth interface {
-	SignUp(ctx context.Context, input *pb.UserSignUpRequest) (uint64, error)
-	SignIn(ctx context.Context, input *pb.UserSignInRequest) (Tokens, error)
+	SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error)
+	SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error)
 	Verify(context.Context, *pb.VerifyRequest) (bool, error)
 	GetVerifyCode(context.Context, *pb.GetVerifyCodeRequest) (bool, error)
-	RefreshTokens(ctx context.Context, input *pb.UserRefreshTokensRequest) (Tokens, error)
+	RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error)
 }
 
 type Service struct {

@@ -37,7 +37,7 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 	// Getting header.
 	header := c.GetRespHeader(authorizationHeader)
 	if header == "" {
-		return errors.New("empty auth header")
+		return c.Next()
 	}
 
 	// Divide the header into two parts.
@@ -60,7 +60,7 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 	// Set claims value.
 	c.Set(userCtx, customClaim)
 
-	return nil
+	return c.Next()
 }
 
 // User identification vy ctx.

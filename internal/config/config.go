@@ -41,33 +41,31 @@ type (
 
 	// HTTP config variables.
 	HTTPConfig struct {
-		// Server host.
-		Host string `mapstructure:"host"`
-		// Server port.
-		Port string `mapstructure:"port"`
-		// Server name.
+		Host    string `mapstructure:"host"`
+		Port    string `mapstructure:"port"`
 		AppName string `mapstructure:"appName"`
 	}
 
 	// GRPC config variables.
 	GRPCConfig struct {
-		// Transport Layer Security.
 		TLS bool `mapstructure:"tls"`
-	}
-
-	// Service config varibles.
-	ServiceConfig struct {
-		// Auth service variables.
-		Auth struct {
-			// Auth service address.
-			Addr string
-		}
 	}
 
 	// Auth config variables.
 	AuthConfig struct {
 		// Signing auth key.
 		SigningKey string
+	}
+
+	// Service config varibles.
+	ServiceConfig struct {
+		// Auth service variables.
+		Auth AuthServiceConfig
+	}
+
+	// Auth service config variables.
+	AuthServiceConfig struct {
+		Addr string `mapstructure:"addr"`
 	}
 )
 
@@ -120,10 +118,13 @@ func unmarshal(cfg *Config) {
 	if err := viper.UnmarshalKey("grpc", &cfg.GRPC); err != nil {
 		log.Error().Msgf("error unmarshal grpc keys: %s", err.Error())
 	}
+	// Unmarshal auth service keys.
+	if err := viper.UnmarshalKey("service.auth", &cfg.Service.Auth); err != nil {
+		log.Error().Msgf("error unmarshal auth service keys: %s", err.Error())
+	}
 }
 
 // Seting environment variables from .env file.
 func setFromEnv(cfg *Config) {
 	cfg.Auth.SigningKey = os.Getenv("AUTH_SIGNING_KEY")
-	cfg.Service.Auth.Addr = os.Getenv("SERVICE_AUTH_ADDR")
 }

@@ -14,9 +14,13 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 http:
-  host: localhost
+  host: api.durudex.local
   port: 8000
   appName: durudex-gateway
 
 grpc:
   tls: true
+
+service:
+  auth:
+    addr: authservice.durudex.local:8001
