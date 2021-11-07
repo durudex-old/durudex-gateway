@@ -78,7 +78,7 @@ func (s *AuthService) RefreshTokens(ctx context.Context, input *pb.RefreshTokens
 func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool, error) {
 	verifyStatus, err := s.grpcHandler.Auth.Verify(ctx, input)
 	if err != nil {
-		return false, err
+		return verifyStatus.Status, err
 	}
 
 	return verifyStatus.Status, nil
@@ -88,7 +88,7 @@ func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool
 func (s *AuthService) GetVerifyCode(ctx context.Context, input *pb.GetVerifyCodeRequest) (bool, error) {
 	emailStatus, err := s.grpcHandler.Auth.GetVerifyCode(ctx, input)
 	if err != nil {
-		return false, err
+		return emailStatus.Status, err
 	}
 
 	return emailStatus.Status, nil

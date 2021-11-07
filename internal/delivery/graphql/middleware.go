@@ -35,7 +35,7 @@ const (
 // Middleware validation of authorization header for validity.
 func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 	// Getting header.
-	header := c.GetRespHeader(authorizationHeader)
+	header := c.Get(authorizationHeader)
 	if header == "" {
 		return c.Next()
 	}
@@ -52,13 +52,13 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 	}
 
 	// Parsing header.
-	customClaim, err := h.auth.JWT.Parse(header)
+	customClaim, err := h.auth.JWT.Parse(headerParts[1])
 	if err != nil {
 		return err
 	}
 
 	// Set claims value.
-	c.Set(userCtx, customClaim)
+	c.Context().SetUserValue(userCtx, customClaim)
 
 	return c.Next()
 }
