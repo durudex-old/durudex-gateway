@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"strings"
-	"fmt"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -68,7 +67,6 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 func (h *Handler) userIdentity(ctx context.Context) string {
 	// Checking ctx value on nil.
 	if ctx.Value(userCtx) == nil {
-		fmt.Println("test")
 		return ""
 	}
 
