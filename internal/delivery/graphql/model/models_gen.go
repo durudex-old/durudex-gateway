@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-type GetVerifyCodeInput struct {
+type GetCodeInput struct {
 	Email string `json:"email"`
 	Name  string `json:"name"`
 }
@@ -49,5 +49,5 @@ type Status struct {
 
 type VerifyInput struct {
 	ID   uint64 `json:"id"`
-	Code int32  `json:"code"`
+	Code uint64 `json:"code"`
 }

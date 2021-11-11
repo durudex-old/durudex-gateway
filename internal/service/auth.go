@@ -85,8 +85,8 @@ func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool
 }
 
 // Get user verification code.
-func (s *AuthService) GetVerifyCode(ctx context.Context, input *pb.GetVerifyCodeRequest) (bool, error) {
-	emailStatus, err := s.grpcHandler.Auth.GetVerifyCode(ctx, input)
+func (s *AuthService) GetCode(ctx context.Context, input *pb.GetCodeRequest) (bool, error) {
+	emailStatus, err := s.grpcHandler.Auth.GetCode(ctx, input)
 	if err != nil {
 		return emailStatus.Status, err
 	}

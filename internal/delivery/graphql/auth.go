@@ -90,14 +90,14 @@ func (r *mutationResolver) Verify(ctx context.Context, input model.VerifyInput) 
 }
 
 // Get verify code in user email.
-func (r *mutationResolver) GetVerifyCode(ctx context.Context, input model.GetVerifyCodeInput) (*model.Status, error) {
+func (r *mutationResolver) GetCode(ctx context.Context, input model.GetCodeInput) (*model.Status, error) {
 	// Send verify code to user email.
-	request := pb.GetVerifyCodeRequest{
+	request := pb.GetCodeRequest{
 		Email: input.Email,
 		Name:  input.Name,
 	}
 
-	status, err := r.service.Auth.GetVerifyCode(ctx, &request)
+	status, err := r.service.Auth.GetCode(ctx, &request)
 	if err != nil {
 		return &model.Status{Status: false}, err
 	}

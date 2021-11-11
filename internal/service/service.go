@@ -33,7 +33,7 @@ type Auth interface {
 	SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error)
 	SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error)
 	Verify(context.Context, *pb.VerifyRequest) (bool, error)
-	GetVerifyCode(context.Context, *pb.GetVerifyCodeRequest) (bool, error)
+	GetCode(context.Context, *pb.GetCodeRequest) (bool, error)
 	RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error)
 }
 

@@ -26,7 +26,7 @@ service AuthService {
   rpc SignUp (SignUpRequest) returns (SignUpResponse);
   rpc SignIn (SignInRequest) returns (SignInResponse);
   rpc Verify(VerifyRequest) returns (types.status.Status);
-  rpc GetVerifyCode(GetVerifyCodeRequest) returns (types.status.Status);
+  rpc GetCode(GetCodeRequest) returns (types.status.Status);
   rpc RefreshTokens (RefreshTokensRequest) returns (RefreshTokensResponse);
 }
 
@@ -64,10 +64,11 @@ message RefreshTokensResponse {
 
 message VerifyRequest {
   uint64 id = 1;
-  int32 code = 2;
+  uint64 code = 2;
 }
 
-message GetVerifyCodeRequest {
-  string email = 1;
-  string name = 2;
+message GetCodeRequest {
+  uint64 id = 1;
+  string email = 2;
+  string name = 3;
 }

@@ -22,7 +22,7 @@ type AuthServiceClient interface {
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	Verify(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*types.Status, error)
-	GetVerifyCode(ctx context.Context, in *GetVerifyCodeRequest, opts ...grpc.CallOption) (*types.Status, error)
+	GetCode(ctx context.Context, in *GetCodeRequest, opts ...grpc.CallOption) (*types.Status, error)
 	RefreshTokens(ctx context.Context, in *RefreshTokensRequest, opts ...grpc.CallOption) (*RefreshTokensResponse, error)
 }
 
@@ -61,9 +61,9 @@ func (c *authServiceClient) Verify(ctx context.Context, in *VerifyRequest, opts 
 	return out, nil
 }
 
-func (c *authServiceClient) GetVerifyCode(ctx context.Context, in *GetVerifyCodeRequest, opts ...grpc.CallOption) (*types.Status, error) {
+func (c *authServiceClient) GetCode(ctx context.Context, in *GetCodeRequest, opts ...grpc.CallOption) (*types.Status, error) {
 	out := new(types.Status)
-	err := c.cc.Invoke(ctx, "/durudex.auth.AuthService/GetVerifyCode", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/durudex.auth.AuthService/GetCode", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +86,7 @@ type AuthServiceServer interface {
 	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
 	Verify(context.Context, *VerifyRequest) (*types.Status, error)
-	GetVerifyCode(context.Context, *GetVerifyCodeRequest) (*types.Status, error)
+	GetCode(context.Context, *GetCodeRequest) (*types.Status, error)
 	RefreshTokens(context.Context, *RefreshTokensRequest) (*RefreshTokensResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
@@ -104,8 +104,8 @@ func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInRequest) (*
 func (UnimplementedAuthServiceServer) Verify(context.Context, *VerifyRequest) (*types.Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
 }
-func (UnimplementedAuthServiceServer) GetVerifyCode(context.Context, *GetVerifyCodeRequest) (*types.Status, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetVerifyCode not implemented")
+func (UnimplementedAuthServiceServer) GetCode(context.Context, *GetCodeRequest) (*types.Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCode not implemented")
 }
 func (UnimplementedAuthServiceServer) RefreshTokens(context.Context, *RefreshTokensRequest) (*RefreshTokensResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshTokens not implemented")
@@ -177,20 +177,20 @@ func _AuthService_Verify_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AuthService_GetVerifyCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetVerifyCodeRequest)
+func _AuthService_GetCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCodeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuthServiceServer).GetVerifyCode(ctx, in)
+		return srv.(AuthServiceServer).GetCode(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.auth.AuthService/GetVerifyCode",
+		FullMethod: "/durudex.auth.AuthService/GetCode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetVerifyCode(ctx, req.(*GetVerifyCodeRequest))
+		return srv.(AuthServiceServer).GetCode(ctx, req.(*GetCodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -233,8 +233,8 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AuthService_Verify_Handler,
 		},
 		{
-			MethodName: "GetVerifyCode",
-			Handler:    _AuthService_GetVerifyCode_Handler,
+			MethodName: "GetCode",
+			Handler:    _AuthService_GetCode_Handler,
 		},
 		{
 			MethodName: "RefreshTokens",
