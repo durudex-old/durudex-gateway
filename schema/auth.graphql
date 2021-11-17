@@ -45,7 +45,6 @@ type SignIn {
 }
 
 input VerifyInput {
-  id: UInt64!
   code: UInt64!
 }
 

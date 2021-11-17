@@ -86,20 +86,44 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.Refres
 }
 
 func (r *mutationResolver) Verify(ctx context.Context, input model.VerifyInput) (*model.Status, error) {
-	return &model.Status{}, nil
+	// Get user id by ctx.
+	userID, err := GetUserID(ctx)
+	if err != nil {
+		return &model.Status{Status: false}, err
+	}
+
+	// Verify user.
+	request := pb.VerifyRequest{
+		Id:   userID,
+		Code: input.Code,
+	}
+
+	status, err := r.service.Auth.Verify(ctx, &request)
+	if err != nil {
+		return &model.Status{Status: status}, err
+	}
+
+	return &model.Status{Status: status}, nil
 }
 
 // Get verify code in user email.
 func (r *mutationResolver) GetCode(ctx context.Context, input model.GetCodeInput) (*model.Status, error) {
+	// Get user id by ctx.
+	userID, err := GetUserID(ctx)
+	if err != nil {
+		return &model.Status{Status: false}, err
+	}
+
 	// Send verify code to user email.
 	request := pb.GetCodeRequest{
+		Id:    userID,
 		Email: input.Email,
 		Name:  input.Name,
 	}
 
 	status, err := r.service.Auth.GetCode(ctx, &request)
 	if err != nil {
-		return &model.Status{Status: false}, err
+		return &model.Status{Status: status}, err
 	}
 
 	return &model.Status{Status: status}, nil

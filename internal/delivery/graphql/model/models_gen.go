@@ -48,6 +48,5 @@ type Status struct {
 }
 
 type VerifyInput struct {
-	ID   uint64 `json:"id"`
 	Code uint64 `json:"code"`
 }

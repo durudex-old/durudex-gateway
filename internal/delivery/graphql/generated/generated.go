@@ -310,7 +310,6 @@ type SignIn {
 }
 
 input VerifyInput {
-  id: UInt64!
   code: UInt64!
 }
 
@@ -2304,14 +2303,6 @@ func (ec *executionContext) unmarshalInputVerifyInput(ctx context.Context, obj i
 
 	for k, v := range asMap {
 		switch k {
-		case "id":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			it.ID, err = ec.unmarshalNUInt642uint64(ctx, v)
-			if err != nil {
-				return it, err
-			}
 		case "code":
 			var err error
 

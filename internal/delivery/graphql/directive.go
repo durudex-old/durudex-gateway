@@ -26,10 +26,9 @@ import (
 
 // User authorization ctx check.
 func (h *Handler) userAuth(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
-	tokenData := h.userIdentity(ctx)
-	if tokenData == "" {
+	if !h.userIdentity(ctx) {
 		return nil, &gqlerror.Error{
-			Message: "Access Denied",
+			Message: "Access denied",
 		}
 	}
 

@@ -20,6 +20,7 @@ package graphql
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
@@ -64,11 +65,16 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 }
 
 // User identification vy ctx.
-func (h *Handler) userIdentity(ctx context.Context) string {
+func (h *Handler) userIdentity(ctx context.Context) bool {
 	// Checking ctx value on nil.
 	if ctx.Value(userCtx) == nil {
-		return ""
+		return false
 	}
 
-	return ctx.Value(userCtx).(string)
+	return true
+}
+
+// Get user id by ctx.
+func GetUserID(ctx context.Context) (uint64, error) {
+	return strconv.ParseUint(ctx.Value(userCtx).(string), 10, 64)
 }
