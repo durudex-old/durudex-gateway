@@ -67,11 +67,7 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 // User identification vy ctx.
 func (h *Handler) userIdentity(ctx context.Context) bool {
 	// Checking ctx value on nil.
-	if ctx.Value(userCtx) == nil {
-		return false
-	}
-
-	return true
+	return ctx.Value(userCtx) != nil
 }
 
 // Get user id by ctx.
