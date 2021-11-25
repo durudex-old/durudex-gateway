@@ -56,6 +56,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 	user := pb.SignInRequest{
 		Username: input.Username,
 		Password: input.Password,
+		Ip:       ctx.Value(userIP).(string),
 	}
 	tokens, err := r.service.Auth.SignIn(ctx, &user)
 	if err != nil {

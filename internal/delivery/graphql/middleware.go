@@ -31,10 +31,14 @@ const (
 
 	// Ctx claims.
 	userCtx = "userID"
+	userIP  = "userIP"
 )
 
 // Middleware validation of authorization header for validity.
 func (h *Handler) authMiddleware(c *fiber.Ctx) error {
+	// Set user ip address.
+	c.Context().SetUserValue(userIP, c.IP())
+
 	// Getting header.
 	header := c.Get(authorizationHeader)
 	if header == "" {

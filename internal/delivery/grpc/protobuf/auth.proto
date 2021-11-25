@@ -46,6 +46,7 @@ message SignUpResponse {
 message SignInRequest {
   string username = 1;
   string password = 2;
+  string ip = 3;
 }
 
 message SignInResponse {
