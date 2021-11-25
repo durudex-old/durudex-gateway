@@ -74,6 +74,7 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.Refres
 	// Refresh auth token for auth service.
 	refreshToken := pb.RefreshTokensRequest{
 		RefreshToken: input.RefreshToken,
+		Ip:           ctx.Value(userIP).(string),
 	}
 	tokens, err := r.service.Auth.RefreshTokens(ctx, &refreshToken)
 	if err != nil {
