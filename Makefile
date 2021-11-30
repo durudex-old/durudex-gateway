@@ -21,6 +21,10 @@ download:
 build: download
 	go build -o .bin/gateway.exe ./cmd/gateway/main.go
 
+.PHONY: lint
+lint:
+	golangci-lint run
+
 .PHONY: run
 run: download
 	go run ./cmd/gateway/main.go

@@ -41,7 +41,7 @@ type Service struct {
 	Auth
 }
 
-// Creating a new service
+// Creating a new service.
 func NewService(grpcHandler *grpc.Handler) *Service {
 	return &Service{
 		Auth: NewAuthService(grpcHandler),

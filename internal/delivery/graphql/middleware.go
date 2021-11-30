@@ -26,6 +26,11 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+var (
+	errAuthHeader   = errors.New("invalid auth header")
+	errTokenIsEmpty = errors.New("token is empty")
+)
+
 const (
 	authorizationHeader = "Authorization"
 
@@ -48,12 +53,12 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 	// Divide the header into two parts.
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		return errors.New("invalid auth header")
+		return errAuthHeader
 	}
 
 	// Check the second part of the header.
 	if len(headerParts[1]) == 0 {
-		return errors.New("token is empty")
+		return errTokenIsEmpty
 	}
 
 	// Parsing header.

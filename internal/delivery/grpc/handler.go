@@ -30,6 +30,8 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+var ErrCACertificate = errors.New("error to add server CA's certificate")
+
 const (
 	CACertFile     = "cert/rootCA.pem"
 	clientCertFile = "cert/client-cert.pem"
@@ -84,7 +86,7 @@ func LoadTLSCredentials() (credentials.TransportCredentials, error) {
 
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(pemCA) {
-		return nil, errors.New("error to add server CA's certificate")
+		return nil, ErrCACertificate
 	}
 
 	// Load client's certificate and private key.

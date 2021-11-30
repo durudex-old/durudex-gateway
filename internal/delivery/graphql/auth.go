@@ -43,6 +43,7 @@ func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) 
 		Sex:      input.Sex,
 	}
 	id, err := r.service.Auth.SignUp(ctx, &user)
+
 	if err != nil {
 		return &model.SignUp{}, err
 	}
@@ -59,6 +60,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 		Ip:       ctx.Value(userIP).(string),
 	}
 	tokens, err := r.service.Auth.SignIn(ctx, &user)
+
 	if err != nil {
 		return &model.SignIn{}, err
 	}
@@ -77,6 +79,7 @@ func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.Refres
 		Ip:           ctx.Value(userIP).(string),
 	}
 	tokens, err := r.service.Auth.RefreshTokens(ctx, &refreshToken)
+
 	if err != nil {
 		return &model.RefreshTokens{}, err
 	}

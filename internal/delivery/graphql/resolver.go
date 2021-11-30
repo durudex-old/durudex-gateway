@@ -23,7 +23,7 @@ type Resolver struct {
 	service *service.Service
 }
 
-// Creating a new resolver
+// Creating a new resolver.
 func NewResolver(service *service.Service) *Resolver {
 	return &Resolver{
 		service: service,

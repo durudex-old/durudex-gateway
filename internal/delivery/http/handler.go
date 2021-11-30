@@ -26,7 +26,7 @@ type Handler struct {
 	graphqlHandler *graphql.Handler
 }
 
-// Creating a new http handler
+// Creating a new http handler.
 func NewHTTPHandler(graphqlHandler *graphql.Handler) *Handler {
 	return &Handler{
 		graphqlHandler: graphqlHandler,

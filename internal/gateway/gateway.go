@@ -50,10 +50,9 @@ func Run(configPath string) {
 
 	// Create and run server.
 	srv := server.NewServer(cfg, httpHandler)
-	go func() {
-		addr := cfg.HTTP.Host + ":" + cfg.HTTP.Port
-		srv.Run(addr)
-	}()
+	addr := cfg.HTTP.Host + ":" + cfg.HTTP.Port
+
+	go srv.Run(addr)
 
 	// Quit in application.
 	quit := make(chan os.Signal, 1)
