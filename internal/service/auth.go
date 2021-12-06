@@ -22,6 +22,7 @@ import (
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
 	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf/types"
 )
 
 type AuthService struct {
@@ -85,7 +86,7 @@ func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool
 }
 
 // Get user verification code.
-func (s *AuthService) GetCode(ctx context.Context, input *pb.GetCodeRequest) (bool, error) {
+func (s *AuthService) GetCode(ctx context.Context, input *types.Id) (bool, error) {
 	emailStatus, err := s.grpcHandler.Auth.GetCode(ctx, input)
 	if err != nil {
 		return emailStatus.Status, err

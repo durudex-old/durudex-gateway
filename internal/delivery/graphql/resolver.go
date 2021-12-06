@@ -17,15 +17,26 @@
 
 package graphql
 
-import "github.com/Durudex/durudex-gateway/internal/service"
+import (
+	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
+	"github.com/Durudex/durudex-gateway/internal/service"
+)
 
 type Resolver struct {
 	service *service.Service
 }
 
+type mutationResolver struct{ *Resolver }
+
+type queryResolver struct{ *Resolver }
+
 // Creating a new resolver.
 func NewResolver(service *service.Service) *Resolver {
-	return &Resolver{
-		service: service,
-	}
+	return &Resolver{service: service}
 }
+
+// Mutation resolver.
+func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
+
+// Query resolver.
+func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }

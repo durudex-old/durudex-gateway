@@ -15,9 +15,11 @@
 
 schema {
   mutation: Mutation
+  query: Query
 }
 
 type Mutation
+type Query
 
 directive @userAuth on FIELD_DEFINITION
 

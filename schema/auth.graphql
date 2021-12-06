@@ -17,8 +17,11 @@ extend type Mutation {
   signUp(input: SignUpInput!): SignUp!
   signIn(input: SignInInput!): SignIn!
   verify(input: VerifyInput!): Status! @userAuth
-  getCode(input: GetCodeInput!): Status! @userAuth
   refreshTokens(input: RefreshTokensInput!): RefreshTokens!
+}
+
+extend type Query {
+  getCode: Status! @userAuth
 }
 
 input SignUpInput {
@@ -46,11 +49,6 @@ type SignIn {
 
 input VerifyInput {
   code: UInt64!
-}
-
-input GetCodeInput {
-  email: String!
-  name: String!
 }
 
 input RefreshTokensInput {
