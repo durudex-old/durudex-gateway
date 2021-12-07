@@ -22,6 +22,7 @@ import (
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
 	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf/types"
 )
 
 type Tokens struct {
@@ -33,7 +34,7 @@ type Auth interface {
 	SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error)
 	SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error)
 	Verify(context.Context, *pb.VerifyRequest) (bool, error)
-	GetCode(context.Context, *pb.GetCodeRequest) (bool, error)
+	GetCode(context.Context, *types.Id) (bool, error)
 	RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error)
 }
 

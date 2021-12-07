@@ -19,10 +19,10 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
-	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error)
+	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.Id, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*SignInResponse, error)
 	Verify(ctx context.Context, in *VerifyRequest, opts ...grpc.CallOption) (*types.Status, error)
-	GetCode(ctx context.Context, in *GetCodeRequest, opts ...grpc.CallOption) (*types.Status, error)
+	GetCode(ctx context.Context, in *types.Id, opts ...grpc.CallOption) (*types.Status, error)
 	RefreshTokens(ctx context.Context, in *RefreshTokensRequest, opts ...grpc.CallOption) (*RefreshTokensResponse, error)
 }
 
@@ -34,8 +34,8 @@ func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
 }
 
-func (c *authServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*SignUpResponse, error) {
-	out := new(SignUpResponse)
+func (c *authServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.Id, error) {
+	out := new(types.Id)
 	err := c.cc.Invoke(ctx, "/durudex.auth.AuthService/SignUp", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -61,7 +61,7 @@ func (c *authServiceClient) Verify(ctx context.Context, in *VerifyRequest, opts 
 	return out, nil
 }
 
-func (c *authServiceClient) GetCode(ctx context.Context, in *GetCodeRequest, opts ...grpc.CallOption) (*types.Status, error) {
+func (c *authServiceClient) GetCode(ctx context.Context, in *types.Id, opts ...grpc.CallOption) (*types.Status, error) {
 	out := new(types.Status)
 	err := c.cc.Invoke(ctx, "/durudex.auth.AuthService/GetCode", in, out, opts...)
 	if err != nil {
@@ -83,10 +83,10 @@ func (c *authServiceClient) RefreshTokens(ctx context.Context, in *RefreshTokens
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
 type AuthServiceServer interface {
-	SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error)
+	SignUp(context.Context, *SignUpRequest) (*types.Id, error)
 	SignIn(context.Context, *SignInRequest) (*SignInResponse, error)
 	Verify(context.Context, *VerifyRequest) (*types.Status, error)
-	GetCode(context.Context, *GetCodeRequest) (*types.Status, error)
+	GetCode(context.Context, *types.Id) (*types.Status, error)
 	RefreshTokens(context.Context, *RefreshTokensRequest) (*RefreshTokensResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
@@ -95,7 +95,7 @@ type AuthServiceServer interface {
 type UnimplementedAuthServiceServer struct {
 }
 
-func (UnimplementedAuthServiceServer) SignUp(context.Context, *SignUpRequest) (*SignUpResponse, error) {
+func (UnimplementedAuthServiceServer) SignUp(context.Context, *SignUpRequest) (*types.Id, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignUp not implemented")
 }
 func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInRequest) (*SignInResponse, error) {
@@ -104,7 +104,7 @@ func (UnimplementedAuthServiceServer) SignIn(context.Context, *SignInRequest) (*
 func (UnimplementedAuthServiceServer) Verify(context.Context, *VerifyRequest) (*types.Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Verify not implemented")
 }
-func (UnimplementedAuthServiceServer) GetCode(context.Context, *GetCodeRequest) (*types.Status, error) {
+func (UnimplementedAuthServiceServer) GetCode(context.Context, *types.Id) (*types.Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetCode not implemented")
 }
 func (UnimplementedAuthServiceServer) RefreshTokens(context.Context, *RefreshTokensRequest) (*RefreshTokensResponse, error) {
@@ -178,7 +178,7 @@ func _AuthService_Verify_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _AuthService_GetCode_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCodeRequest)
+	in := new(types.Id)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -190,7 +190,7 @@ func _AuthService_GetCode_Handler(srv interface{}, ctx context.Context, dec func
 		FullMethod: "/durudex.auth.AuthService/GetCode",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).GetCode(ctx, req.(*GetCodeRequest))
+		return srv.(AuthServiceServer).GetCode(ctx, req.(*types.Id))
 	}
 	return interceptor(ctx, in, info, handler)
 }

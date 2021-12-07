@@ -6,11 +6,6 @@ import (
 	"time"
 )
 
-type GetCodeInput struct {
-	Email string `json:"email"`
-	Name  string `json:"name"`
-}
-
 type RefreshTokens struct {
 	AccessToken  string `json:"accessToken"`
 	RefreshToken string `json:"refreshToken"`

@@ -25,6 +25,10 @@ build: download
 lint:
 	golangci-lint run
 
+.PHONY: test
+test: lint
+	go test -v ./...
+
 .PHONY: run
 run: download
 	go run ./cmd/gateway/main.go

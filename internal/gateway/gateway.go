@@ -35,7 +35,10 @@ import (
 // Run durudex gateway application.
 func Run(configPath string) {
 	// Initialize config.
-	cfg := config.Init(configPath)
+	cfg, err := config.Init(configPath)
+	if err != nil {
+		log.Error().Msg(err.Error())
+	}
 
 	// Managers
 	auth := auth.NewAuthManager(auth.JWTConfig{

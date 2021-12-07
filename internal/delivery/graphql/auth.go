@@ -20,16 +20,11 @@ package graphql
 import (
 	"context"
 
-	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
 	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf/types"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-type mutationResolver struct{ *Resolver }
-
-// Mutation resolver.
-func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Sign Up resolver.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error) {
@@ -112,21 +107,14 @@ func (r *mutationResolver) Verify(ctx context.Context, input model.VerifyInput) 
 }
 
 // Get verify code in user email.
-func (r *mutationResolver) GetCode(ctx context.Context, input model.GetCodeInput) (*model.Status, error) {
+func (r *queryResolver) GetCode(ctx context.Context) (*model.Status, error) {
 	// Get user id by ctx.
 	userID, err := GetUserID(ctx)
 	if err != nil {
 		return &model.Status{Status: false}, err
 	}
 
-	// Send verify code to user email.
-	request := pb.GetCodeRequest{
-		Id:    userID,
-		Email: input.Email,
-		Name:  input.Name,
-	}
-
-	status, err := r.service.Auth.GetCode(ctx, &request)
+	status, err := r.service.Auth.GetCode(ctx, &types.Id{Id: userID})
 	if err != nil {
 		return &model.Status{Status: status}, err
 	}

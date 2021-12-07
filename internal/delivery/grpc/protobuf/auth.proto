@@ -21,12 +21,13 @@ option go_package = "github.com/Durudex/durudex-gateway/internal/delivery/grpc/p
 
 import "google/protobuf/timestamp.proto";
 import "internal/delivery/grpc/protobuf/types/status.proto";
+import "internal/delivery/grpc/protobuf/types/id.proto";
 
 service AuthService {
-  rpc SignUp (SignUpRequest) returns (SignUpResponse);
+  rpc SignUp (SignUpRequest) returns (types.id.Id);
   rpc SignIn (SignInRequest) returns (SignInResponse);
   rpc Verify(VerifyRequest) returns (types.status.Status);
-  rpc GetCode(GetCodeRequest) returns (types.status.Status);
+  rpc GetCode(types.id.Id) returns (types.status.Status);
   rpc RefreshTokens (RefreshTokensRequest) returns (RefreshTokensResponse);
 }
 
@@ -37,10 +38,6 @@ message SignUpRequest {
   string password = 4;
   google.protobuf.Timestamp birthday = 5;
   int32 sex = 6;
-}
-
-message SignUpResponse {
-  uint64 id = 1;
 }
 
 message SignInRequest {
@@ -67,10 +64,4 @@ message RefreshTokensResponse {
 message VerifyRequest {
   uint64 id = 1;
   uint64 code = 2;
-}
-
-message GetCodeRequest {
-  uint64 id = 1;
-  string email = 2;
-  string name = 3;
 }

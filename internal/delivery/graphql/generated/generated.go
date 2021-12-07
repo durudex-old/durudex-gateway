@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -37,6 +38,7 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	Query() QueryResolver
 }
 
 type DirectiveRoot struct {
@@ -45,7 +47,6 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		GetCode       func(childComplexity int, input model.GetCodeInput) int
 		RefreshTokens func(childComplexity int, input model.RefreshTokensInput) int
 		SignIn        func(childComplexity int, input model.SignInInput) int
 		SignUp        func(childComplexity int, input model.SignUpInput) int
@@ -53,6 +54,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		GetCode func(childComplexity int) int
 	}
 
 	RefreshTokens struct {
@@ -78,8 +80,10 @@ type MutationResolver interface {
 	SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error)
 	SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error)
 	Verify(ctx context.Context, input model.VerifyInput) (*model.Status, error)
-	GetCode(ctx context.Context, input model.GetCodeInput) (*model.Status, error)
 	RefreshTokens(ctx context.Context, input model.RefreshTokensInput) (*model.RefreshTokens, error)
+}
+type QueryResolver interface {
+	GetCode(ctx context.Context) (*model.Status, error)
 }
 
 type executableSchema struct {
@@ -96,18 +100,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
-
-	case "Mutation.getCode":
-		if e.complexity.Mutation.GetCode == nil {
-			break
-		}
-
-		args, err := ec.field_Mutation_getCode_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.GetCode(childComplexity, args["input"].(model.GetCodeInput)), true
 
 	case "Mutation.refreshTokens":
 		if e.complexity.Mutation.RefreshTokens == nil {
@@ -156,6 +148,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.Verify(childComplexity, args["input"].(model.VerifyInput)), true
+
+	case "Query.getCode":
+		if e.complexity.Query.GetCode == nil {
+			break
+		}
+
+		return e.complexity.Query.GetCode(childComplexity), true
 
 	case "RefreshTokens.accessToken":
 		if e.complexity.RefreshTokens.AccessToken == nil {
@@ -282,8 +281,11 @@ extend type Mutation {
   signUp(input: SignUpInput!): SignUp!
   signIn(input: SignInInput!): SignIn!
   verify(input: VerifyInput!): Status! @userAuth
-  getCode(input: GetCodeInput!): Status! @userAuth
   refreshTokens(input: RefreshTokensInput!): RefreshTokens!
+}
+
+extend type Query {
+  getCode: Status! @userAuth
 }
 
 input SignUpInput {
@@ -313,11 +315,6 @@ input VerifyInput {
   code: UInt64!
 }
 
-input GetCodeInput {
-  email: String!
-  name: String!
-}
-
 input RefreshTokensInput {
   refreshToken: String!
 }
@@ -344,9 +341,11 @@ type RefreshTokens {
 
 schema {
   mutation: Mutation
+  query: Query
 }
 
 type Mutation
+type Query
 
 directive @userAuth on FIELD_DEFINITION
 
@@ -364,21 +363,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) field_Mutation_getCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.GetCodeInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNGetCodeInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐGetCodeInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
 
 func (ec *executionContext) field_Mutation_refreshTokens_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -639,68 +623,6 @@ func (ec *executionContext) _Mutation_verify(ctx context.Context, field graphql.
 	return ec.marshalNStatus2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Mutation_getCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_getCode_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().GetCode(rctx, args["input"].(model.GetCodeInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.UserAuth == nil {
-				return nil, errors.New("directive userAuth is not implemented")
-			}
-			return ec.directives.UserAuth(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*model.Status); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/Durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Status)
-	fc.Result = res
-	return ec.marshalNStatus2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
-}
-
 func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -741,6 +663,61 @@ func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field g
 	res := resTmp.(*model.RefreshTokens)
 	fc.Result = res
 	return ec.marshalNRefreshTokens2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_getCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().GetCode(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.UserAuth == nil {
+				return nil, errors.New("directive userAuth is not implemented")
+			}
+			return ec.directives.UserAuth(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*model.Status); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/Durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Status)
+	fc.Result = res
+	return ec.marshalNStatus2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2146,37 +2123,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputGetCodeInput(ctx context.Context, obj interface{}) (model.GetCodeInput, error) {
-	var it model.GetCodeInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	for k, v := range asMap {
-		switch k {
-		case "email":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-			it.Email, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context, obj interface{}) (model.RefreshTokensInput, error) {
 	var it model.RefreshTokensInput
 	asMap := map[string]interface{}{}
@@ -2355,11 +2301,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
-		case "getCode":
-			out.Values[i] = ec._Mutation_getCode(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "refreshTokens":
 			out.Values[i] = ec._Mutation_refreshTokens(ctx, field)
 			if out.Values[i] == graphql.Null {
@@ -2391,6 +2332,20 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
+		case "getCode":
+			field := field
+			out.Concurrently(i, func() (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getCode(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			})
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -2787,11 +2742,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNGetCodeInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐGetCodeInput(ctx context.Context, v interface{}) (model.GetCodeInput, error) {
-	res, err := ec.unmarshalInputGetCodeInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNInt322int32(ctx context.Context, v interface{}) (int32, error) {

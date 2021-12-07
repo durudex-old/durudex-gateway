@@ -13,20 +13,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-schema {
-  mutation: Mutation
-  query: Query
-}
+http:
+  host: api.durudex.local
+  port: 8000
+  appName: durudex-gateway
 
-type Mutation
-type Query
+grpc:
+  tls: true
 
-directive @userAuth on FIELD_DEFINITION
-
-type Status {
-  status: Boolean!
-}
-
-scalar Int32
-scalar UInt64
-scalar Time
+service:
+  auth:
+    addr: authservice.durudex.local:8001
