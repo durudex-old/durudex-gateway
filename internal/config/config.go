@@ -18,6 +18,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -70,24 +71,31 @@ type (
 )
 
 // Initialize config.
-func Init(configPath string) *Config {
+func Init(configPath string) (*Config, error) {
 	log.Debug().Msg("Initialize config...")
 
+	// Populate defaults config variables.
+	populateDefaults()
+
 	// Parsing config file.
-	parseConfigFile(configPath)
+	if err := parseConfigFile(configPath); err != nil {
+		return nil, fmt.Errorf("error parsing config file: %s", err.Error())
+	}
 
 	var cfg Config
 	// Unmarshal config keys.
-	unmarshal(&cfg)
+	if err := unmarshal(&cfg); err != nil {
+		return nil, fmt.Errorf("error unmarshal config keys: %s", err.Error())
+	}
 
 	// Set env configurations.
 	setFromEnv(&cfg)
 
-	return &cfg
+	return &cfg, nil
 }
 
 // Parsing config file.
-func parseConfigFile(configPath string) {
+func parseConfigFile(configPath string) error {
 	log.Debug().Msgf("Parsing config file: %s", configPath)
 
 	// Split path to folder and file.
@@ -97,34 +105,37 @@ func parseConfigFile(configPath string) {
 	viper.SetConfigName(path[1]) // file
 
 	// Read config file.
-	if err := viper.ReadInConfig(); err != nil {
-		// Set default variables.
-		viper.SetDefault("http.addr", defaultHTTPPort)
-		viper.SetDefault("http.appName", defaultHTTPAppName)
-
-		log.Error().Msgf("error parsing config file: %s", err.Error())
-	}
+	return viper.ReadInConfig()
 }
 
 // Unmarshal config keys.
-func unmarshal(cfg *Config) {
+func unmarshal(cfg *Config) error {
 	log.Debug().Msg("Unmarshal config keys...")
 
 	// Unmarshal http keys.
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
-		log.Error().Msgf("error unmarshal http keys: %s", err.Error())
+		return err
 	}
 	// Unmarshal grpc keys.
 	if err := viper.UnmarshalKey("grpc", &cfg.GRPC); err != nil {
-		log.Error().Msgf("error unmarshal grpc keys: %s", err.Error())
+		return err
 	}
 	// Unmarshal auth service keys.
-	if err := viper.UnmarshalKey("service.auth", &cfg.Service.Auth); err != nil {
-		log.Error().Msgf("error unmarshal auth service keys: %s", err.Error())
-	}
+	return viper.UnmarshalKey("service.auth", &cfg.Service.Auth)
 }
 
 // Seting environment variables from .env file.
 func setFromEnv(cfg *Config) {
+	log.Debug().Msg("Set from environment configurations...")
+
+	// Auth variables.
 	cfg.Auth.SigningKey = os.Getenv("AUTH_SIGNING_KEY")
+}
+
+// Populate defaults config variables.
+func populateDefaults() {
+	log.Debug().Msg("Populate defaults config variables.")
+
+	viper.SetDefault("http.addr", defaultHTTPPort)
+	viper.SetDefault("http.appName", defaultHTTPAppName)
 }
