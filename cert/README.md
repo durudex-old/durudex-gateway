@@ -6,10 +6,11 @@ To generate certificates you need:
 ```
 authservice.durudex.local
 notifservice.durudex.local
+userservice.durudex.local
 ```
 3) And use `make cert`
 
-**If you do not want to use tls connection change [grpc.tls](https://github.com/Durudex/durudex-auth-service/blob/main/configs/main.yml) configuration to `false`**:
+**If you do not want to use tls connection change [grpc.tls](https://github.com/Durudex/durudex-gateway/blob/main/configs/main.yml) configuration to `false`**:
 ```yml
 grpc:
     tls: false

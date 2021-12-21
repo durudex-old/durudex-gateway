@@ -40,6 +40,12 @@ mkcert \
   -key-file notifservice-key.pem \
   notifservice.durudex.local
 
+echo "Create User Service certificate...."
+mkcert \
+  -cert-file userservice-cert.pem \
+  -key-file userservice-key.pem \
+  userservice.durudex.local
+
 echo "Create Client certificate...."
 mkcert -client \
   -cert-file client-cert.pem \
