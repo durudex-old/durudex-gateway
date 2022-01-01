@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -46,14 +46,14 @@ protoc:
 		--go_opt=paths=source_relative \
 		--go-grpc_out=. \
 		--go-grpc_opt=paths=source_relative \
-		internal/delivery/grpc/protobuf/*.proto
+		internal/delivery/grpc/pb/*.proto
 
 .PHONY: protoc-types
 protoc-types:
 	protoc \
 		--go_out=. \
 		--go_opt=paths=source_relative \
-		internal/delivery/grpc/protobuf/types/*.proto
+		internal/delivery/grpc/pb/types/*.proto
 
 .PHONY: cert
 cert:

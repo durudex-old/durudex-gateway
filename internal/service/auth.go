@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -21,8 +21,8 @@ import (
 	"context"
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
-	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf/types"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 )
 
 type AuthService struct {
@@ -31,9 +31,7 @@ type AuthService struct {
 
 // Creating a new auth service.
 func NewAuthService(grpcHandler *grpc.Handler) *AuthService {
-	return &AuthService{
-		grpcHandler: grpcHandler,
-	}
+	return &AuthService{grpcHandler: grpcHandler}
 }
 
 // Sign Up user.
@@ -86,7 +84,7 @@ func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool
 }
 
 // Get user verification code.
-func (s *AuthService) GetCode(ctx context.Context, input *types.Id) (bool, error) {
+func (s *AuthService) GetCode(ctx context.Context, input *types.ID) (bool, error) {
 	emailStatus, err := s.grpcHandler.Auth.GetCode(ctx, input)
 	if err != nil {
 		return emailStatus.Status, err

@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -21,8 +21,8 @@ import (
 	"context"
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
-	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf/types"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -114,7 +114,7 @@ func (r *queryResolver) GetCode(ctx context.Context) (*model.Status, error) {
 		return &model.Status{Status: false}, err
 	}
 
-	status, err := r.service.Auth.GetCode(ctx, &types.Id{Id: userID})
+	status, err := r.service.Auth.GetCode(ctx, &types.ID{Id: userID})
 	if err != nil {
 		return &model.Status{Status: status}, err
 	}

@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,7 @@ import (
 	"io/ioutil"
 
 	"github.com/Durudex/durudex-gateway/internal/config"
-	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"

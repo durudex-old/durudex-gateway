@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -21,8 +21,8 @@ import (
 	"context"
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
-	pb "github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/protobuf/types"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
+	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 )
 
 type Tokens struct {
@@ -34,7 +34,7 @@ type Auth interface {
 	SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error)
 	SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error)
 	Verify(context.Context, *pb.VerifyRequest) (bool, error)
-	GetCode(context.Context, *types.Id) (bool, error)
+	GetCode(context.Context, *types.ID) (bool, error)
 	RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error)
 }
 
@@ -44,7 +44,5 @@ type Service struct {
 
 // Creating a new service.
 func NewService(grpcHandler *grpc.Handler) *Service {
-	return &Service{
-		Auth: NewAuthService(grpcHandler),
-	}
+	return &Service{Auth: NewAuthService(grpcHandler)}
 }
