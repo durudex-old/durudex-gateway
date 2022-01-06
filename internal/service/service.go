@@ -21,21 +21,15 @@ import (
 	"context"
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
+	"github.com/Durudex/durudex-gateway/internal/domain"
 )
 
-type Tokens struct {
-	AccessToken  string
-	RefreshToken string
-}
-
 type Auth interface {
-	SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error)
-	SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error)
-	Verify(context.Context, *pb.VerifyRequest) (bool, error)
-	GetCode(context.Context, *types.ID) (bool, error)
-	RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error)
+	SignUp(ctx context.Context, input *domain.SignUpInput) (uint64, error)
+	SignIn(ctx context.Context, input *domain.SignInInput) (domain.Tokens, error)
+	Verify(ctx context.Context, input *domain.VerifyInput) (bool, error)
+	GetCode(ctx context.Context, code uint64) (bool, error)
+	RefreshTokens(ctx context.Context, input *domain.RefreshTokensInput) (domain.Tokens, error)
 }
 
 type Service struct {

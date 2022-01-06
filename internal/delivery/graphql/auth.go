@@ -21,20 +21,18 @@ import (
 	"context"
 
 	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
-	"google.golang.org/protobuf/types/known/timestamppb"
+	"github.com/Durudex/durudex-gateway/internal/domain"
 )
 
 // Sign Up resolver.
 func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error) {
 	// Sign Up user for auth service.
-	user := pb.SignUpRequest{
+	user := domain.SignUpInput{
 		Username: input.Username,
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
-		Birthday: timestamppb.New(input.Birthday),
+		Birthday: input.Birthday,
 		Sex:      input.Sex,
 	}
 	id, err := r.service.Auth.SignUp(ctx, &user)
@@ -49,7 +47,7 @@ func (r *mutationResolver) SignUp(ctx context.Context, input model.SignUpInput) 
 // Sign In resolver.
 func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error) {
 	// Sign In user for auth service.
-	user := pb.SignInRequest{
+	user := domain.SignInInput{
 		Username: input.Username,
 		Password: input.Password,
 		Ip:       ctx.Value(userIP).(string),
@@ -69,7 +67,7 @@ func (r *mutationResolver) SignIn(ctx context.Context, input model.SignInInput) 
 // Refresh user auth tokens.
 func (r *mutationResolver) RefreshTokens(ctx context.Context, input model.RefreshTokensInput) (*model.RefreshTokens, error) {
 	// Refresh auth token for auth service.
-	refreshToken := pb.RefreshTokensRequest{
+	refreshToken := domain.RefreshTokensInput{
 		RefreshToken: input.RefreshToken,
 		Ip:           ctx.Value(userIP).(string),
 	}
@@ -93,12 +91,12 @@ func (r *mutationResolver) Verify(ctx context.Context, input model.VerifyInput) 
 	}
 
 	// Verify user.
-	request := pb.VerifyRequest{
+	verifyInput := domain.VerifyInput{
 		Id:   userID,
 		Code: input.Code,
 	}
 
-	status, err := r.service.Auth.Verify(ctx, &request)
+	status, err := r.service.Auth.Verify(ctx, &verifyInput)
 	if err != nil {
 		return &model.Status{Status: status}, err
 	}
@@ -114,7 +112,7 @@ func (r *queryResolver) GetCode(ctx context.Context) (*model.Status, error) {
 		return &model.Status{Status: false}, err
 	}
 
-	status, err := r.service.Auth.GetCode(ctx, &types.ID{Id: userID})
+	status, err := r.service.Auth.GetCode(ctx, userID)
 	if err != nil {
 		return &model.Status{Status: status}, err
 	}

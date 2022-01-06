@@ -23,6 +23,8 @@ import (
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
+	"github.com/Durudex/durudex-gateway/internal/domain"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 type AuthService struct {
@@ -35,9 +37,17 @@ func NewAuthService(grpcHandler *grpc.Handler) *AuthService {
 }
 
 // Sign Up user.
-func (s *AuthService) SignUp(ctx context.Context, input *pb.SignUpRequest) (uint64, error) {
+func (s *AuthService) SignUp(ctx context.Context, input *domain.SignUpInput) (uint64, error) {
 	// Get for auth service.
-	id, err := s.grpcHandler.Auth.SignUp(ctx, input)
+	user := pb.SignUpRequest{
+		Username: input.Username,
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
+		Birthday: timestamppb.New(input.Birthday),
+		Sex:      input.Sex,
+	}
+	id, err := s.grpcHandler.Auth.SignUp(ctx, &user)
 	if err != nil {
 		return 0, err
 	}
@@ -46,36 +56,47 @@ func (s *AuthService) SignUp(ctx context.Context, input *pb.SignUpRequest) (uint
 }
 
 // Sign In user.
-func (s *AuthService) SignIn(ctx context.Context, input *pb.SignInRequest) (Tokens, error) {
+func (s *AuthService) SignIn(ctx context.Context, input *domain.SignInInput) (domain.Tokens, error) {
 	// Get for auth service.
-	tokens, err := s.grpcHandler.Auth.SignIn(ctx, input)
+	user := pb.SignInRequest{
+		Username: input.Username,
+		Password: input.Password,
+		Ip:       input.Ip,
+	}
+	tokens, err := s.grpcHandler.Auth.SignIn(ctx, &user)
 	if err != nil {
-		return Tokens{}, err
+		return domain.Tokens{}, err
 	}
 
-	return Tokens{
+	return domain.Tokens{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 	}, nil
 }
 
 // Refresh user auth tokens.
-func (s *AuthService) RefreshTokens(ctx context.Context, input *pb.RefreshTokensRequest) (Tokens, error) {
+func (s *AuthService) RefreshTokens(ctx context.Context, input *domain.RefreshTokensInput) (domain.Tokens, error) {
 	// Get for auth service.
-	tokens, err := s.grpcHandler.Auth.RefreshTokens(ctx, input)
+	refreshTokensInput := pb.RefreshTokensRequest{
+		RefreshToken: input.RefreshToken,
+		Ip:           input.Ip,
+	}
+	tokens, err := s.grpcHandler.Auth.RefreshTokens(ctx, &refreshTokensInput)
 	if err != nil {
-		return Tokens{}, err
+		return domain.Tokens{}, err
 	}
 
-	return Tokens{
+	return domain.Tokens{
 		AccessToken:  tokens.AccessToken,
 		RefreshToken: tokens.RefreshToken,
 	}, nil
 }
 
 // Verification user.
-func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool, error) {
-	verifyStatus, err := s.grpcHandler.Auth.Verify(ctx, input)
+func (s *AuthService) Verify(ctx context.Context, input *domain.VerifyInput) (bool, error) {
+	// Get for auth service.
+	verifyInput := pb.VerifyRequest{Id: input.Id, Code: input.Code}
+	verifyStatus, err := s.grpcHandler.Auth.Verify(ctx, &verifyInput)
 	if err != nil {
 		return verifyStatus.Status, err
 	}
@@ -84,8 +105,8 @@ func (s *AuthService) Verify(ctx context.Context, input *pb.VerifyRequest) (bool
 }
 
 // Get user verification code.
-func (s *AuthService) GetCode(ctx context.Context, input *types.ID) (bool, error) {
-	emailStatus, err := s.grpcHandler.Auth.GetCode(ctx, input)
+func (s *AuthService) GetCode(ctx context.Context, id uint64) (bool, error) {
+	emailStatus, err := s.grpcHandler.Auth.GetCode(ctx, &types.ID{Id: id})
 	if err != nil {
 		return emailStatus.Status, err
 	}
