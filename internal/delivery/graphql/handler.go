@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -20,22 +20,23 @@ package graphql
 import (
 	"net/http"
 
+	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
+	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/pkg/auth"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/Durudex/durudex-auth-service/pkg/auth"
-	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
-	"github.com/Durudex/durudex-gateway/internal/service"
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Handler struct {
 	service *service.Service
-	auth    *auth.Manager
+	auth    auth.JWT
 }
 
 // Creating a new graphql handler.
-func NewGraphQLHandler(service *service.Service, auth *auth.Manager) *Handler {
+func NewGraphQLHandler(service *service.Service, auth auth.JWT) *Handler {
 	return &Handler{
 		service: service,
 		auth:    auth,

@@ -18,24 +18,11 @@
 package grpc
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"errors"
-	"io/ioutil"
+	"github.com/durudex/durudex-gateway/internal/config"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 
-	"github.com/Durudex/durudex-gateway/internal/config"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-)
-
-var ErrCACertificate = errors.New("error to add server CA's certificate")
-
-const (
-	CACertFile     = "cert/rootCA.pem"
-	clientCertFile = "cert/client-cert.pem"
-	clientKeyFile  = "cert/client-key.pem"
 )
 
 type Handler struct {
@@ -74,32 +61,4 @@ func ConnectToService(address string, transportOption grpc.DialOption) *grpc.Cli
 	}
 
 	return conn
-}
-
-// Loading TLS credentials.
-func LoadTLSCredentials() (credentials.TransportCredentials, error) {
-	// Load certificate od the CA who signed server's certificate.
-	pemCA, err := ioutil.ReadFile(CACertFile)
-	if err != nil {
-		return nil, err
-	}
-
-	certPool := x509.NewCertPool()
-	if !certPool.AppendCertsFromPEM(pemCA) {
-		return nil, ErrCACertificate
-	}
-
-	// Load client's certificate and private key.
-	clientCert, err := tls.LoadX509KeyPair(clientCertFile, clientKeyFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// Create the credentials and returning it.
-	config := &tls.Config{
-		Certificates: []tls.Certificate{clientCert},
-		RootCAs:      certPool,
-	}
-
-	return credentials.NewTLS(config), nil
 }

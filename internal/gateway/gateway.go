@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -22,13 +22,14 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/Durudex/durudex-auth-service/pkg/auth"
-	"github.com/Durudex/durudex-gateway/internal/config"
-	"github.com/Durudex/durudex-gateway/internal/delivery/graphql"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
-	"github.com/Durudex/durudex-gateway/internal/delivery/http"
-	"github.com/Durudex/durudex-gateway/internal/server"
-	"github.com/Durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/internal/config"
+	"github.com/durudex/durudex-gateway/internal/delivery/graphql"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc"
+	"github.com/durudex/durudex-gateway/internal/delivery/http"
+	"github.com/durudex/durudex-gateway/internal/server"
+	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/pkg/auth"
+
 	"github.com/rs/zerolog/log"
 )
 

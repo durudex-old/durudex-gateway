@@ -17,7 +17,7 @@ syntax = "proto3";
 
 package durudex.auth;
 
-option go_package = "github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
+option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
 import "google/protobuf/timestamp.proto";
 import "internal/delivery/grpc/pb/types/status.proto";

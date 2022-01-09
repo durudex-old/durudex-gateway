@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -62,7 +62,7 @@ func (h *Handler) authMiddleware(c *fiber.Ctx) error {
 	}
 
 	// Parsing header.
-	customClaim, err := h.auth.JWT.Parse(headerParts[1])
+	customClaim, err := h.auth.Parse(headerParts[1])
 	if err != nil {
 		return err
 	}

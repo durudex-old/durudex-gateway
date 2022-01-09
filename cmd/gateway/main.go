@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 
 package main
 
-import "github.com/Durudex/durudex-gateway/internal/gateway"
+import "github.com/durudex/durudex-gateway/internal/gateway"
 
 const configPath = "configs/main"
 

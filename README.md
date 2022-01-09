@@ -54,3 +54,4 @@ Copyright © 2021 [Durudex](https://github.com/Durudex). Released under the [GNU
 + [adaptor](https://github.com/gofiber/adaptor/blob/master/LICENSE)
 + [grpc-go](https://github.com/grpc/grpc-go/blob/master/LICENSE)
 + [protobuf](https://github.com/protocolbuffers/protobuf/blob/master/LICENSE)
++ [jwt](https://github.com/golang-jwt/jwt/blob/main/LICENSE)

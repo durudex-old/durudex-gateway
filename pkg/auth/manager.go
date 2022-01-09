@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021-2022 Durudex
+	Copyright © 2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,25 @@
 	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 */
 
-package http
+package auth
 
-import (
-	"github.com/durudex/durudex-gateway/internal/delivery/graphql"
-
-	"github.com/gofiber/fiber/v2"
-)
-
-type Handler struct {
-	graphqlHandler *graphql.Handler
+type JWT interface {
+	Parse(accessToken string) (string, error)
 }
 
-// Creating a new http handler.
-func NewHTTPHandler(graphqlHandler *graphql.Handler) *Handler {
-	return &Handler{graphqlHandler: graphqlHandler}
+type Config struct {
+	JWT JWTConfig
 }
 
-// Initialize http routes.
-func (h *Handler) InitRoutes(router fiber.Router) {
-	// Ping pong route
-	router.Get("/ping", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("pong")
-	})
+type Manager struct {
+	Config
+	JWT
+}
 
-	// GrapgQL routes.
-	h.graphqlHandler.InitRoutes(router)
+// Creating a new auth manager.
+func NewAuthManager(jwt JWTConfig) *Manager {
+	return &Manager{
+		Config: Config{JWT: jwt},
+		JWT:    NewJWTManager(jwt),
+	}
 }

@@ -20,8 +20,8 @@ package graphql
 import (
 	"context"
 
-	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
-	"github.com/Durudex/durudex-gateway/internal/domain"
+	"github.com/durudex/durudex-gateway/internal/delivery/graphql/model"
+	"github.com/durudex/durudex-gateway/internal/domain"
 )
 
 // Sign Up resolver.

@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,8 @@
 package graphql
 
 import (
-	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/generated"
-	"github.com/Durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
+	"github.com/durudex/durudex-gateway/internal/service"
 )
 
 type Resolver struct {

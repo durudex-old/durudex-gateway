@@ -20,10 +20,11 @@ package service
 import (
 	"context"
 
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb"
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
-	"github.com/Durudex/durudex-gateway/internal/domain"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
+	"github.com/durudex/durudex-gateway/internal/domain"
+
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

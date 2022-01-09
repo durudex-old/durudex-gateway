@@ -17,6 +17,6 @@ syntax = "proto3";
 
 package types;
 
-option go_package = "github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types;types";
+option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types;types";
 
 message Status { bool status = 1; }

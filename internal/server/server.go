@@ -1,5 +1,5 @@
 /*
-	Copyright © 2021 Durudex
+	Copyright © 2021-2022 Durudex
 
 	This file is part of Durudex: you can redistribute it and/or modify
 	it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,9 @@
 package server
 
 import (
-	"github.com/Durudex/durudex-gateway/internal/config"
-	"github.com/Durudex/durudex-gateway/internal/delivery/http"
+	"github.com/durudex/durudex-gateway/internal/config"
+	"github.com/durudex/durudex-gateway/internal/delivery/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )

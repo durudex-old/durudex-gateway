@@ -4,7 +4,7 @@ package pb
 
 import (
 	context "context"
-	types "github.com/Durudex/durudex-gateway/internal/delivery/grpc/pb/types"
+	types "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"

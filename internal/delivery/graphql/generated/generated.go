@@ -14,7 +14,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/Durudex/durudex-gateway/internal/delivery/graphql/model"
+	"github.com/durudex/durudex-gateway/internal/delivery/graphql/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -370,7 +370,7 @@ func (ec *executionContext) field_Mutation_refreshTokens_args(ctx context.Contex
 	var arg0 model.RefreshTokensInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -385,7 +385,7 @@ func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawA
 	var arg0 model.SignInInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSignInInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx, tmp)
+		arg0, err = ec.unmarshalNSignInInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -400,7 +400,7 @@ func (ec *executionContext) field_Mutation_signUp_args(ctx context.Context, rawA
 	var arg0 model.SignUpInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSignUpInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx, tmp)
+		arg0, err = ec.unmarshalNSignUpInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -415,7 +415,7 @@ func (ec *executionContext) field_Mutation_verify_args(ctx context.Context, rawA
 	var arg0 model.VerifyInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNVerifyInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐVerifyInput(ctx, tmp)
+		arg0, err = ec.unmarshalNVerifyInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐVerifyInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -516,7 +516,7 @@ func (ec *executionContext) _Mutation_signUp(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.SignUp)
 	fc.Result = res
-	return ec.marshalNSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx, field.Selections, res)
+	return ec.marshalNSignUp2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -558,7 +558,7 @@ func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.SignIn)
 	fc.Result = res
-	return ec.marshalNSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx, field.Selections, res)
+	return ec.marshalNSignIn2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_verify(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -606,7 +606,7 @@ func (ec *executionContext) _Mutation_verify(ctx context.Context, field graphql.
 		if data, ok := tmp.(*model.Status); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/Durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -620,7 +620,7 @@ func (ec *executionContext) _Mutation_verify(ctx context.Context, field graphql.
 	}
 	res := resTmp.(*model.Status)
 	fc.Result = res
-	return ec.marshalNStatus2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
+	return ec.marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -662,7 +662,7 @@ func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field g
 	}
 	res := resTmp.(*model.RefreshTokens)
 	fc.Result = res
-	return ec.marshalNRefreshTokens2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx, field.Selections, res)
+	return ec.marshalNRefreshTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query_getCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -703,7 +703,7 @@ func (ec *executionContext) _Query_getCode(ctx context.Context, field graphql.Co
 		if data, ok := tmp.(*model.Status); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/Durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -717,7 +717,7 @@ func (ec *executionContext) _Query_getCode(ctx context.Context, field graphql.Co
 	}
 	res := resTmp.(*model.Status)
 	fc.Result = res
-	return ec.marshalNStatus2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
+	return ec.marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2759,11 +2759,11 @@ func (ec *executionContext) marshalNInt322int32(ctx context.Context, sel ast.Sel
 	return res
 }
 
-func (ec *executionContext) marshalNRefreshTokens2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v model.RefreshTokens) graphql.Marshaler {
+func (ec *executionContext) marshalNRefreshTokens2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v model.RefreshTokens) graphql.Marshaler {
 	return ec._RefreshTokens(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNRefreshTokens2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v *model.RefreshTokens) graphql.Marshaler {
+func (ec *executionContext) marshalNRefreshTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v *model.RefreshTokens) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2773,16 +2773,16 @@ func (ec *executionContext) marshalNRefreshTokens2ᚖgithubᚗcomᚋDurudexᚋdu
 	return ec._RefreshTokens(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNRefreshTokensInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx context.Context, v interface{}) (model.RefreshTokensInput, error) {
+func (ec *executionContext) unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx context.Context, v interface{}) (model.RefreshTokensInput, error) {
 	res, err := ec.unmarshalInputRefreshTokensInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSignIn2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v model.SignIn) graphql.Marshaler {
+func (ec *executionContext) marshalNSignIn2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v model.SignIn) graphql.Marshaler {
 	return ec._SignIn(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v *model.SignIn) graphql.Marshaler {
+func (ec *executionContext) marshalNSignIn2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v *model.SignIn) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2792,16 +2792,16 @@ func (ec *executionContext) marshalNSignIn2ᚖgithubᚗcomᚋDurudexᚋdurudex�
 	return ec._SignIn(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
+func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
 	res, err := ec.unmarshalInputSignInInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSignUp2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v model.SignUp) graphql.Marshaler {
+func (ec *executionContext) marshalNSignUp2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v model.SignUp) graphql.Marshaler {
 	return ec._SignUp(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v *model.SignUp) graphql.Marshaler {
+func (ec *executionContext) marshalNSignUp2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v *model.SignUp) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2811,16 +2811,16 @@ func (ec *executionContext) marshalNSignUp2ᚖgithubᚗcomᚋDurudexᚋdurudex�
 	return ec._SignUp(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNSignUpInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx context.Context, v interface{}) (model.SignUpInput, error) {
+func (ec *executionContext) unmarshalNSignUpInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx context.Context, v interface{}) (model.SignUpInput, error) {
 	res, err := ec.unmarshalInputSignUpInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNStatus2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v model.Status) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v model.Status) graphql.Marshaler {
 	return ec._Status(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNStatus2ᚖgithubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v *model.Status) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v *model.Status) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2875,7 +2875,7 @@ func (ec *executionContext) marshalNUInt642uint64(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNVerifyInput2githubᚗcomᚋDurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐVerifyInput(ctx context.Context, v interface{}) (model.VerifyInput, error) {
+func (ec *executionContext) unmarshalNVerifyInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐVerifyInput(ctx context.Context, v interface{}) (model.VerifyInput, error) {
 	res, err := ec.unmarshalInputVerifyInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }

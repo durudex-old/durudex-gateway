@@ -20,8 +20,8 @@ package service
 import (
 	"context"
 
-	"github.com/Durudex/durudex-gateway/internal/delivery/grpc"
-	"github.com/Durudex/durudex-gateway/internal/domain"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc"
+	"github.com/durudex/durudex-gateway/internal/domain"
 )
 
 type Auth interface {
