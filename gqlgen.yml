@@ -15,6 +15,7 @@
 
 schema:
   - schema/*.graphql
+  - schema/types/*.graphql
 
 exec:
   filename: internal/delivery/graphql/generated/generated.go
@@ -24,14 +25,6 @@ model:
   filename: internal/delivery/graphql/model/models_gen.go
   package: model
 
-# resolver:
-#   layout: follow-schema
-#   dir: internal/delivery/graphql
-#   package: graphql
-
-autobind:
-  - "github.com/durudex/durudex-gateway/internal/delivery/graphql/model"
-
 models:
   ID:
     model:
@@ -39,13 +32,11 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/99designs/gqlgen/graphql.Uint64
   Int:
     model:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
-  Int32:
-    model:
       - github.com/99designs/gqlgen/graphql.Int32
   UInt64:
     model:
