@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-cd cert/
+cd certs/
 
 export CAROOT="./"
 
@@ -28,26 +28,32 @@ fi
 echo "Install new CA..."
 mkcert -install
 
-echo "Create Auth Service certificate...."
+echo "Create Auth Service certificate..."
 mkcert \
-  -cert-file authservice-cert.pem \
-  -key-file authservice-key.pem \
-  authservice.durudex.local
+  -cert-file auth.service-cert.pem \
+  -key-file auth.service-key.pem \
+  auth.service.durudex.local
 
-echo "Create Notif Service certificate...."
+echo "Create Email Service certificate..."
 mkcert \
-  -cert-file notifservice-cert.pem \
-  -key-file notifservice-key.pem \
-  notifservice.durudex.local
+  -cert-file email.service-cert.pem \
+  -key-file email.service-key.pem \
+  email.service.durudex.local
 
-echo "Create User Service certificate...."
+echo "Create User Service certificate..."
 mkcert \
-  -cert-file userservice-cert.pem \
-  -key-file userservice-key.pem \
-  userservice.durudex.local
+  -cert-file user.service-cert.pem \
+  -key-file user.service-key.pem \
+  user.service.durudex.local
 
-echo "Create Client certificate...."
+echo "Create Code Service certificate..."
+mkcert \
+  -cert-file code.service-cert.pem \
+  -key-file code.service-key.pem \
+  code.service.durudex.local
+
+echo "Create Client certificate..."
 mkcert -client \
   -cert-file client-cert.pem \
   -key-file client-key.pem \
-  localhost 127.0.0.1
+  localhost 127.0.0.1 api.durudex.local
