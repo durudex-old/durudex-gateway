@@ -1,4 +1,4 @@
-# Copyright © 2021-2022 Durudex
+# Copyright © 2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,28 +13,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-extend type Mutation {
-  signUp(input: SignUpInput!): ID! @emailCode
-  signIn(input: SignInInput!): Tokens!
-  refreshTokens(input: RefreshTokensInput!): Tokens!
-  getCodeByEmail(input: GetCodeByEmailInput!): Status!
-}
-
-input SignUpInput {
-  username: String!
-  email: String!
-  password: String!
-}
-
-input SignInInput {
-  username: String!
-  password: String!
-}
-
-input RefreshTokensInput {
-  refresh: String!
-}
-
-input GetCodeByEmailInput {
-  email: String!
+type Status {
+  status: Boolean!
 }

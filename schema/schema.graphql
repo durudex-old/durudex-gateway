@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,20 +13,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
+scalar UInt64
+
 schema {
   mutation: Mutation
-  query: Query
 }
 
 type Mutation
-type Query
 
-directive @userAuth on FIELD_DEFINITION
-
-type Status {
-  status: Boolean!
-}
-
-scalar Int32
-scalar UInt64
-scalar Time
+directive @emailCode(code: UInt64) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
