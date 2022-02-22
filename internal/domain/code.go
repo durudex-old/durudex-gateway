@@ -17,22 +17,7 @@
 
 package domain
 
-// User Sign Up input.
-type SignUpInput struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
-// User Sign In input.
-type SignInInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	IP       string
-}
-
-// Refresh tokens input.
-type RefreshTokensInput struct {
-	Token string `json:"token"`
-	IP    string
+// Getting code by email address.
+type GetCodeByEmailInput struct {
+	Email string `json:"email"`
 }
