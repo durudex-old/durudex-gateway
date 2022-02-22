@@ -22,22 +22,24 @@ exec:
   package: generated
 
 model:
-  filename: internal/delivery/graphql/model/models_gen.go
-  package: model
+  filename: internal/delivery/graphql/generated/models_gen.go
+  package: generated
+
+resolver:
+  layout: follow-schema
+  dir: internal/delivery/graphql/resolver/
+  package: resolver
+  filename_template: "{name}.go"
+
+autobind:
+  - "github.com/durudex/durudex-gateway/internal/domain"
 
 models:
-  ID:
-    model:
-      - github.com/99designs/gqlgen/graphql.ID
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
-      - github.com/99designs/gqlgen/graphql.Uint64
   Int:
     model:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
-  UInt64:
+  Uint64:
     model:
       - github.com/99designs/gqlgen/graphql.Uint64
