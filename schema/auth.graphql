@@ -14,27 +14,45 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 extend type Mutation {
-  signUp(input: SignUpInput!): ID! @emailCode
+  """
+  User Sign Up
+  """
+  signUp(input: SignUpInput!): Uint64! @emailCode
+
+  """
+  User Sign In.
+  """
   signIn(input: SignInInput!): Tokens!
+
+  """
+  Refresh authorization tokens.
+  """
   refreshTokens(input: RefreshTokensInput!): Tokens!
-  getCodeByEmail(input: GetCodeByEmailInput!): Status!
 }
 
+"""
+User Sign Up input.
+"""
 input SignUpInput {
   username: String!
   email: String!
   password: String!
 }
 
+"""
+User Sign In input.
+"""
 input SignInInput {
   username: String!
   password: String!
 }
 
+"""
+Authorization refresh token input.
+"""
 input RefreshTokensInput {
-  refresh: String!
-}
-
-input GetCodeByEmailInput {
-  email: String!
+  """
+  Refresh token.
+  """
+  token: String!
 }

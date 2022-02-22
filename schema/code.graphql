@@ -1,4 +1,4 @@
-# Copyright © 2021-2022 Durudex
+# Copyright © 2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,20 +13,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-scalar Uint64
-
-schema {
-  mutation: Mutation
-  query: Query
+extend type Mutation {
+  """
+  Getting code by email address.
+  """
+  getCodeByEmail(input: GetCodeByEmailInput!): Status!
 }
 
-type Mutation
-
-type Query {
-  ping: String!
+"""
+Getting code by email address input.
+"""
+input GetCodeByEmailInput {
+  email: String!
 }
-
-directive @emailCode(code: Uint64) on FIELD
-  | FIELD_DEFINITION
-  | INPUT_FIELD_DEFINITION
-  | ARGUMENT_DEFINITION
