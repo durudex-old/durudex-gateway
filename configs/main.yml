@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,4 +23,4 @@ grpc:
 
 service:
   auth:
-    addr: authservice.durudex.local:8001
+    addr: auth.service.durudex.local:8001

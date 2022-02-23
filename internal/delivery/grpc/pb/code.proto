@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,17 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package service
+syntax = "proto3";
 
-import "github.com/durudex/durudex-gateway/internal/delivery/grpc"
+package durudex.code;
 
-// Service structure.
-type Service struct {
-	Auth
-	Code
-}
+option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
-// Creating a new service.
-func NewService(grpcHandler *grpc.Handler) *Service {
-	return &Service{
-		Auth: NewAuthService(grpcHandler.Auth),
-		Code: NewCodeService(grpcHandler.Code),
-	}
+import "internal/delivery/grpc/pb/types/code.proto";
+import "internal/delivery/grpc/pb/types/email.proto";
+import "internal/delivery/grpc/pb/types/status.proto";
+
+service CodeService {
+  rpc CreateByEmail (types.Email) returns (types.Status);
+  rpc GetByEmail (types.Email) returns (types.Code);
 }

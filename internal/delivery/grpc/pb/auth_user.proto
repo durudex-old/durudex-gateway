@@ -15,20 +15,38 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package service
+syntax = "proto3";
 
-import "github.com/durudex/durudex-gateway/internal/delivery/grpc"
+package durudex.user;
 
-// Service structure.
-type Service struct {
-	Auth
-	Code
+option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
+
+import "internal/delivery/grpc/pb/types/id.proto";
+
+service AuthUserService {
+  rpc SignUp (SignUpRequest) returns (types.ID);
+  rpc SignIn (SignInRequest) returns (Tokens);
+  rpc RefreshTokens (RefreshTokensRequest) returns (Tokens);
 }
 
-// Creating a new service.
-func NewService(grpcHandler *grpc.Handler) *Service {
-	return &Service{
-		Auth: NewAuthService(grpcHandler.Auth),
-		Code: NewCodeService(grpcHandler.Code),
-	}
+message SignUpRequest {
+  string username = 1;
+  string email = 2;
+  string password = 3;
+}
+
+message SignInRequest {
+  string username = 1;
+  string password = 2;
+  string ip = 3;
+}
+
+message RefreshTokensRequest {
+  string refreshToken = 1;
+  string ip = 2;
+}
+
+message Tokens {
+  string access = 1;
+  string refresh = 2;
 }
