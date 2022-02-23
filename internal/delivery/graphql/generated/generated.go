@@ -10,11 +10,10 @@ import (
 	"strconv"
 	"sync"
 	"sync/atomic"
-	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/durudex/durudex-gateway/internal/delivery/graphql/model"
+	"github.com/durudex/durudex-gateway/internal/domain"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -42,48 +41,39 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	UserAuth func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	EmailCode func(ctx context.Context, obj interface{}, next graphql.Resolver, code *uint64) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
 	Mutation struct {
-		RefreshTokens func(childComplexity int, input model.RefreshTokensInput) int
-		SignIn        func(childComplexity int, input model.SignInInput) int
-		SignUp        func(childComplexity int, input model.SignUpInput) int
-		Verify        func(childComplexity int, input model.VerifyInput) int
+		GetCodeByEmail func(childComplexity int, input domain.GetCodeByEmailInput) int
+		RefreshTokens  func(childComplexity int, input domain.RefreshTokensInput) int
+		SignIn         func(childComplexity int, input domain.SignInInput) int
+		SignUp         func(childComplexity int, input domain.SignUpInput) int
 	}
 
 	Query struct {
-		GetCode func(childComplexity int) int
-	}
-
-	RefreshTokens struct {
-		AccessToken  func(childComplexity int) int
-		RefreshToken func(childComplexity int) int
-	}
-
-	SignIn struct {
-		AccessToken  func(childComplexity int) int
-		RefreshToken func(childComplexity int) int
-	}
-
-	SignUp struct {
-		ID func(childComplexity int) int
+		Ping func(childComplexity int) int
 	}
 
 	Status struct {
 		Status func(childComplexity int) int
 	}
+
+	Tokens struct {
+		Access  func(childComplexity int) int
+		Refresh func(childComplexity int) int
+	}
 }
 
 type MutationResolver interface {
-	SignUp(ctx context.Context, input model.SignUpInput) (*model.SignUp, error)
-	SignIn(ctx context.Context, input model.SignInInput) (*model.SignIn, error)
-	Verify(ctx context.Context, input model.VerifyInput) (*model.Status, error)
-	RefreshTokens(ctx context.Context, input model.RefreshTokensInput) (*model.RefreshTokens, error)
+	SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error)
+	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
+	RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error)
+	GetCodeByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (*domain.Status, error)
 }
 type QueryResolver interface {
-	GetCode(ctx context.Context) (*model.Status, error)
+	Ping(ctx context.Context) (string, error)
 }
 
 type executableSchema struct {
@@ -101,6 +91,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Mutation.getCodeByEmail":
+		if e.complexity.Mutation.GetCodeByEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_getCodeByEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.GetCodeByEmail(childComplexity, args["input"].(domain.GetCodeByEmailInput)), true
+
 	case "Mutation.refreshTokens":
 		if e.complexity.Mutation.RefreshTokens == nil {
 			break
@@ -111,7 +113,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RefreshTokens(childComplexity, args["input"].(model.RefreshTokensInput)), true
+		return e.complexity.Mutation.RefreshTokens(childComplexity, args["input"].(domain.RefreshTokensInput)), true
 
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
@@ -123,7 +125,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SignIn(childComplexity, args["input"].(model.SignInInput)), true
+		return e.complexity.Mutation.SignIn(childComplexity, args["input"].(domain.SignInInput)), true
 
 	case "Mutation.signUp":
 		if e.complexity.Mutation.SignUp == nil {
@@ -135,61 +137,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SignUp(childComplexity, args["input"].(model.SignUpInput)), true
+		return e.complexity.Mutation.SignUp(childComplexity, args["input"].(domain.SignUpInput)), true
 
-	case "Mutation.verify":
-		if e.complexity.Mutation.Verify == nil {
+	case "Query.ping":
+		if e.complexity.Query.Ping == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_verify_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Mutation.Verify(childComplexity, args["input"].(model.VerifyInput)), true
-
-	case "Query.getCode":
-		if e.complexity.Query.GetCode == nil {
-			break
-		}
-
-		return e.complexity.Query.GetCode(childComplexity), true
-
-	case "RefreshTokens.accessToken":
-		if e.complexity.RefreshTokens.AccessToken == nil {
-			break
-		}
-
-		return e.complexity.RefreshTokens.AccessToken(childComplexity), true
-
-	case "RefreshTokens.refreshToken":
-		if e.complexity.RefreshTokens.RefreshToken == nil {
-			break
-		}
-
-		return e.complexity.RefreshTokens.RefreshToken(childComplexity), true
-
-	case "SignIn.accessToken":
-		if e.complexity.SignIn.AccessToken == nil {
-			break
-		}
-
-		return e.complexity.SignIn.AccessToken(childComplexity), true
-
-	case "SignIn.refreshToken":
-		if e.complexity.SignIn.RefreshToken == nil {
-			break
-		}
-
-		return e.complexity.SignIn.RefreshToken(childComplexity), true
-
-	case "SignUp.id":
-		if e.complexity.SignUp.ID == nil {
-			break
-		}
-
-		return e.complexity.SignUp.ID(childComplexity), true
+		return e.complexity.Query.Ping(childComplexity), true
 
 	case "Status.status":
 		if e.complexity.Status.Status == nil {
@@ -197,6 +152,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Status.Status(childComplexity), true
+
+	case "Tokens.access":
+		if e.complexity.Tokens.Access == nil {
+			break
+		}
+
+		return e.complexity.Tokens.Access(childComplexity), true
+
+	case "Tokens.refresh":
+		if e.complexity.Tokens.Refresh == nil {
+			break
+		}
+
+		return e.complexity.Tokens.Refresh(childComplexity), true
 
 	}
 	return 0, false
@@ -262,7 +231,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "schema/auth.graphql", Input: `# Copyright © 2021 Durudex
+	{Name: "schema/auth.graphql", Input: `# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -278,53 +247,50 @@ var sources = []*ast.Source{
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 extend type Mutation {
-  signUp(input: SignUpInput!): SignUp!
-  signIn(input: SignInInput!): SignIn!
-  verify(input: VerifyInput!): Status! @userAuth
-  refreshTokens(input: RefreshTokensInput!): RefreshTokens!
+  """
+  User Sign Up
+  """
+  signUp(input: SignUpInput!): Uint64! @emailCode
+
+  """
+  User Sign In.
+  """
+  signIn(input: SignInInput!): Tokens!
+
+  """
+  Refresh authorization tokens.
+  """
+  refreshTokens(input: RefreshTokensInput!): Tokens!
 }
 
-extend type Query {
-  getCode: Status! @userAuth
-}
-
+"""
+User Sign Up input.
+"""
 input SignUpInput {
   username: String!
-  name: String!
   email: String!
   password: String!
-  birthday: Time!
-  sex: Int32!
 }
 
-type SignUp {
-  id: UInt64!
-}
-
+"""
+User Sign In input.
+"""
 input SignInInput {
   username: String!
   password: String!
 }
 
-type SignIn {
-  accessToken: String!
-  refreshToken: String!
-}
-
-input VerifyInput {
-  code: UInt64!
-}
-
+"""
+Authorization refresh token input.
+"""
 input RefreshTokensInput {
-  refreshToken: String!
-}
-
-type RefreshTokens {
-  accessToken: String!
-  refreshToken: String!
+  """
+  Refresh token.
+  """
+  token: String!
 }
 `, BuiltIn: false},
-	{Name: "schema/schema.graphql", Input: `# Copyright © 2021 Durudex
+	{Name: "schema/code.graphql", Input: `# Copyright © 2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -339,23 +305,104 @@ type RefreshTokens {
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
+extend type Mutation {
+  """
+  Getting code by email address.
+  """
+  getCodeByEmail(input: GetCodeByEmailInput!): Status!
+}
+
+"""
+Getting code by email address input.
+"""
+input GetCodeByEmailInput {
+  email: String!
+}
+`, BuiltIn: false},
+	{Name: "schema/schema.graphql", Input: `# Copyright © 2021-2022 Durudex
+
+# This file is part of Durudex: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# Durudex is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with Durudex. If not, see <https://www.gnu.org/licenses/>.
+
+scalar Uint64
+
 schema {
   mutation: Mutation
   query: Query
 }
 
 type Mutation
-type Query
 
-directive @userAuth on FIELD_DEFINITION
+type Query {
+  ping: String!
+}
 
+directive @emailCode(code: Uint64) on FIELD
+  | FIELD_DEFINITION
+  | INPUT_FIELD_DEFINITION
+  | ARGUMENT_DEFINITION
+`, BuiltIn: false},
+	{Name: "schema/types/status.graphql", Input: `# Copyright © 2022 Durudex
+
+# This file is part of Durudex: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# Durudex is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with Durudex. If not, see <https://www.gnu.org/licenses/>.
+
+"""
+Status.
+"""
 type Status {
   status: Boolean!
 }
+`, BuiltIn: false},
+	{Name: "schema/types/token.graphql", Input: `# Copyright © 2022 Durudex
 
-scalar Int32
-scalar UInt64
-scalar Time
+# This file is part of Durudex: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+
+# Durudex is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU Affero General Public License for more details.
+
+# You should have received a copy of the GNU Affero General Public License
+# along with Durudex. If not, see <https://www.gnu.org/licenses/>.
+
+"""
+Authorization tokens.
+"""
+type Tokens {
+  """
+  JWT access token.
+  """
+  access: String!
+
+  """
+  Refresh token.
+  """
+  refresh: String!
+}
 `, BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
@@ -364,13 +411,43 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_emailCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *uint64
+	if tmp, ok := rawArgs["code"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
+		arg0, err = ec.unmarshalOUint642ᚖuint64(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["code"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_getCodeByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 domain.GetCodeByEmailInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNGetCodeByEmailInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐGetCodeByEmailInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_refreshTokens_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.RefreshTokensInput
+	var arg0 domain.RefreshTokensInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokensInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -382,10 +459,10 @@ func (ec *executionContext) field_Mutation_refreshTokens_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SignInInput
+	var arg0 domain.SignInInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSignInInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx, tmp)
+		arg0, err = ec.unmarshalNSignInInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐSignInInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -397,25 +474,10 @@ func (ec *executionContext) field_Mutation_signIn_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_signUp_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 model.SignUpInput
+	var arg0 domain.SignUpInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNSignUpInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Mutation_verify_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	var arg0 model.VerifyInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNVerifyInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐVerifyInput(ctx, tmp)
+		arg0, err = ec.unmarshalNSignUpInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐSignUpInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -473,6 +535,34 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    ************************** directives.gotpl **************************
 
+func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{}, next graphql.Resolver) interface{} {
+	fc := graphql.GetFieldContext(ctx)
+	for _, d := range fc.Field.Directives {
+		switch d.Name {
+		case "emailCode":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_emailCode_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return nil
+			}
+			n := next
+			next = func(ctx context.Context) (interface{}, error) {
+				if ec.directives.EmailCode == nil {
+					return nil, errors.New("directive emailCode is not implemented")
+				}
+				return ec.directives.EmailCode(ctx, obj, n, args["code"].(*uint64))
+			}
+		}
+	}
+	res, err := ec.ResolverMiddleware(ctx, next)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return res
+}
+
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
@@ -500,23 +590,40 @@ func (ec *executionContext) _Mutation_signUp(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SignUp(rctx, args["input"].(model.SignUpInput))
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Mutation().SignUp(rctx, args["input"].(domain.SignUpInput))
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.EmailCode == nil {
+				return nil, errors.New("directive emailCode is not implemented")
+			}
+			return ec.directives.EmailCode(ctx, nil, directive0, nil)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(uint64); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be uint64`, tmp)
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.SignUp)
+	res := resTmp.(uint64)
 	fc.Result = res
-	return ec.marshalNSignUp2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx, field.Selections, res)
+	return ec.marshalNUint642uint64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -542,85 +649,20 @@ func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.
 		return graphql.Null
 	}
 	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SignIn(rctx, args["input"].(model.SignInInput))
+		return ec.resolvers.Mutation().SignIn(rctx, args["input"].(domain.SignInInput))
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.SignIn)
+	res := resTmp.(*domain.Tokens)
 	fc.Result = res
-	return ec.marshalNSignIn2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Mutation_verify(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   true,
-		IsResolver: true,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := ec.field_Mutation_verify_args(ctx, rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().Verify(rctx, args["input"].(model.VerifyInput))
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.UserAuth == nil {
-				return nil, errors.New("directive userAuth is not implemented")
-			}
-			return ec.directives.UserAuth(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*model.Status); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*model.Status)
-	fc.Result = res
-	return ec.marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
+	return ec.marshalNTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐTokens(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -646,26 +688,62 @@ func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field g
 		return graphql.Null
 	}
 	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RefreshTokens(rctx, args["input"].(model.RefreshTokensInput))
+		return ec.resolvers.Mutation().RefreshTokens(rctx, args["input"].(domain.RefreshTokensInput))
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.RefreshTokens)
+	res := resTmp.(*domain.Tokens)
 	fc.Result = res
-	return ec.marshalNRefreshTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx, field.Selections, res)
+	return ec.marshalNTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐTokens(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _Query_getCode(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Mutation_getCodeByEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_getCodeByEmail_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().GetCodeByEmail(rctx, args["input"].(domain.GetCodeByEmailInput))
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*domain.Status)
+	fc.Result = res
+	return ec.marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐStatus(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -681,43 +759,20 @@ func (ec *executionContext) _Query_getCode(ctx context.Context, field graphql.Co
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().GetCode(rctx)
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.UserAuth == nil {
-				return nil, errors.New("directive userAuth is not implemented")
-			}
-			return ec.directives.UserAuth(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*model.Status); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/durudex/durudex-gateway/internal/delivery/graphql/model.Status`, tmp)
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Ping(rctx)
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
 		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Status)
+	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx, field.Selections, res)
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -743,14 +798,11 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		return graphql.Null
 	}
 	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectType(args["name"].(string))
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -775,14 +827,11 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectSchema()
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -791,182 +840,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) _RefreshTokens_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.RefreshTokens) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "RefreshTokens",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AccessToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _RefreshTokens_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.RefreshTokens) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "RefreshTokens",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RefreshToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignIn_accessToken(ctx context.Context, field graphql.CollectedField, obj *model.SignIn) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SignIn",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.AccessToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignIn_refreshToken(ctx context.Context, field graphql.CollectedField, obj *model.SignIn) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SignIn",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.RefreshToken, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _SignUp_id(ctx context.Context, field graphql.CollectedField, obj *model.SignUp) (ret graphql.Marshaler) {
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	fc := &graphql.FieldContext{
-		Object:     "SignUp",
-		Field:      field,
-		Args:       nil,
-		IsMethod:   false,
-		IsResolver: false,
-	}
-
-	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(uint64)
-	fc.Result = res
-	return ec.marshalNUInt642uint64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) _Status_status(ctx context.Context, field graphql.CollectedField, obj *model.Status) (ret graphql.Marshaler) {
+func (ec *executionContext) _Status_status(ctx context.Context, field graphql.CollectedField, obj *domain.Status) (ret graphql.Marshaler) {
 	defer func() {
 		if r := recover(); r != nil {
 			ec.Error(ctx, ec.Recover(ctx, r))
@@ -982,14 +856,11 @@ func (ec *executionContext) _Status_status(ctx context.Context, field graphql.Co
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Status, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -999,6 +870,70 @@ func (ec *executionContext) _Status_status(ctx context.Context, field graphql.Co
 	res := resTmp.(bool)
 	fc.Result = res
 	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Tokens_access(ctx context.Context, field graphql.CollectedField, obj *domain.Tokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Tokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Access, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Tokens_refresh(ctx context.Context, field graphql.CollectedField, obj *domain.Tokens) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Tokens",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   false,
+		IsResolver: false,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Refresh, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1017,14 +952,11 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1052,14 +984,11 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1084,14 +1013,11 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Locations, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1119,14 +1045,11 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1154,14 +1077,11 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsRepeatable, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1189,14 +1109,11 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1224,14 +1141,11 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1256,14 +1170,11 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsDeprecated(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1291,14 +1202,11 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DeprecationReason(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1323,14 +1231,11 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1358,14 +1263,11 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1390,14 +1292,11 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1425,14 +1324,11 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1460,14 +1356,11 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsDeprecated(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1495,14 +1388,11 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DeprecationReason(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1527,14 +1417,11 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1562,14 +1449,11 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1594,14 +1478,11 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1629,14 +1510,11 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultValue, nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1661,14 +1539,11 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Types(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1696,14 +1571,11 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.QueryType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1731,14 +1603,11 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.MutationType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1763,14 +1632,11 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SubscriptionType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1795,14 +1661,11 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Directives(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1830,14 +1693,11 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		if !graphql.HasFieldError(ctx, fc) {
 			ec.Errorf(ctx, "must not be null")
@@ -1865,14 +1725,11 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1897,14 +1754,11 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1936,14 +1790,11 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 		return graphql.Null
 	}
 	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Fields(args["includeDeprecated"].(bool)), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -1968,14 +1819,11 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Interfaces(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -2000,14 +1848,11 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PossibleTypes(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -2039,14 +1884,11 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 		return graphql.Null
 	}
 	fc.Args = args
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EnumValues(args["includeDeprecated"].(bool)), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -2071,14 +1913,11 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InputFields(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -2103,14 +1942,11 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	}
 
 	ctx = graphql.WithFieldContext(ctx, fc)
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.OfType(), nil
 	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
+
 	if resTmp == nil {
 		return graphql.Null
 	}
@@ -2123,8 +1959,8 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context, obj interface{}) (model.RefreshTokensInput, error) {
-	var it model.RefreshTokensInput
+func (ec *executionContext) unmarshalInputGetCodeByEmailInput(ctx context.Context, obj interface{}) (domain.GetCodeByEmailInput, error) {
+	var it domain.GetCodeByEmailInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2132,11 +1968,11 @@ func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context
 
 	for k, v := range asMap {
 		switch k {
-		case "refreshToken":
+		case "email":
 			var err error
 
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("refreshToken"))
-			it.RefreshToken, err = ec.unmarshalNString2string(ctx, v)
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2146,8 +1982,31 @@ func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj interface{}) (model.SignInInput, error) {
-	var it model.SignInInput
+func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context, obj interface{}) (domain.RefreshTokensInput, error) {
+	var it domain.RefreshTokensInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "token":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("token"))
+			it.Token, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj interface{}) (domain.SignInInput, error) {
+	var it domain.SignInInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2177,8 +2036,8 @@ func (ec *executionContext) unmarshalInputSignInInput(ctx context.Context, obj i
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj interface{}) (model.SignUpInput, error) {
-	var it model.SignUpInput
+func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj interface{}) (domain.SignUpInput, error) {
+	var it domain.SignUpInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2191,14 +2050,6 @@ func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj i
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
 			it.Username, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "name":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2215,45 +2066,6 @@ func (ec *executionContext) unmarshalInputSignUpInput(ctx context.Context, obj i
 
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
 			it.Password, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "birthday":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("birthday"))
-			it.Birthday, err = ec.unmarshalNTime2timeᚐTime(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "sex":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("sex"))
-			it.Sex, err = ec.unmarshalNInt322int32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
-func (ec *executionContext) unmarshalInputVerifyInput(ctx context.Context, obj interface{}) (model.VerifyInput, error) {
-	var it model.VerifyInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
-		asMap[k] = v
-	}
-
-	for k, v := range asMap {
-		switch k {
-		case "code":
-			var err error
-
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
-			it.Code, err = ec.unmarshalNUInt642uint64(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -2275,7 +2087,6 @@ var mutationImplementors = []string{"Mutation"}
 
 func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mutationImplementors)
-
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Mutation",
 	})
@@ -2283,26 +2094,51 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
 		case "signUp":
-			out.Values[i] = ec._Mutation_signUp(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signUp(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "signIn":
-			out.Values[i] = ec._Mutation_signIn(ctx, field)
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signIn(ctx, field)
 			}
-		case "verify":
-			out.Values[i] = ec._Mutation_verify(ctx, field)
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "refreshTokens":
-			out.Values[i] = ec._Mutation_refreshTokens(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_refreshTokens(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "getCodeByEmail":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_getCodeByEmail(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2321,7 +2157,6 @@ var queryImplementors = []string{"Query"}
 
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, queryImplementors)
-
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Query",
 	})
@@ -2329,118 +2164,51 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
+		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
+			Object: field.Name,
+			Field:  field,
+		})
+
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getCode":
+		case "ping":
 			field := field
-			out.Concurrently(i, func() (res graphql.Marshaler) {
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getCode(ctx, field)
+				res = ec._Query_ping(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&invalids, 1)
 				}
 				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx, innerFunc)
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return rrm(innerCtx)
 			})
 		case "__type":
-			out.Values[i] = ec._Query___type(ctx, field)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Query___type(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
 		case "__schema":
-			out.Values[i] = ec._Query___schema(ctx, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var refreshTokensImplementors = []string{"RefreshTokens"}
-
-func (ec *executionContext) _RefreshTokens(ctx context.Context, sel ast.SelectionSet, obj *model.RefreshTokens) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, refreshTokensImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("RefreshTokens")
-		case "accessToken":
-			out.Values[i] = ec._RefreshTokens_accessToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Query___schema(ctx, field)
 			}
-		case "refreshToken":
-			out.Values[i] = ec._RefreshTokens_refreshToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
 
-var signInImplementors = []string{"SignIn"}
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
 
-func (ec *executionContext) _SignIn(ctx context.Context, sel ast.SelectionSet, obj *model.SignIn) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, signInImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SignIn")
-		case "accessToken":
-			out.Values[i] = ec._SignIn_accessToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		case "refreshToken":
-			out.Values[i] = ec._SignIn_refreshToken(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch()
-	if invalids > 0 {
-		return graphql.Null
-	}
-	return out
-}
-
-var signUpImplementors = []string{"SignUp"}
-
-func (ec *executionContext) _SignUp(ctx context.Context, sel ast.SelectionSet, obj *model.SignUp) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, signUpImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	var invalids uint32
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SignUp")
-		case "id":
-			out.Values[i] = ec._SignUp_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2454,9 +2222,8 @@ func (ec *executionContext) _SignUp(ctx context.Context, sel ast.SelectionSet, o
 
 var statusImplementors = []string{"Status"}
 
-func (ec *executionContext) _Status(ctx context.Context, sel ast.SelectionSet, obj *model.Status) graphql.Marshaler {
+func (ec *executionContext) _Status(ctx context.Context, sel ast.SelectionSet, obj *domain.Status) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, statusImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2464,7 +2231,53 @@ func (ec *executionContext) _Status(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Status")
 		case "status":
-			out.Values[i] = ec._Status_status(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Status_status(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch()
+	if invalids > 0 {
+		return graphql.Null
+	}
+	return out
+}
+
+var tokensImplementors = []string{"Tokens"}
+
+func (ec *executionContext) _Tokens(ctx context.Context, sel ast.SelectionSet, obj *domain.Tokens) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, tokensImplementors)
+	out := graphql.NewFieldSet(fields)
+	var invalids uint32
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Tokens")
+		case "access":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Tokens_access(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "refresh":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Tokens_refresh(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2483,7 +2296,6 @@ var __DirectiveImplementors = []string{"__Directive"}
 
 func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __DirectiveImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2491,24 +2303,49 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Directive")
 		case "name":
-			out.Values[i] = ec.___Directive_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___Directive_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "locations":
-			out.Values[i] = ec.___Directive_locations(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_locations(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "args":
-			out.Values[i] = ec.___Directive_args(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_args(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "isRepeatable":
-			out.Values[i] = ec.___Directive_isRepeatable(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Directive_isRepeatable(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2527,7 +2364,6 @@ var __EnumValueImplementors = []string{"__EnumValue"}
 
 func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __EnumValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2535,19 +2371,39 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__EnumValue")
 		case "name":
-			out.Values[i] = ec.___EnumValue_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___EnumValue_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "isDeprecated":
-			out.Values[i] = ec.___EnumValue_isDeprecated(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_isDeprecated(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "deprecationReason":
-			out.Values[i] = ec.___EnumValue_deprecationReason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___EnumValue_deprecationReason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2563,7 +2419,6 @@ var __FieldImplementors = []string{"__Field"}
 
 func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __FieldImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2571,29 +2426,59 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Field")
 		case "name":
-			out.Values[i] = ec.___Field_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___Field_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "args":
-			out.Values[i] = ec.___Field_args(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_args(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "type":
-			out.Values[i] = ec.___Field_type(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_type(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "isDeprecated":
-			out.Values[i] = ec.___Field_isDeprecated(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_isDeprecated(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "deprecationReason":
-			out.Values[i] = ec.___Field_deprecationReason(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Field_deprecationReason(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2609,7 +2494,6 @@ var __InputValueImplementors = []string{"__InputValue"}
 
 func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __InputValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2617,19 +2501,39 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__InputValue")
 		case "name":
-			out.Values[i] = ec.___InputValue_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "description":
-			out.Values[i] = ec.___InputValue_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "type":
-			out.Values[i] = ec.___InputValue_type(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_type(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "defaultValue":
-			out.Values[i] = ec.___InputValue_defaultValue(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___InputValue_defaultValue(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2645,7 +2549,6 @@ var __SchemaImplementors = []string{"__Schema"}
 
 func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __SchemaImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2653,21 +2556,46 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "types":
-			out.Values[i] = ec.___Schema_types(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_types(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "queryType":
-			out.Values[i] = ec.___Schema_queryType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_queryType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "mutationType":
-			out.Values[i] = ec.___Schema_mutationType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_mutationType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "subscriptionType":
-			out.Values[i] = ec.___Schema_subscriptionType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_subscriptionType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "directives":
-			out.Values[i] = ec.___Schema_directives(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Schema_directives(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
@@ -2686,7 +2614,6 @@ var __TypeImplementors = []string{"__Type"}
 
 func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __TypeImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	var invalids uint32
 	for i, field := range fields {
@@ -2694,26 +2621,71 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("__Type")
 		case "kind":
-			out.Values[i] = ec.___Type_kind(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_kind(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 			if out.Values[i] == graphql.Null {
 				invalids++
 			}
 		case "name":
-			out.Values[i] = ec.___Type_name(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_name(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "description":
-			out.Values[i] = ec.___Type_description(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_description(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "fields":
-			out.Values[i] = ec.___Type_fields(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_fields(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "interfaces":
-			out.Values[i] = ec.___Type_interfaces(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_interfaces(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "possibleTypes":
-			out.Values[i] = ec.___Type_possibleTypes(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_possibleTypes(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "enumValues":
-			out.Values[i] = ec.___Type_enumValues(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_enumValues(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "inputFields":
-			out.Values[i] = ec.___Type_inputFields(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_inputFields(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		case "ofType":
-			out.Values[i] = ec.___Type_ofType(ctx, field, obj)
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec.___Type_ofType(ctx, field, obj)
+			}
+
+			out.Values[i] = innerFunc(ctx)
+
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2744,83 +2716,31 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) unmarshalNInt322int32(ctx context.Context, v interface{}) (int32, error) {
-	res, err := graphql.UnmarshalInt32(v)
+func (ec *executionContext) unmarshalNGetCodeByEmailInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐGetCodeByEmailInput(ctx context.Context, v interface{}) (domain.GetCodeByEmailInput, error) {
+	res, err := ec.unmarshalInputGetCodeByEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNInt322int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
-	res := graphql.MarshalInt32(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) marshalNRefreshTokens2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v model.RefreshTokens) graphql.Marshaler {
-	return ec._RefreshTokens(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNRefreshTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokens(ctx context.Context, sel ast.SelectionSet, v *model.RefreshTokens) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._RefreshTokens(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐRefreshTokensInput(ctx context.Context, v interface{}) (model.RefreshTokensInput, error) {
+func (ec *executionContext) unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokensInput(ctx context.Context, v interface{}) (domain.RefreshTokensInput, error) {
 	res, err := ec.unmarshalInputRefreshTokensInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSignIn2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v model.SignIn) graphql.Marshaler {
-	return ec._SignIn(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSignIn2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignIn(ctx context.Context, sel ast.SelectionSet, v *model.SignIn) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._SignIn(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignInInput(ctx context.Context, v interface{}) (model.SignInInput, error) {
+func (ec *executionContext) unmarshalNSignInInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐSignInInput(ctx context.Context, v interface{}) (domain.SignInInput, error) {
 	res, err := ec.unmarshalInputSignInInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNSignUp2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v model.SignUp) graphql.Marshaler {
-	return ec._SignUp(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNSignUp2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUp(ctx context.Context, sel ast.SelectionSet, v *model.SignUp) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	return ec._SignUp(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNSignUpInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐSignUpInput(ctx context.Context, v interface{}) (model.SignUpInput, error) {
+func (ec *executionContext) unmarshalNSignUpInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐSignUpInput(ctx context.Context, v interface{}) (domain.SignUpInput, error) {
 	res, err := ec.unmarshalInputSignUpInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNStatus2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v model.Status) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐStatus(ctx context.Context, sel ast.SelectionSet, v domain.Status) graphql.Marshaler {
 	return ec._Status(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐStatus(ctx context.Context, sel ast.SelectionSet, v *model.Status) graphql.Marshaler {
+func (ec *executionContext) marshalNStatus2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐStatus(ctx context.Context, sel ast.SelectionSet, v *domain.Status) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
@@ -2845,27 +2765,26 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {
-	res, err := graphql.UnmarshalTime(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+func (ec *executionContext) marshalNTokens2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐTokens(ctx context.Context, sel ast.SelectionSet, v domain.Tokens) graphql.Marshaler {
+	return ec._Tokens(ctx, sel, &v)
 }
 
-func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
-	res := graphql.MarshalTime(v)
-	if res == graphql.Null {
+func (ec *executionContext) marshalNTokens2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐTokens(ctx context.Context, sel ast.SelectionSet, v *domain.Tokens) graphql.Marshaler {
+	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "must not be null")
 		}
+		return graphql.Null
 	}
-	return res
+	return ec._Tokens(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNUInt642uint64(ctx context.Context, v interface{}) (uint64, error) {
+func (ec *executionContext) unmarshalNUint642uint64(ctx context.Context, v interface{}) (uint64, error) {
 	res, err := graphql.UnmarshalUint64(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNUInt642uint64(ctx context.Context, sel ast.SelectionSet, v uint64) graphql.Marshaler {
+func (ec *executionContext) marshalNUint642uint64(ctx context.Context, sel ast.SelectionSet, v uint64) graphql.Marshaler {
 	res := graphql.MarshalUint64(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2873,11 +2792,6 @@ func (ec *executionContext) marshalNUInt642uint64(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNVerifyInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdeliveryᚋgraphqlᚋmodelᚐVerifyInput(ctx context.Context, v interface{}) (model.VerifyInput, error) {
-	res, err := ec.unmarshalInputVerifyInput(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
@@ -2946,11 +2860,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v interface{}) ([]string, error) {
 	var vSlice []interface{}
 	if v != nil {
-		if tmp1, ok := v.([]interface{}); ok {
-			vSlice = tmp1
-		} else {
-			vSlice = []interface{}{v}
-		}
+		vSlice = graphql.CoerceList(v)
 	}
 	var err error
 	res := make([]string, len(vSlice))
@@ -3143,7 +3053,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
-	return graphql.MarshalBoolean(v)
+	res := graphql.MarshalBoolean(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v interface{}) (*bool, error) {
@@ -3158,7 +3069,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalBoolean(*v)
+	res := graphql.MarshalBoolean(*v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {
@@ -3167,7 +3079,8 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	return graphql.MarshalString(v)
+	res := graphql.MarshalString(v)
+	return res
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {
@@ -3182,7 +3095,24 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	if v == nil {
 		return graphql.Null
 	}
-	return graphql.MarshalString(*v)
+	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOUint642ᚖuint64(ctx context.Context, v interface{}) (*uint64, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalUint64(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUint642ᚖuint64(ctx context.Context, sel ast.SelectionSet, v *uint64) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalUint64(*v)
+	return res
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
