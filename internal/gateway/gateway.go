@@ -34,16 +34,16 @@ import (
 )
 
 // Run durudex gateway application.
-func Run(configPath string) {
+func Run() {
 	// Initialize config.
-	cfg, err := config.Init(configPath)
+	cfg, err := config.Init()
 	if err != nil {
 		log.Error().Msg(err.Error())
 	}
 
 	// Managers
 	auth := auth.NewAuthManager(auth.JWTConfig{
-		SigningKey: cfg.Auth.SigningKey,
+		SigningKey: cfg.Auth.JWT.SigningKey,
 	})
 
 	// Service, Handlers
@@ -54,7 +54,7 @@ func Run(configPath string) {
 
 	// Create and run server.
 	srv := server.NewServer(cfg, httpHandler)
-	addr := cfg.HTTP.Host + ":" + cfg.HTTP.Port
+	addr := cfg.Server.Host + ":" + cfg.Server.Port
 
 	go srv.Run(addr)
 

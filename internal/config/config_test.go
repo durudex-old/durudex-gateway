@@ -1,19 +1,19 @@
 /*
-	Copyright © 2021 Durudex
+ * Copyright © 2021-2022 Durudex
 
-	This file is part of Durudex: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as
-	published by the Free Software Foundation, either version 3 of the
-	License, or (at your option) any later version.
+ * This file is part of Durudex: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
 
-	Durudex is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+ * Durudex is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 package config
 
@@ -26,19 +26,15 @@ import (
 // Testing initialize config.
 func TestInit(t *testing.T) {
 	// Environment configurations.
-	type env struct {
-		authSigningKey string
-	}
+	type env struct{ configPath, authSigningKey string }
 
 	// Testing args.
-	type args struct {
-		path string
-		env  env
-	}
+	type args struct{ env env }
 
 	// Set environment configurations.
 	setEnv := func(env env) {
-		os.Setenv("AUTH_SIGNING_KEY", env.authSigningKey)
+		os.Setenv("CONFIG_PATH", env.configPath)
+		os.Setenv("JWT_SIGNING_KEY", env.authSigningKey)
 	}
 
 	// Testing structures.
@@ -49,22 +45,28 @@ func TestInit(t *testing.T) {
 		wantErr bool
 	}{
 		{
-			name: "test config",
-			args: args{
-				path: "fixtures/main",
-				env:  env{authSigningKey: "super-key"},
-			},
+			name: "OK",
+			args: args{env: env{
+				configPath:     "fixtures/main",
+				authSigningKey: "super-key",
+			}},
 			want: &Config{
-				HTTP: HTTPConfig{
-					Host:    "api.durudex.local",
-					Port:    "8000",
-					AppName: "durudex-gateway",
+				Server: ServerConfig{
+					Host: defaultServerHost,
+					Port: defaultServerPort,
+					Name: defaultServerName,
 				},
-				GRPC: GRPCConfig{TLS: true},
+				Auth: AuthConfig{JWT: JWTConfig{SigningKey: "super-key"}},
 				Service: ServiceConfig{
-					Auth: AuthServiceConfig{Addr: "authservice.durudex.local:8001"},
+					Auth: Service{
+						Addr: defaultServiceAuthAddr,
+						TLS:  defaultServiceAuthTLS,
+					},
+					Code: Service{
+						Addr: defaultServiceCodeAddr,
+						TLS:  defaultServiceCodeTLS,
+					},
 				},
-				Auth: AuthConfig{SigningKey: "super-key"},
 			},
 		},
 	}
@@ -76,7 +78,7 @@ func TestInit(t *testing.T) {
 			setEnv(tt.args.env)
 
 			// Initialize config.
-			got, err := Init(tt.args.path)
+			got, err := Init()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error initialize config: %s", err.Error())
 			}

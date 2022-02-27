@@ -34,7 +34,7 @@ type Server struct {
 func NewServer(cfg *config.Config, httpHandler *http.Handler) *Server {
 	return &Server{
 		httpApp: fiber.New(fiber.Config{
-			AppName: cfg.HTTP.AppName,
+			AppName: cfg.Server.Name,
 		}),
 		httpHandler: httpHandler,
 	}

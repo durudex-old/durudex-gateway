@@ -1,19 +1,19 @@
 /*
-	Copyright © 2021 Durudex
+ * Copyright © 2021-2022 Durudex
 
-	This file is part of Durudex: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as
-	published by the Free Software Foundation, either version 3 of the
-	License, or (at your option) any later version.
+ * This file is part of Durudex: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as
+ * published by the Free Software Foundation, either version 3 of the
+ * License, or (at your option) any later version.
 
-	Durudex is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-	GNU Affero General Public License for more details.
+ * Durudex is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with Durudex. If not, see <https://www.gnu.org/licenses/>.
-*/
+ * You should have received a copy of the GNU Affero General Public License
+ * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
+ */
 
 package config
 
@@ -26,59 +26,52 @@ import (
 	"github.com/spf13/viper"
 )
 
-// Default variables.
-const (
-	defaultHTTPPort    = "8000"
-	defaultHTTPAppName = "durudex-gateway"
-)
-
 type (
 	Config struct {
-		HTTP    HTTPConfig
-		GRPC    GRPCConfig
-		Service ServiceConfig
+		Server  ServerConfig
 		Auth    AuthConfig
+		Service ServiceConfig
 	}
 
-	// HTTP config variables.
-	HTTPConfig struct {
-		Host    string `mapstructure:"host"`
-		Port    string `mapstructure:"port"`
-		AppName string `mapstructure:"appName"`
-	}
-
-	// GRPC config variables.
-	GRPCConfig struct {
-		TLS bool `mapstructure:"tls"`
+	// Server config variables.
+	ServerConfig struct {
+		Host string `mapstructure:"host"`
+		Port string `mapstructure:"port"`
+		Name string `mapstructure:"name"`
 	}
 
 	// Auth config variables.
 	AuthConfig struct {
-		// Signing auth key.
+		JWT JWTConfig
+	}
+
+	// JWT config variables.
+	JWTConfig struct {
 		SigningKey string
 	}
 
-	// Service config varibles.
-	ServiceConfig struct {
-		// Auth service variables.
-		Auth AuthServiceConfig
+	// Service base config.
+	Service struct {
+		Addr string `mapstructure:"addr"`
+		TLS  bool   `mapstructure:"tls"`
 	}
 
-	// Auth service config variables.
-	AuthServiceConfig struct {
-		Addr string `mapstructure:"addr"`
+	// Services config varibles.
+	ServiceConfig struct {
+		Auth Service
+		Code Service
 	}
 )
 
 // Initialize config.
-func Init(configPath string) (*Config, error) {
+func Init() (*Config, error) {
 	log.Debug().Msg("Initialize config...")
 
 	// Populate defaults config variables.
 	populateDefaults()
 
 	// Parsing config file.
-	if err := parseConfigFile(configPath); err != nil {
+	if err := parseConfigFile(); err != nil {
 		return nil, fmt.Errorf("error parsing config file: %s", err.Error())
 	}
 
@@ -95,14 +88,22 @@ func Init(configPath string) (*Config, error) {
 }
 
 // Parsing config file.
-func parseConfigFile(configPath string) error {
+func parseConfigFile() error {
+	// Get config path variable.
+	configPath := os.Getenv("CONFIG_PATH")
+
+	// Check is config path variable empty.
+	if configPath == "" {
+		configPath = defaultConfigPath
+	}
+
 	log.Debug().Msgf("Parsing config file: %s", configPath)
 
 	// Split path to folder and file.
 	path := strings.Split(configPath, "/")
 
-	viper.AddConfigPath(path[0]) // folder
-	viper.SetConfigName(path[1]) // file
+	viper.AddConfigPath(path[0]) // Folder.
+	viper.SetConfigName(path[1]) // File.
 
 	// Read config file.
 	return viper.ReadInConfig()
@@ -112,12 +113,12 @@ func parseConfigFile(configPath string) error {
 func unmarshal(cfg *Config) error {
 	log.Debug().Msg("Unmarshal config keys...")
 
-	// Unmarshal http keys.
-	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
+	// Unmarshal server keys.
+	if err := viper.UnmarshalKey("server", &cfg.Server); err != nil {
 		return err
 	}
-	// Unmarshal grpc keys.
-	if err := viper.UnmarshalKey("grpc", &cfg.GRPC); err != nil {
+	// Unmarshal code service keys.
+	if err := viper.UnmarshalKey("service.code", &cfg.Service.Code); err != nil {
 		return err
 	}
 	// Unmarshal auth service keys.
@@ -129,13 +130,14 @@ func setFromEnv(cfg *Config) {
 	log.Debug().Msg("Set from environment configurations...")
 
 	// Auth variables.
-	cfg.Auth.SigningKey = os.Getenv("AUTH_SIGNING_KEY")
+	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
 }
 
 // Populate defaults config variables.
 func populateDefaults() {
 	log.Debug().Msg("Populate defaults config variables.")
 
-	viper.SetDefault("http.addr", defaultHTTPPort)
-	viper.SetDefault("http.appName", defaultHTTPAppName)
+	viper.SetDefault("server.host", defaultServerHost)
+	viper.SetDefault("server.port", defaultServerPort)
+	viper.SetDefault("server.name", defaultServerName)
 }

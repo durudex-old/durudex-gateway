@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,22 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package http
+package config
 
-import (
-	"github.com/durudex/durudex-gateway/internal/delivery/graphql"
+const (
+	// Config defaults.
+	defaultConfigPath string = "configs/main"
 
-	"github.com/gofiber/fiber/v2"
+	// Server defaults.
+	defaultServerHost string = "api.durudex.local"
+	defaultServerPort string = "8000"
+	defaultServerName string = "durudex-api-gateway"
+
+	// Auth service defaults.
+	defaultServiceAuthAddr string = "auth.service.durudex.local:8001"
+	defaultServiceAuthTLS  bool   = true
+
+	// Code service defaults.
+	defaultServiceCodeAddr string = "code.service.durudex.local:8003"
+	defaultServiceCodeTLS  bool   = true
 )
-
-type Handler struct {
-	graphqlHandler *graphql.Handler
-}
-
-// Creating a new http handler.
-func NewHTTPHandler(graphqlHandler *graphql.Handler) *Handler {
-	return &Handler{graphqlHandler: graphqlHandler}
-}
-
-// Initialize http routes.
-func (h *Handler) InitRoutes(router fiber.Router) {
-	// Ping pong route
-	router.Get("/ping", func(ctx *fiber.Ctx) error {
-		return ctx.SendString("pong")
-	})
-
-	// GrapgQL routes.
-	h.graphqlHandler.InitRoutes(router)
-}

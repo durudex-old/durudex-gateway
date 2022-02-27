@@ -20,9 +20,11 @@ package grpc
 import (
 	"github.com/durudex/durudex-gateway/internal/config"
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
+	"github.com/durudex/durudex-gateway/pkg/tls"
 
 	"github.com/rs/zerolog/log"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 type Handler struct {
@@ -32,29 +34,37 @@ type Handler struct {
 
 // Creating a new grpc handler.
 func NewGRPCHandler(cfg *config.Config) *Handler {
-	transportOption := grpc.WithInsecure()
+	authServiceConn := connectToService(cfg.Service.Auth)
+	codeServiceConn := connectToService(cfg.Service.Code)
 
-	// If TLS is true.
-	if cfg.GRPC.TLS {
-		tlsCredentials, err := LoadTLSCredentials()
+	return &Handler{
+		Auth: pb.NewAuthUserServiceClient(authServiceConn),
+		Code: pb.NewCodeServiceClient(codeServiceConn),
+	}
+}
+
+// Connecting to gRPC service.
+func connectToService(cfg config.Service) *grpc.ClientConn {
+	log.Debug().Msgf("Connecting to %s service", cfg.Addr)
+
+	var transportOption []grpc.DialOption
+
+	// Check is server TLS.
+	if cfg.TLS {
+		// Loading server TLS credentials.
+		tlsCredentials, err := tls.LoadTLSCredentials(CACertFile, clientCertFile, clientKeyFile)
 		if err != nil {
 			log.Fatal().Msgf("error load tls credentials: %s", err.Error())
 		}
 
-		transportOption = grpc.WithTransportCredentials(tlsCredentials)
+		// Append TLS credentials.
+		transportOption = append(transportOption, grpc.WithTransportCredentials(tlsCredentials))
+	} else {
+		transportOption = append(transportOption, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	}
 
-	authServiceConn := ConnectToService(cfg.Service.Auth.Addr, transportOption)
-
-	return &Handler{Auth: pb.NewAuthUserServiceClient(authServiceConn)}
-}
-
-// Connecting to service.
-func ConnectToService(address string, transportOption grpc.DialOption) *grpc.ClientConn {
-	log.Debug().Msgf("Connecting to %s service", address)
-
 	// Connecting to service.
-	conn, err := grpc.Dial(address, transportOption)
+	conn, err := grpc.Dial(cfg.Addr, transportOption...)
 	if err != nil {
 		log.Error().Msgf("error connecting to service: %s", err.Error())
 	}
