@@ -23,31 +23,25 @@ import (
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/resolver"
 	"github.com/durudex/durudex-gateway/internal/service"
-	"github.com/durudex/durudex-gateway/pkg/auth"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/gofiber/adaptor/v2"
-	"github.com/gofiber/fiber/v2"
 )
 
-// Grapgql handler structure.
-type Handler struct {
-	service *service.Service
-	auth    auth.JWT
-}
+// GraphQL handler structure.
+type Handler struct{ service *service.Service }
 
 // Creating a new graphql handler.
-func NewHandler(service *service.Service, auth auth.JWT) *Handler {
-	return &Handler{service: service, auth: auth}
+func NewHandler(service *service.Service) *Handler {
+	return &Handler{service: service}
 }
 
-// Defining the graphql handler.
-func (h *Handler) graphqlHandler() http.HandlerFunc {
-	// NewExecutableSchema and Config are in the generate.go file.
-	// Resolver is in the resolver.go file.
+func (h *Handler) GraphqlHandler() http.HandlerFunc {
 	config := generated.Config{
 		Resolvers: resolver.NewResolver(h.service),
+		Directives: generated.DirectiveRoot{
+			EmailCode: h.emailCode,
+		},
 	}
 
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))
@@ -57,17 +51,7 @@ func (h *Handler) graphqlHandler() http.HandlerFunc {
 	}
 }
 
-// Defining the Playground handler.
-func (h *Handler) playgroundHandler() http.HandlerFunc {
-	handler := playground.Handler("GraphQL", "/query")
-
-	return func(w http.ResponseWriter, r *http.Request) {
-		handler.ServeHTTP(w, r)
-	}
-}
-
-// Initialize graphql routes.
-func (h *Handler) InitRoutes(router fiber.Router) {
-	router.Post("/query", adaptor.HTTPHandlerFunc(h.graphqlHandler()))
-	router.Get("/", adaptor.HTTPHandlerFunc(h.playgroundHandler()))
+// GraphQL playground handler.
+func (h *Handler) PlaygroundHandler() http.HandlerFunc {
+	return playground.Handler("GraphQL", "/query")
 }

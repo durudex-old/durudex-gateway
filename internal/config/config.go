@@ -56,7 +56,7 @@ type (
 		TLS  bool   `mapstructure:"tls"`
 	}
 
-	// Services config varibles.
+	// Services config variables.
 	ServiceConfig struct {
 		Auth Service
 		Code Service

@@ -19,26 +19,31 @@ package http
 
 import (
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql"
+	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/pkg/auth"
 
+	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
 type Handler struct {
-	graphqlHandler *graphql.Handler
+	service *service.Service
+	auth    *auth.Manager
 }
 
 // Creating a new http handler.
-func NewHTTPHandler(graphqlHandler *graphql.Handler) *Handler {
-	return &Handler{graphqlHandler: graphqlHandler}
+func NewHandler(service *service.Service, auth *auth.Manager) *Handler {
+	return &Handler{service: service, auth: auth}
 }
 
 // Initialize http routes.
 func (h *Handler) InitRoutes(router fiber.Router) {
-	// Ping pong route
 	router.Get("/ping", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("pong")
 	})
 
-	// GrapgQL routes.
-	h.graphqlHandler.InitRoutes(router)
+	graphql := graphql.NewHandler(h.service)
+
+	router.Get("/", adaptor.HTTPHandlerFunc(graphql.PlaygroundHandler()))
+	router.Post("/query", adaptor.HTTPHandlerFunc(graphql.GraphqlHandler()))
 }

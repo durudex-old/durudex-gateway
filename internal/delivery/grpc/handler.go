@@ -27,6 +27,13 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const (
+	CACertFile     = "certs/rootCA.pem"
+	clientCertFile = "certs/client-cert.pem"
+	clientKeyFile  = "certs/client-key.pem"
+)
+
+// GRPC handler structure.
 type Handler struct {
 	Auth pb.AuthUserServiceClient
 	Code pb.CodeServiceClient

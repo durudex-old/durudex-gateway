@@ -10,5 +10,5 @@ import (
 )
 
 func (r *mutationResolver) GetCodeByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (*domain.Status, error) {
-	return r.service.Code.GetCodeByEmail(ctx, input)
+	return r.service.Code.GetByEmail(ctx, input)
 }
