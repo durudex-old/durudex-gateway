@@ -19,7 +19,7 @@ package main
 
 import "github.com/durudex/durudex-gateway/internal/gateway"
 
-// The main function that running the gateway application.
+// The main function that is called when running the API gateway.
 func main() {
 	gateway.Run()
 }

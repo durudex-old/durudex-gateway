@@ -18,19 +18,18 @@
 package config
 
 import (
-	"fmt"
 	"os"
-	"strings"
+	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
 type (
+	// Config variables.
 	Config struct {
-		Server  ServerConfig
-		Auth    AuthConfig
-		Service ServiceConfig
+		Server  ServerConfig  // Server config variables.
+		Service ServiceConfig // Service config variables.
 	}
 
 	// Server config variables.
@@ -38,11 +37,6 @@ type (
 		Host string `mapstructure:"host"`
 		Port string `mapstructure:"port"`
 		Name string `mapstructure:"name"`
-	}
-
-	// Auth config variables.
-	AuthConfig struct {
-		JWT JWTConfig
 	}
 
 	// JWT config variables.
@@ -72,17 +66,14 @@ func Init() (*Config, error) {
 
 	// Parsing config file.
 	if err := parseConfigFile(); err != nil {
-		return nil, fmt.Errorf("error parsing config file: %s", err.Error())
+		return nil, err
 	}
 
 	var cfg Config
 	// Unmarshal config keys.
 	if err := unmarshal(&cfg); err != nil {
-		return nil, fmt.Errorf("error unmarshal config keys: %s", err.Error())
+		return nil, err
 	}
-
-	// Set env configurations.
-	setFromEnv(&cfg)
 
 	return &cfg, nil
 }
@@ -100,10 +91,10 @@ func parseConfigFile() error {
 	log.Debug().Msgf("Parsing config file: %s", configPath)
 
 	// Split path to folder and file.
-	path := strings.Split(configPath, "/")
+	dir, file := filepath.Split(configPath)
 
-	viper.AddConfigPath(path[0]) // Folder.
-	viper.SetConfigName(path[1]) // File.
+	viper.AddConfigPath(dir)
+	viper.SetConfigName(file)
 
 	// Read config file.
 	return viper.ReadInConfig()
@@ -125,19 +116,20 @@ func unmarshal(cfg *Config) error {
 	return viper.UnmarshalKey("service.auth", &cfg.Service.Auth)
 }
 
-// Seting environment variables from .env file.
-func setFromEnv(cfg *Config) {
-	log.Debug().Msg("Set from environment configurations...")
-
-	// Auth variables.
-	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
-}
-
 // Populate defaults config variables.
 func populateDefaults() {
 	log.Debug().Msg("Populate defaults config variables.")
 
+	// Server defaults.
 	viper.SetDefault("server.host", defaultServerHost)
 	viper.SetDefault("server.port", defaultServerPort)
 	viper.SetDefault("server.name", defaultServerName)
+
+	// Auth service defaults.
+	viper.SetDefault("service.auth.addr", defaultServiceAuthAddr)
+	viper.SetDefault("service.auth.tls", defaultServiceAuthTLS)
+
+	// Code service defaults.
+	viper.SetDefault("service.code.addr", defaultServiceCodeAddr)
+	viper.SetDefault("service.code.tls", defaultServiceCodeTLS)
 }

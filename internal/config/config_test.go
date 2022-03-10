@@ -26,7 +26,7 @@ import (
 // Testing initialize config.
 func TestInit(t *testing.T) {
 	// Environment configurations.
-	type env struct{ configPath, authSigningKey string }
+	type env struct{ configPath string }
 
 	// Testing args.
 	type args struct{ env env }
@@ -34,7 +34,6 @@ func TestInit(t *testing.T) {
 	// Set environment configurations.
 	setEnv := func(env env) {
 		os.Setenv("CONFIG_PATH", env.configPath)
-		os.Setenv("JWT_SIGNING_KEY", env.authSigningKey)
 	}
 
 	// Testing structures.
@@ -46,17 +45,13 @@ func TestInit(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{env: env{
-				configPath:     "fixtures/main",
-				authSigningKey: "super-key",
-			}},
+			args: args{env: env{configPath: "fixtures/main"}},
 			want: &Config{
 				Server: ServerConfig{
 					Host: defaultServerHost,
 					Port: defaultServerPort,
 					Name: defaultServerName,
 				},
-				Auth: AuthConfig{JWT: JWTConfig{SigningKey: "super-key"}},
 				Service: ServiceConfig{
 					Auth: Service{
 						Addr: defaultServiceAuthAddr,
