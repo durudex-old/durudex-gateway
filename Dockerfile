@@ -1,4 +1,4 @@
-# Copyright © 2021-2022 Durudex
+# Copyright © 2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,15 +13,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-server:
-  host: api.durudex.local
-  port: 8000
-  name: durudex-gateway
+FROM alpine:latest
 
-service:
-  auth:
-    addr: auth.service.durudex.local:8001
-    tls: true
-  code:
-    addr: code.service.durudex.local:8003
-    tls: true
+WORKDIR /root/
+
+ENTRYPOINT ["./app"]

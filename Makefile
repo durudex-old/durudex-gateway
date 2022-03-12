@@ -13,13 +13,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-.PHONY: download
-download:
-	go mod download
-
 .PHONY: build
-build: download
-	go build -o .bin/gateway.exe ./cmd/gateway/main.go
+build:
+	go mod download && CGO_ENABLE=0 GOOS=linux go build -o ./.bin/app ./cmd/gateway/main.go
+
+.PHONY: run
+run: build
+	docker-compose up --remove-orphans app
 
 .PHONY: lint
 lint:
@@ -28,10 +28,6 @@ lint:
 .PHONY: test
 test: lint
 	go test -v ./...
-
-.PHONY: run
-run: download
-	go run ./cmd/gateway/main.go
 
 .PHONY: gqlgen
 gqlgen:
