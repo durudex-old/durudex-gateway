@@ -26,7 +26,7 @@ type Query {
   ping: String!
 }
 
-directive @emailCode(email: String, code: Uint64) on FIELD
+directive @emailCode(email: String!, code: Uint64!) on FIELD
   | FIELD_DEFINITION
   | INPUT_FIELD_DEFINITION
   | ARGUMENT_DEFINITION

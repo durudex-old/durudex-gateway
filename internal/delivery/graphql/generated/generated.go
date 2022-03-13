@@ -41,7 +41,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	EmailCode func(ctx context.Context, obj interface{}, next graphql.Resolver, email *string, code *uint64) (res interface{}, err error)
+	EmailCode func(ctx context.Context, obj interface{}, next graphql.Resolver, email string, code uint64) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -347,7 +347,7 @@ type Query {
   ping: String!
 }
 
-directive @emailCode(email: String, code: Uint64) on FIELD
+directive @emailCode(email: String!, code: Uint64!) on FIELD
   | FIELD_DEFINITION
   | INPUT_FIELD_DEFINITION
   | ARGUMENT_DEFINITION
@@ -414,19 +414,19 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) dir_emailCode_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *string
+	var arg0 string
 	if tmp, ok := rawArgs["email"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
-		arg0, err = ec.unmarshalOString2ᚖstring(ctx, tmp)
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
 	args["email"] = arg0
-	var arg1 *uint64
+	var arg1 uint64
 	if tmp, ok := rawArgs["code"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
-		arg1, err = ec.unmarshalOUint642ᚖuint64(ctx, tmp)
+		arg1, err = ec.unmarshalNUint642uint64(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -560,7 +560,7 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj interface{
 				if ec.directives.EmailCode == nil {
 					return nil, errors.New("directive emailCode is not implemented")
 				}
-				return ec.directives.EmailCode(ctx, obj, n, args["email"].(*string), args["code"].(*uint64))
+				return ec.directives.EmailCode(ctx, obj, n, args["email"].(string), args["code"].(uint64))
 			}
 		}
 	}
@@ -608,7 +608,7 @@ func (ec *executionContext) _Mutation_signUp(ctx context.Context, field graphql.
 			if ec.directives.EmailCode == nil {
 				return nil, errors.New("directive emailCode is not implemented")
 			}
-			return ec.directives.EmailCode(ctx, nil, directive0, nil, nil)
+			return ec.directives.EmailCode(ctx, nil, directive0, "", 0)
 		}
 
 		tmp, err := directive1(rctx)
@@ -3167,22 +3167,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 		return graphql.Null
 	}
 	res := graphql.MarshalString(*v)
-	return res
-}
-
-func (ec *executionContext) unmarshalOUint642ᚖuint64(ctx context.Context, v interface{}) (*uint64, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := graphql.UnmarshalUint64(v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOUint642ᚖuint64(ctx context.Context, sel ast.SelectionSet, v *uint64) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	res := graphql.MarshalUint64(*v)
 	return res
 }
 
