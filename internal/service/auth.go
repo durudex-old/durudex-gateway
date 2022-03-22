@@ -29,6 +29,7 @@ type Auth interface {
 	SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
 	RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error)
+	Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error)
 }
 
 // User auth service structure.
@@ -78,4 +79,8 @@ func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTok
 	}
 
 	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil
+}
+
+func (s *AuthService) Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error) {
+	return true, nil
 }

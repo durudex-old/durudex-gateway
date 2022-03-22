@@ -35,12 +35,17 @@ func NewHandler(service *service.Service) *Handler {
 
 // Initialize http routes.
 func (h *Handler) InitRoutes(router fiber.Router) {
+	router.Use(h.authMiddleware)
+
 	router.Get("/ping", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("pong")
 	})
 
 	graphql := graphql.NewHandler(h.service)
 
-	router.Get("/", adaptor.HTTPHandlerFunc(graphql.PlaygroundHandler()))
-	router.Post("/query", adaptor.HTTPHandlerFunc(graphql.GraphqlHandler()))
+	graph := router.Group("/graph")
+	{
+		graph.Get("/", adaptor.HTTPHandlerFunc(graphql.PlaygroundHandler()))
+		graph.Post("/query", adaptor.HTTPHandlerFunc(graphql.GraphqlHandler()))
+	}
 }

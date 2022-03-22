@@ -17,7 +17,4 @@
 
 package domain
 
-// Status.
-type Status struct {
-	Status bool `json:"status"`
-}
+const UserCtx string = "userID"

@@ -9,6 +9,6 @@ import (
 	"github.com/durudex/durudex-gateway/internal/domain"
 )
 
-func (r *mutationResolver) GetCodeByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (*domain.Status, error) {
+func (r *mutationResolver) GetCodeByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (bool, error) {
 	return r.service.Code.GetByEmail(ctx, input)
 }

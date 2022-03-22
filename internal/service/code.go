@@ -27,7 +27,7 @@ import (
 
 // Code service interface.
 type Code interface {
-	GetByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (*domain.Status, error)
+	GetByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (bool, error)
 	CheckByEmail(ctx context.Context, email string, input uint64) (bool, error)
 }
 
@@ -40,13 +40,13 @@ func NewCodeService(grpcHandler pb.CodeServiceClient) *CodeService {
 }
 
 // Getting code by email address.
-func (s *CodeService) GetByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (*domain.Status, error) {
+func (s *CodeService) GetByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (bool, error) {
 	status, err := s.grpcHandler.CreateByEmail(ctx, &types.Email{Email: input.Email})
 	if err != nil {
-		return &domain.Status{Status: status.Status}, err
+		return status.Status, err
 	}
 
-	return &domain.Status{Status: status.Status}, nil
+	return status.Status, nil
 }
 
 func (s *CodeService) CheckByEmail(ctx context.Context, email string, input uint64) (bool, error) {

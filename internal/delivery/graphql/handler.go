@@ -41,6 +41,7 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 		Resolvers: resolver.NewResolver(h.service),
 		Directives: generated.DirectiveRoot{
 			EmailCode: h.emailCode,
+			Auth:      h.auth,
 		},
 	}
 
@@ -53,5 +54,5 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 
 // GraphQL playground handler.
 func (h *Handler) PlaygroundHandler() http.HandlerFunc {
-	return playground.Handler("GraphQL", "/query")
+	return playground.Handler("GraphQL", "/graph/query")
 }

@@ -3,7 +3,7 @@ module github.com/durudex/durudex-gateway
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.17.1
+	github.com/99designs/gqlgen v0.17.2
 	github.com/gofiber/adaptor/v2 v2.1.16
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/rs/zerolog v1.26.1

@@ -14,9 +14,19 @@ func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput)
 }
 
 func (r *mutationResolver) SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error) {
+	input.IP = ""
+
 	return r.service.Auth.SignIn(ctx, input)
 }
 
 func (r *mutationResolver) RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error) {
+	input.IP = ""
+
 	return r.service.Auth.RefreshTokens(ctx, input)
+}
+
+func (r *mutationResolver) Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error) {
+	input.IP = ""
+
+	return r.service.Auth.Logout(ctx, input)
 }
