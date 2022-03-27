@@ -19,11 +19,14 @@ package service
 
 import (
 	"context"
+	"errors"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	"github.com/durudex/durudex-gateway/internal/domain"
 )
+
+var ErrCodeFailed = errors.New("error code failed")
 
 // Code service interface.
 type Code interface {
@@ -56,7 +59,7 @@ func (s *CodeService) CheckByEmail(ctx context.Context, email string, input uint
 	}
 
 	if code.Code != input {
-		return false, nil // todo
+		return false, ErrCodeFailed
 	}
 
 	return true, nil
