@@ -17,4 +17,7 @@
 
 package domain
 
-const UserCtx string = "userID"
+const (
+	UserCtx string = "userID"
+	IPCtx   string = "IP"
+)
