@@ -17,8 +17,48 @@
 
 package http
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"errors"
+	"strings"
 
+	"github.com/durudex/durudex-gateway/internal/domain"
+
+	"github.com/gofiber/fiber/v2"
+)
+
+const authorizationHeader string = "Authorization"
+
+var (
+	ErrAuthHeader       = errors.New("invalid auth header")
+	ErrAuthTokenIsEmpty = errors.New("token is empty")
+)
+
+// HTTP authorization middleware.
 func (h *Handler) authMiddleware(ctx *fiber.Ctx) error {
+	// Getting authorization header.
+	header := ctx.Get(authorizationHeader)
+	if header == "" {
+		return ctx.Next()
+	}
+
+	// Checking header parts.
+	headerParts := strings.Split(header, " ")
+	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
+		return ErrAuthHeader
+	}
+
+	// Check the second part of the header.
+	if len(headerParts[1]) == 0 {
+		return ErrAuthTokenIsEmpty
+	}
+
+	// Parsing jwt access token.
+	customClaim, err := h.auth.JWT.Parse(headerParts[1])
+	if err != nil {
+		return err
+	}
+
+	ctx.Context().SetUserValue(domain.UserCtx, customClaim)
+
 	return ctx.Next()
 }

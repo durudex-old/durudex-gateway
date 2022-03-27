@@ -30,6 +30,7 @@ type (
 	Config struct {
 		Server  ServerConfig  // Server config variables.
 		Service ServiceConfig // Service config variables.
+		Auth    AuthConfig    // Auth config variables.
 	}
 
 	// Server config variables.
@@ -39,10 +40,11 @@ type (
 		Name string `mapstructure:"name"`
 	}
 
+	// Auth config variables.
+	AuthConfig struct{ JWT JWTConfig }
+
 	// JWT config variables.
-	JWTConfig struct {
-		SigningKey string
-	}
+	JWTConfig struct{ SigningKey string }
 
 	// Service base config.
 	Service struct {
@@ -51,10 +53,7 @@ type (
 	}
 
 	// Services config variables.
-	ServiceConfig struct {
-		Auth Service
-		Code Service
-	}
+	ServiceConfig struct{ Auth, Code Service }
 )
 
 // Initialize config.
@@ -74,6 +73,9 @@ func Init() (*Config, error) {
 	if err := unmarshal(&cfg); err != nil {
 		return nil, err
 	}
+
+	// Set env configurations.
+	setFromEnv(&cfg)
 
 	return &cfg, nil
 }
@@ -114,6 +116,14 @@ func unmarshal(cfg *Config) error {
 	}
 	// Unmarshal auth service keys.
 	return viper.UnmarshalKey("service.auth", &cfg.Service.Auth)
+}
+
+// Seting environment variables from .env file.
+func setFromEnv(cfg *Config) {
+	log.Debug().Msg("Set from environment configurations...")
+
+	// Auth variables.
+	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
 }
 
 // Populate defaults config variables.

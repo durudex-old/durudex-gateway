@@ -20,17 +20,21 @@ package http
 import (
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql"
 	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/pkg/auth"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
 // HTTP handler structure.
-type Handler struct{ service *service.Service }
+type Handler struct {
+	service *service.Service
+	auth    *auth.Auth
+}
 
 // Creating a new http handler.
-func NewHandler(service *service.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *service.Service, auth *auth.Auth) *Handler {
+	return &Handler{service: service, auth: auth}
 }
 
 // Initialize http routes.

@@ -38,11 +38,8 @@ func NewHandler(service *service.Service) *Handler {
 
 func (h *Handler) GraphqlHandler() http.HandlerFunc {
 	config := generated.Config{
-		Resolvers: resolver.NewResolver(h.service),
-		Directives: generated.DirectiveRoot{
-			EmailCode: h.emailCode,
-			Auth:      h.auth,
-		},
+		Resolvers:  resolver.NewResolver(h.service),
+		Directives: generated.DirectiveRoot{IsAuth: h.isAuth},
 	}
 
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))

@@ -27,6 +27,7 @@ import (
 	"github.com/durudex/durudex-gateway/internal/delivery/http"
 	"github.com/durudex/durudex-gateway/internal/server"
 	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/pkg/auth"
 
 	"github.com/rs/zerolog/log"
 )
@@ -39,10 +40,13 @@ func Run() {
 		log.Error().Err(err).Msg("error initialize config")
 	}
 
+	// Creating a new auth manager.
+	authManager := auth.NewAuthManager(cfg.Auth.JWT.SigningKey)
+
 	// Creating a new service and handlers.
 	grpcHandler := grpc.NewGRPCHandler(cfg)
 	service := service.NewService(grpcHandler)
-	httpHandler := http.NewHandler(service)
+	httpHandler := http.NewHandler(service, authManager)
 
 	// Creating a new server.
 	srv := server.NewServer(cfg, httpHandler)

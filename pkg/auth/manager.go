@@ -15,25 +15,11 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package domain
+package auth
 
-// User Sign Up input.
-type SignUpInput struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Code     uint64 `json:"code"`
-}
+type Auth struct{ JWT }
 
-// User Sign In input.
-type SignInInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-	IP       string
-}
-
-// Refresh tokens input.
-type RefreshTokensInput struct {
-	Token string `json:"token"`
-	IP    string
+// Creating a new auth manager.
+func NewAuthManager(signingKey string) *Auth {
+	return &Auth{JWT: NewJWTManager(signingKey)}
 }
