@@ -68,9 +68,9 @@ func (s *AuthService) SignIn(ctx context.Context, input domain.SignInInput) (*do
 	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
-// Refresh user auth tokens.
+// Refresh user auth tokens by refresh token.
 func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error) {
-	tokens, err := s.grpcHandler.RefreshTokens(ctx, &pb.RefreshTokensRequest{
+	tokens, err := s.grpcHandler.RefreshTokens(ctx, &pb.RefreshTokenRequest{
 		RefreshToken: input.Token,
 		Ip:           input.IP,
 	})
@@ -81,6 +81,15 @@ func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTok
 	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
+// Logout user session by refresh token.
 func (s *AuthService) Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error) {
-	return true, nil
+	status, err := s.grpcHandler.Logout(ctx, &pb.RefreshTokenRequest{
+		RefreshToken: input.Token,
+		Ip:           input.IP,
+	})
+	if err != nil {
+		return status.Status, err
+	}
+
+	return status.Status, nil
 }

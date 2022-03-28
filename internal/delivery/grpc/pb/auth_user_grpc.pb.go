@@ -21,7 +21,8 @@ const _ = grpc.SupportPackageIsVersion7
 type AuthUserServiceClient interface {
 	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.ID, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*Tokens, error)
-	RefreshTokens(ctx context.Context, in *RefreshTokensRequest, opts ...grpc.CallOption) (*Tokens, error)
+	RefreshTokens(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*Tokens, error)
+	Logout(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*types.Status, error)
 }
 
 type authUserServiceClient struct {
@@ -50,9 +51,18 @@ func (c *authUserServiceClient) SignIn(ctx context.Context, in *SignInRequest, o
 	return out, nil
 }
 
-func (c *authUserServiceClient) RefreshTokens(ctx context.Context, in *RefreshTokensRequest, opts ...grpc.CallOption) (*Tokens, error) {
+func (c *authUserServiceClient) RefreshTokens(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*Tokens, error) {
 	out := new(Tokens)
 	err := c.cc.Invoke(ctx, "/durudex.user.AuthUserService/RefreshTokens", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authUserServiceClient) Logout(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*types.Status, error) {
+	out := new(types.Status)
+	err := c.cc.Invoke(ctx, "/durudex.user.AuthUserService/Logout", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +75,8 @@ func (c *authUserServiceClient) RefreshTokens(ctx context.Context, in *RefreshTo
 type AuthUserServiceServer interface {
 	SignUp(context.Context, *SignUpRequest) (*types.ID, error)
 	SignIn(context.Context, *SignInRequest) (*Tokens, error)
-	RefreshTokens(context.Context, *RefreshTokensRequest) (*Tokens, error)
+	RefreshTokens(context.Context, *RefreshTokenRequest) (*Tokens, error)
+	Logout(context.Context, *RefreshTokenRequest) (*types.Status, error)
 	mustEmbedUnimplementedAuthUserServiceServer()
 }
 
@@ -79,8 +90,11 @@ func (UnimplementedAuthUserServiceServer) SignUp(context.Context, *SignUpRequest
 func (UnimplementedAuthUserServiceServer) SignIn(context.Context, *SignInRequest) (*Tokens, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignIn not implemented")
 }
-func (UnimplementedAuthUserServiceServer) RefreshTokens(context.Context, *RefreshTokensRequest) (*Tokens, error) {
+func (UnimplementedAuthUserServiceServer) RefreshTokens(context.Context, *RefreshTokenRequest) (*Tokens, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RefreshTokens not implemented")
+}
+func (UnimplementedAuthUserServiceServer) Logout(context.Context, *RefreshTokenRequest) (*types.Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedAuthUserServiceServer) mustEmbedUnimplementedAuthUserServiceServer() {}
 
@@ -132,7 +146,7 @@ func _AuthUserService_SignIn_Handler(srv interface{}, ctx context.Context, dec f
 }
 
 func _AuthUserService_RefreshTokens_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RefreshTokensRequest)
+	in := new(RefreshTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -144,7 +158,25 @@ func _AuthUserService_RefreshTokens_Handler(srv interface{}, ctx context.Context
 		FullMethod: "/durudex.user.AuthUserService/RefreshTokens",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthUserServiceServer).RefreshTokens(ctx, req.(*RefreshTokensRequest))
+		return srv.(AuthUserServiceServer).RefreshTokens(ctx, req.(*RefreshTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthUserService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthUserServiceServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/durudex.user.AuthUserService/Logout",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthUserServiceServer).Logout(ctx, req.(*RefreshTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -167,6 +199,10 @@ var AuthUserService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RefreshTokens",
 			Handler:    _AuthUserService_RefreshTokens_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _AuthUserService_Logout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

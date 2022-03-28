@@ -22,11 +22,13 @@ package durudex.user;
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
 import "internal/delivery/grpc/pb/types/id.proto";
+import "internal/delivery/grpc/pb/types/status.proto";
 
 service AuthUserService {
   rpc SignUp (SignUpRequest) returns (types.ID);
   rpc SignIn (SignInRequest) returns (Tokens);
-  rpc RefreshTokens (RefreshTokensRequest) returns (Tokens);
+  rpc RefreshTokens (RefreshTokenRequest) returns (Tokens);
+  rpc Logout (RefreshTokenRequest) returns (types.Status);
 }
 
 message SignUpRequest {
@@ -41,7 +43,7 @@ message SignInRequest {
   string ip = 3;
 }
 
-message RefreshTokensRequest {
+message RefreshTokenRequest {
   string refreshToken = 1;
   string ip = 2;
 }

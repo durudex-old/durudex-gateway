@@ -35,6 +35,9 @@ api.durudex.local
 ```env
 # Config variables:
 CONFIG_PATH=configs/main
+
+# Auth variables:
+JWT_SIGNING_KEY=
 ```
 3) Generate certificates, information can be found at [certs/README.md](cert/README.md).
 4) Run services:
