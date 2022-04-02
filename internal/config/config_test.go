@@ -63,6 +63,10 @@ func TestInit(t *testing.T) {
 						Addr: defaultServiceCodeAddr,
 						TLS:  defaultServiceCodeTLS,
 					},
+					User: Service{
+						Addr: defaultServiceUserAddr,
+						TLS:  defaultServiceUserTLS,
+					},
 				},
 			},
 		},

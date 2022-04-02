@@ -53,7 +53,7 @@ type (
 	}
 
 	// Services config variables.
-	ServiceConfig struct{ Auth, Code Service }
+	ServiceConfig struct{ Auth, Code, User Service }
 )
 
 // Initialize config.
@@ -110,6 +110,10 @@ func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("server", &cfg.Server); err != nil {
 		return err
 	}
+	// Unmarshal user service keys.
+	if err := viper.UnmarshalKey("service.user", &cfg.Service.User); err != nil {
+		return err
+	}
 	// Unmarshal code service keys.
 	if err := viper.UnmarshalKey("service.code", &cfg.Service.Code); err != nil {
 		return err
@@ -142,4 +146,8 @@ func populateDefaults() {
 	// Code service defaults.
 	viper.SetDefault("service.code.addr", defaultServiceCodeAddr)
 	viper.SetDefault("service.code.tls", defaultServiceCodeTLS)
+
+	// User service defaults.
+	viper.SetDefault("service.user.addr", defaultServiceUserAddr)
+	viper.SetDefault("service.user.tls", defaultServiceUserTLS)
 }

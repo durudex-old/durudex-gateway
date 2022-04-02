@@ -15,26 +15,11 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package config
+package domain
 
-const (
-	// Config defaults.
-	defaultConfigPath string = "configs/main"
-
-	// Server defaults.
-	defaultServerHost string = "api.durudex.local"
-	defaultServerPort string = "8000"
-	defaultServerName string = "durudex-api-gateway"
-
-	// Auth service defaults.
-	defaultServiceAuthAddr string = "auth.service.durudex.local:8001"
-	defaultServiceAuthTLS  bool   = true
-
-	// Code service defaults.
-	defaultServiceCodeAddr string = "code.service.durudex.local:8003"
-	defaultServiceCodeTLS  bool   = true
-
-	// User service defaults.
-	defaultServiceUserAddr string = "user.service.durudex.local:8004"
-	defaultServiceUserTLS  bool   = true
-)
+// User forgot password input.
+type ForgotPasswordInput struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Code     uint64 `json:"code"`
+}

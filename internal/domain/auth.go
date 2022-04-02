@@ -33,7 +33,7 @@ type SignInInput struct {
 }
 
 // Refresh tokens input.
-type RefreshTokensInput struct {
+type RefreshTokenInput struct {
 	Token string `json:"token"`
 	IP    string
 }

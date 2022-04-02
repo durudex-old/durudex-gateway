@@ -15,26 +15,20 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package config
+syntax = "proto3";
 
-const (
-	// Config defaults.
-	defaultConfigPath string = "configs/main"
+package durudex.user;
 
-	// Server defaults.
-	defaultServerHost string = "api.durudex.local"
-	defaultServerPort string = "8000"
-	defaultServerName string = "durudex-api-gateway"
+option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
-	// Auth service defaults.
-	defaultServiceAuthAddr string = "auth.service.durudex.local:8001"
-	defaultServiceAuthTLS  bool   = true
+import "internal/delivery/grpc/pb/types/status.proto";
 
-	// Code service defaults.
-	defaultServiceCodeAddr string = "code.service.durudex.local:8003"
-	defaultServiceCodeTLS  bool   = true
+service UserService {
+  rpc ForgotPassword (ForgotPasswordRequest) returns (types.Status);
+}
 
-	// User service defaults.
-	defaultServiceUserAddr string = "user.service.durudex.local:8004"
-	defaultServiceUserTLS  bool   = true
-)
+// Request for forgot password.
+message ForgotPasswordRequest {
+  string email = 1;
+  string password = 2;
+}

@@ -46,9 +46,10 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
+		ForgotPassword func(childComplexity int, input domain.ForgotPasswordInput) int
 		GetCodeByEmail func(childComplexity int, input domain.GetCodeByEmailInput) int
-		Logout         func(childComplexity int, input domain.RefreshTokensInput) int
-		RefreshTokens  func(childComplexity int, input domain.RefreshTokensInput) int
+		Logout         func(childComplexity int, input domain.RefreshTokenInput) int
+		RefreshTokens  func(childComplexity int, input domain.RefreshTokenInput) int
 		SignIn         func(childComplexity int, input domain.SignInInput) int
 		SignUp         func(childComplexity int, input domain.SignUpInput) int
 	}
@@ -66,9 +67,10 @@ type ComplexityRoot struct {
 type MutationResolver interface {
 	SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
-	RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error)
-	Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error)
+	RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error)
+	Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
 	GetCodeByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (bool, error)
+	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error)
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
@@ -88,6 +90,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Mutation.forgotPassword":
+		if e.complexity.Mutation.ForgotPassword == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_forgotPassword_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ForgotPassword(childComplexity, args["input"].(domain.ForgotPasswordInput)), true
 
 	case "Mutation.getCodeByEmail":
 		if e.complexity.Mutation.GetCodeByEmail == nil {
@@ -111,7 +125,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Logout(childComplexity, args["input"].(domain.RefreshTokensInput)), true
+		return e.complexity.Mutation.Logout(childComplexity, args["input"].(domain.RefreshTokenInput)), true
 
 	case "Mutation.refreshTokens":
 		if e.complexity.Mutation.RefreshTokens == nil {
@@ -123,7 +137,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.RefreshTokens(childComplexity, args["input"].(domain.RefreshTokensInput)), true
+		return e.complexity.Mutation.RefreshTokens(childComplexity, args["input"].(domain.RefreshTokenInput)), true
 
 	case "Mutation.signIn":
 		if e.complexity.Mutation.SignIn == nil {
@@ -253,12 +267,12 @@ extend type Mutation {
   """
   Refresh authorization tokens.
   """
-  refreshTokens(input: RefreshTokensInput!): Tokens!
+  refreshTokens(input: RefreshTokenInput!): Tokens!
 
   """
   Logout user session by refresh token.
   """
-  logout(input: RefreshTokensInput!): Boolean! @isAuth
+  logout(input: RefreshTokenInput!): Boolean! @isAuth
 }
 
 """
@@ -304,7 +318,7 @@ input SignInInput {
 """
 Authorization refresh token input.
 """
-input RefreshTokensInput {
+input RefreshTokenInput {
   """
   Refresh token.
   """
@@ -318,17 +332,17 @@ input RefreshTokensInput {
 
 extend type Mutation {
   """
-  Getting code by email address.
+  Getting verification code by email address.
   """
   getCodeByEmail(input: GetCodeByEmailInput!): Boolean!
 }
 
 """
-Getting code by email address input.
+Getting verification code by email address input.
 """
 input GetCodeByEmailInput {
   """
-  User email.
+  User email address.
   """
   email: String!
 }
@@ -363,6 +377,38 @@ type Query {
   ping: String!
 }
 `, BuiltIn: false},
+	{Name: "schema/src/user.graphqls", Input: `# Copyright © 2022 Durudex
+
+# This source code is licensed under the MIT license found in the
+# LICENSE file in the root directory of this source tree.
+
+extend type Mutation {
+  """
+  Forgot user password.
+  """
+  forgotPassword(input: ForgotPasswordInput!): Boolean!
+}
+
+"""
+Forgot user password input.
+"""
+input ForgotPasswordInput {
+  """
+  User email.
+  """
+  email: String!
+
+  """
+  New user password.
+  """
+  password: String!
+
+  """
+  User verification code.
+  """
+  code: Uint64!
+}
+`, BuiltIn: false},
 	{Name: "schema/src/types/token.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
@@ -390,6 +436,21 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_forgotPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 domain.ForgotPasswordInput
+	if tmp, ok := rawArgs["input"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+		arg0, err = ec.unmarshalNForgotPasswordInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐForgotPasswordInput(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_getCodeByEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -408,10 +469,10 @@ func (ec *executionContext) field_Mutation_getCodeByEmail_args(ctx context.Conte
 func (ec *executionContext) field_Mutation_logout_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 domain.RefreshTokensInput
+	var arg0 domain.RefreshTokenInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokensInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRefreshTokenInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokenInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -423,10 +484,10 @@ func (ec *executionContext) field_Mutation_logout_args(ctx context.Context, rawA
 func (ec *executionContext) field_Mutation_refreshTokens_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 domain.RefreshTokensInput
+	var arg0 domain.RefreshTokenInput
 	if tmp, ok := rawArgs["input"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokensInput(ctx, tmp)
+		arg0, err = ec.unmarshalNRefreshTokenInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokenInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -627,7 +688,7 @@ func (ec *executionContext) _Mutation_refreshTokens(ctx context.Context, field g
 	fc.Args = args
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().RefreshTokens(rctx, args["input"].(domain.RefreshTokensInput))
+		return ec.resolvers.Mutation().RefreshTokens(rctx, args["input"].(domain.RefreshTokenInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -670,7 +731,7 @@ func (ec *executionContext) _Mutation_logout(ctx context.Context, field graphql.
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		directive0 := func(rctx context.Context) (interface{}, error) {
 			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Mutation().Logout(rctx, args["input"].(domain.RefreshTokensInput))
+			return ec.resolvers.Mutation().Logout(rctx, args["input"].(domain.RefreshTokenInput))
 		}
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.IsAuth == nil {
@@ -732,6 +793,48 @@ func (ec *executionContext) _Mutation_getCodeByEmail(ctx context.Context, field 
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Mutation().GetCodeByEmail(rctx, args["input"].(domain.GetCodeByEmailInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) _Mutation_forgotPassword(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	fc := &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		Args:       nil,
+		IsMethod:   true,
+		IsResolver: true,
+	}
+
+	ctx = graphql.WithFieldContext(ctx, fc)
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := ec.field_Mutation_forgotPassword_args(ctx, rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	fc.Args = args
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ForgotPassword(rctx, args["input"].(domain.ForgotPasswordInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2110,6 +2213,45 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputForgotPasswordInput(ctx context.Context, obj interface{}) (domain.ForgotPasswordInput, error) {
+	var it domain.ForgotPasswordInput
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	for k, v := range asMap {
+		switch k {
+		case "email":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+			it.Email, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "password":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("password"))
+			it.Password, err = ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		case "code":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("code"))
+			it.Code, err = ec.unmarshalNUint642uint64(ctx, v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputGetCodeByEmailInput(ctx context.Context, obj interface{}) (domain.GetCodeByEmailInput, error) {
 	var it domain.GetCodeByEmailInput
 	asMap := map[string]interface{}{}
@@ -2133,8 +2275,8 @@ func (ec *executionContext) unmarshalInputGetCodeByEmailInput(ctx context.Contex
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputRefreshTokensInput(ctx context.Context, obj interface{}) (domain.RefreshTokensInput, error) {
-	var it domain.RefreshTokensInput
+func (ec *executionContext) unmarshalInputRefreshTokenInput(ctx context.Context, obj interface{}) (domain.RefreshTokenInput, error) {
+	var it domain.RefreshTokenInput
 	asMap := map[string]interface{}{}
 	for k, v := range obj.(map[string]interface{}) {
 		asMap[k] = v
@@ -2304,6 +2446,16 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "getCodeByEmail":
 			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_getCodeByEmail(ctx, field)
+			}
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "forgotPassword":
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_forgotPassword(ctx, field)
 			}
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, innerFunc)
@@ -2868,6 +3020,11 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNForgotPasswordInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐForgotPasswordInput(ctx context.Context, v interface{}) (domain.ForgotPasswordInput, error) {
+	res, err := ec.unmarshalInputForgotPasswordInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNGetCodeByEmailInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐGetCodeByEmailInput(ctx context.Context, v interface{}) (domain.GetCodeByEmailInput, error) {
 	res, err := ec.unmarshalInputGetCodeByEmailInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2888,8 +3045,8 @@ func (ec *executionContext) marshalNID2uint64(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) unmarshalNRefreshTokensInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokensInput(ctx context.Context, v interface{}) (domain.RefreshTokensInput, error) {
-	res, err := ec.unmarshalInputRefreshTokensInput(ctx, v)
+func (ec *executionContext) unmarshalNRefreshTokenInput2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐRefreshTokenInput(ctx context.Context, v interface{}) (domain.RefreshTokenInput, error) {
+	res, err := ec.unmarshalInputRefreshTokenInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

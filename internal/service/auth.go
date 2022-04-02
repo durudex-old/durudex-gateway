@@ -28,8 +28,8 @@ import (
 type Auth interface {
 	SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
-	RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error)
-	Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error)
+	RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error)
+	Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
 }
 
 // User auth service structure.
@@ -69,7 +69,7 @@ func (s *AuthService) SignIn(ctx context.Context, input domain.SignInInput) (*do
 }
 
 // Refresh user auth tokens by refresh token.
-func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTokensInput) (*domain.Tokens, error) {
+func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error) {
 	tokens, err := s.grpcHandler.RefreshTokens(ctx, &pb.RefreshTokenRequest{
 		RefreshToken: input.Token,
 		Ip:           input.IP,
@@ -82,7 +82,7 @@ func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTok
 }
 
 // Logout user session by refresh token.
-func (s *AuthService) Logout(ctx context.Context, input domain.RefreshTokensInput) (bool, error) {
+func (s *AuthService) Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
 	status, err := s.grpcHandler.Logout(ctx, &pb.RefreshTokenRequest{
 		RefreshToken: input.Token,
 		Ip:           input.IP,

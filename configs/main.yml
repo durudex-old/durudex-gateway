@@ -25,3 +25,6 @@ service:
   code:
     addr: code.service.durudex.local:8003
     tls: true
+  user:
+    addr: user.service.durudex.local:8004
+    tls: true

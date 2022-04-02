@@ -23,6 +23,7 @@ import "github.com/durudex/durudex-gateway/internal/delivery/grpc"
 type Service struct {
 	Auth
 	Code
+	User
 }
 
 // Creating a new service.
@@ -30,5 +31,6 @@ func NewService(grpcHandler *grpc.Handler) *Service {
 	return &Service{
 		Auth: NewAuthService(grpcHandler.Auth),
 		Code: NewCodeService(grpcHandler.Code),
+		User: NewUserService(grpcHandler.User),
 	}
 }
