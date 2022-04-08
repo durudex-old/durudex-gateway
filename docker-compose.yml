@@ -31,3 +31,10 @@ services:
       - ./configs/:/root/configs/
     env_file:
       - .env
+    networks:
+      - durudex-backend
+
+networks:
+  durudex-backend:
+    driver: bridge
+    name: durudex-backend
