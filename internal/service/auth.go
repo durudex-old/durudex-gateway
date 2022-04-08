@@ -22,11 +22,12 @@ import (
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/gofrs/uuid"
 )
 
 // User auth interface.
 type Auth interface {
-	SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error)
+	SignUp(ctx context.Context, input domain.SignUpInput) (string, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
 	RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error)
 	Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
@@ -41,17 +42,23 @@ func NewAuthService(grpcHandler pb.AuthUserServiceClient) *AuthService {
 }
 
 // Sign Up user.
-func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error) {
+func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
 	id, err := s.grpcHandler.SignUp(ctx, &pb.SignUpRequest{
 		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
 	})
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 
-	return id.Id, err
+	// Get user uuid from bytes.
+	userID, err := uuid.FromBytes(id.Value)
+	if err != nil {
+		return "", err
+	}
+
+	return userID.String(), err
 }
 
 // Sign In user.

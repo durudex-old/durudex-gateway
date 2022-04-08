@@ -21,11 +21,11 @@ package durudex.user;
 
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
-import "internal/delivery/grpc/pb/types/id.proto";
+import "internal/delivery/grpc/pb/types/uuid.proto";
 import "internal/delivery/grpc/pb/types/status.proto";
 
 service AuthUserService {
-  rpc SignUp (SignUpRequest) returns (types.ID);
+  rpc SignUp (SignUpRequest) returns (types.UUID);
   rpc SignIn (SignInRequest) returns (Tokens);
   rpc RefreshTokens (RefreshTokenRequest) returns (Tokens);
   rpc Logout (RefreshTokenRequest) returns (types.Status);

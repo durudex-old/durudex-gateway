@@ -19,7 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthUserServiceClient interface {
-	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.ID, error)
+	SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.UUID, error)
 	SignIn(ctx context.Context, in *SignInRequest, opts ...grpc.CallOption) (*Tokens, error)
 	RefreshTokens(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*Tokens, error)
 	Logout(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*types.Status, error)
@@ -33,8 +33,8 @@ func NewAuthUserServiceClient(cc grpc.ClientConnInterface) AuthUserServiceClient
 	return &authUserServiceClient{cc}
 }
 
-func (c *authUserServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.ID, error) {
-	out := new(types.ID)
+func (c *authUserServiceClient) SignUp(ctx context.Context, in *SignUpRequest, opts ...grpc.CallOption) (*types.UUID, error) {
+	out := new(types.UUID)
 	err := c.cc.Invoke(ctx, "/durudex.user.AuthUserService/SignUp", in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func (c *authUserServiceClient) Logout(ctx context.Context, in *RefreshTokenRequ
 // All implementations must embed UnimplementedAuthUserServiceServer
 // for forward compatibility
 type AuthUserServiceServer interface {
-	SignUp(context.Context, *SignUpRequest) (*types.ID, error)
+	SignUp(context.Context, *SignUpRequest) (*types.UUID, error)
 	SignIn(context.Context, *SignInRequest) (*Tokens, error)
 	RefreshTokens(context.Context, *RefreshTokenRequest) (*Tokens, error)
 	Logout(context.Context, *RefreshTokenRequest) (*types.Status, error)
@@ -84,7 +84,7 @@ type AuthUserServiceServer interface {
 type UnimplementedAuthUserServiceServer struct {
 }
 
-func (UnimplementedAuthUserServiceServer) SignUp(context.Context, *SignUpRequest) (*types.ID, error) {
+func (UnimplementedAuthUserServiceServer) SignUp(context.Context, *SignUpRequest) (*types.UUID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignUp not implemented")
 }
 func (UnimplementedAuthUserServiceServer) SignIn(context.Context, *SignInRequest) (*Tokens, error) {

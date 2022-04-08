@@ -21,4 +21,5 @@ package types;
 
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types;types";
 
-message ID { uint64 id = 1; }
+// UUID type.
+message UUID { bytes value = 1; }

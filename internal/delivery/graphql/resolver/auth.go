@@ -9,11 +9,11 @@ import (
 	"github.com/durudex/durudex-gateway/internal/domain"
 )
 
-func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (uint64, error) {
+func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
 	// Checking user input code.
 	status, err := r.service.Code.CheckByEmail(ctx, input.Email, input.Code)
 	if err != nil || !status {
-		return 0, err
+		return "", err
 	}
 
 	return r.service.Auth.SignUp(ctx, input)
