@@ -7,13 +7,14 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
 	// Checking user input code.
 	status, err := r.service.Code.CheckByEmail(ctx, input.Email, input.Code)
 	if err != nil || !status {
-		return "", err
+		return "", &gqlerror.Error{Message: "Error sending email"}
 	}
 
 	return r.service.Auth.SignUp(ctx, input)
