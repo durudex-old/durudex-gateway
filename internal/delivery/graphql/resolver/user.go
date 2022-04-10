@@ -18,3 +18,7 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.Forg
 
 	return r.service.User.ForgotPassword(ctx, input)
 }
+
+func (r *queryResolver) GetUser(ctx context.Context, id string) (*domain.User, error) {
+	return r.service.User.Get(ctx, id)
+}

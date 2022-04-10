@@ -17,23 +17,7 @@
 
 package domain
 
-import "time"
-
-// User structure.
-type User struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	JoinedIn  time.Time `json:"joinedIn"`
-	LastVisit time.Time `json:"lastVisit"`
-	Verified  bool      `json:"verified"`
-	AvatarURL *string   `json:"avatarUrl"`
-}
-
-func (User) IsNode() {}
-
-// User forgot password input.
-type ForgotPasswordInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Code     uint64 `json:"code"`
+// GraphQL Node interface.
+type Node interface {
+	IsNode()
 }

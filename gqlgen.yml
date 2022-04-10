@@ -46,3 +46,6 @@ models:
   Uint64:
     model:
       - github.com/99designs/gqlgen/graphql.Uint64
+  Timestamp:
+    model:
+      - github.com/99designs/gqlgen/graphql.Time

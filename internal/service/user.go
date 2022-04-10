@@ -26,6 +26,7 @@ import (
 
 // User interface.
 type User interface {
+	Get(ctx context.Context, id string) (*domain.User, error)
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error)
 }
 
@@ -35,6 +36,11 @@ type UserService struct{ grpcHandler pb.UserServiceClient }
 // Creating a new user service.
 func NewUserService(grpcHandler pb.UserServiceClient) *UserService {
 	return &UserService{grpcHandler: grpcHandler}
+}
+
+// Get user by id.
+func (s *UserService) Get(ctx context.Context, id string) (*domain.User, error) {
+	return &domain.User{}, nil
 }
 
 // Forgot user password.

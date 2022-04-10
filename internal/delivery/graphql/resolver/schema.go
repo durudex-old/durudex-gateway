@@ -4,14 +4,8 @@ package resolver
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
-	"context"
-
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
 )
-
-func (r *queryResolver) Ping(ctx context.Context) (string, error) {
-	return "pong", nil
-}
 
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
