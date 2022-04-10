@@ -21,7 +21,10 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
+	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	"github.com/durudex/durudex-gateway/internal/domain"
+
+	"github.com/gofrs/uuid"
 )
 
 // User interface.
@@ -40,7 +43,26 @@ func NewUserService(grpcHandler pb.UserServiceClient) *UserService {
 
 // Get user by id.
 func (s *UserService) Get(ctx context.Context, id string) (*domain.User, error) {
-	return &domain.User{}, nil
+	// Get user uuid by string.
+	userID, err := uuid.FromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get user by uuid.
+	user, err := s.grpcHandler.GetByID(ctx, &types.UUID{Value: userID.Bytes()})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.User{
+		ID:        id,
+		Username:  user.Username,
+		JoinedIn:  user.JoinedIn.AsTime(),
+		LastVisit: user.LastVisit.AsTime(),
+		Verified:  user.Verified,
+		AvatarURL: &user.AvatarUrl,
+	}, nil
 }
 
 // Forgot user password.

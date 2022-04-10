@@ -21,10 +21,22 @@ package durudex.user;
 
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
+import "google/protobuf/timestamp.proto";
+import "internal/delivery/grpc/pb/types/uuid.proto";
 import "internal/delivery/grpc/pb/types/status.proto";
 
 service UserService {
+  rpc GetByID (types.UUID) returns (User);
   rpc ForgotPassword (ForgotPasswordRequest) returns (types.Status);
+}
+
+// Public user structure.
+message User {
+  string username = 1;
+  google.protobuf.Timestamp joinedIn = 2;
+  google.protobuf.Timestamp lastVisit = 3;
+  bool verified = 4;
+  string avatarUrl = 5;
 }
 
 // Request for forgot password.
