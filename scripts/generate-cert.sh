@@ -25,35 +25,42 @@ if [ -f './rootCA.pem' ]; then
   rm *.pem
 fi
 
-echo "Install new CA..."
+printf "Enter domain name: "
+read domain
+
+if [ -z "$domain" ]; then
+  echo "Domain name is empty!"
+  exit 1
+fi
+
 mkcert -install
 
-echo "Create Auth Service certificate..."
 mkcert \
-  -cert-file auth.service-cert.pem \
-  -key-file auth.service-key.pem \
-  auth.service.durudex.local
+  -cert-file auth.service.$domain-cert.pem \
+  -key-file auth.service.$domain-key.pem \
+  auth.service.$domain
 
-echo "Create Email Service certificate..."
 mkcert \
-  -cert-file email.service-cert.pem \
-  -key-file email.service-key.pem \
-  email.service.durudex.local
+  -cert-file email.service.$domain-cert.pem \
+  -key-file email.service.$domain-key.pem \
+  email.service.$domain
 
-echo "Create User Service certificate..."
 mkcert \
-  -cert-file user.service-cert.pem \
-  -key-file user.service-key.pem \
-  user.service.durudex.local
+  -cert-file user.service.$domain-cert.pem \
+  -key-file user.service.$domain-key.pem \
+  user.service.$domain
 
-echo "Create Code Service certificate..."
 mkcert \
-  -cert-file code.service-cert.pem \
-  -key-file code.service-key.pem \
-  code.service.durudex.local
+  -cert-file code.service.$domain-cert.pem \
+  -key-file code.service.$domain-key.pem \
+  code.service.$domain
 
-echo "Create Client certificate..."
+mkcert \
+  -cert-file post.service.$domain-cert.pem \
+  -key-file post.service.$domain-key.pem \
+  post.service.$domain
+
 mkcert -client \
   -cert-file client-cert.pem \
   -key-file client-key.pem \
-  localhost 127.0.0.1 api.durudex.local
+  localhost 127.0.0.1 api.$domain

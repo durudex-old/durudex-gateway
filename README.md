@@ -27,11 +27,7 @@ GraphQL API Gateway that integrates many services.
 + [golangci-lint](https://golangci-lint.run/usage/install/)
 
 ## ⚙️ Build & Run
-1) Add local domains:
-```sh
-api.durudex.local
-```
-2) Create an `.env` file in the root directory and add the following values from `.env.example`:
+1) Create an `.env` file in the root directory and add the following values from `.env.example`:
 ```env
 # Config variables:
 CONFIG_PATH=configs/main
@@ -39,8 +35,8 @@ CONFIG_PATH=configs/main
 # Auth variables:
 JWT_SIGNING_KEY=
 ```
-3) Generate certificates, information can be found at [certs/README.md](cert/README.md).
-4) Run services:
+2) Generate certificates, information can be found at [certs/README.md](cert/README.md).
+3) Run services:
 + [durudex-auth-service](https://github.com/durudex/durudex-auth-service)
 + [durudex-code-service](https://github.com/durudex/durudex-code-service)
 
