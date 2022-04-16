@@ -58,7 +58,7 @@ func (s *UserService) Get(ctx context.Context, id string) (*domain.User, error) 
 	return &domain.User{
 		ID:        id,
 		Username:  user.Username,
-		JoinedIn:  user.JoinedIn.AsTime(),
+		CreatedAt: user.CreatedAt.AsTime(),
 		LastVisit: user.LastVisit.AsTime(),
 		Verified:  user.Verified,
 		AvatarURL: &user.AvatarUrl,

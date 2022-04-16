@@ -7,7 +7,6 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
-
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

@@ -33,7 +33,7 @@ service UserService {
 // Public user structure.
 message User {
   string username = 1;
-  google.protobuf.Timestamp joinedIn = 2;
+  google.protobuf.Timestamp createdAt = 2;
   google.protobuf.Timestamp lastVisit = 3;
   bool verified = 4;
   string avatarUrl = 5;

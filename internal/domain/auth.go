@@ -17,6 +17,12 @@
 
 package domain
 
+// Authorization tokens.
+type Tokens struct {
+	Access  string `json:"access"`
+	Refresh string `json:"refresh"`
+}
+
 // User Sign Up input.
 type SignUpInput struct {
 	Username string `json:"username"`

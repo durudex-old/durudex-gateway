@@ -23,7 +23,7 @@ import "time"
 type User struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
-	JoinedIn  time.Time `json:"joinedIn"`
+	CreatedAt time.Time `json:"createdAt"`
 	LastVisit time.Time `json:"lastVisit"`
 	Verified  bool      `json:"verified"`
 	AvatarURL *string   `json:"avatarUrl"`
