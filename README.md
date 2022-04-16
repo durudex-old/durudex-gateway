@@ -39,6 +39,7 @@ JWT_SIGNING_KEY=
 3) Run services:
 + [durudex-auth-service](https://github.com/durudex/durudex-auth-service)
 + [durudex-code-service](https://github.com/durudex/durudex-code-service)
++ [durudex-user-service](https://github.com/durudex/durudex-user-service)
 
 Use `make run` to run and `make build` to build project.
 
