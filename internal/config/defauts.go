@@ -33,7 +33,6 @@ const (
 
 	// Auth service defaults.
 	defaultServiceAuthAddr string = "auth.service.durudex.local:8001"
-	defaultServiceAuthTLS  bool   = true
 
 	// Code service defaults.
 	defaultServiceCodeAddr string = "code.service.durudex.local:8003"
@@ -53,7 +52,6 @@ func populateDefaults() {
 
 	// Auth service defaults.
 	viper.SetDefault("service.auth.addr", defaultServiceAuthAddr)
-	viper.SetDefault("service.auth.tls", defaultServiceAuthTLS)
 
 	// Code service defaults.
 	viper.SetDefault("service.code.addr", defaultServiceCodeAddr)
