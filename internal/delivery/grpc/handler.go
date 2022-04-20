@@ -27,12 +27,6 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-const (
-	CACertFile     = "certs/rootCA.pem"
-	clientCertFile = "certs/client-cert.pem"
-	clientKeyFile  = "certs/client-key.pem"
-)
-
 // GRPC handler structure.
 type Handler struct {
 	Auth pb.AuthServiceClient
@@ -55,12 +49,11 @@ func connectToService(cfg config.Service) *grpc.ClientConn {
 
 	var transportOption []grpc.DialOption
 
-	// Check is server TLS.
-	if cfg.TLS {
+	if cfg.TLS.Enable {
 		// Loading server TLS credentials.
-		tlsCredentials, err := tls.LoadTLSCredentials(CACertFile, clientCertFile, clientKeyFile)
+		tlsCredentials, err := tls.LoadTLSCredentials(cfg.TLS.CACert, cfg.TLS.Cert, cfg.TLS.Key)
 		if err != nil {
-			log.Fatal().Msgf("error load tls credentials: %s", err.Error())
+			log.Fatal().Err(err).Msg("error load tls credentials")
 		}
 
 		// Append TLS credentials.
@@ -72,7 +65,7 @@ func connectToService(cfg config.Service) *grpc.ClientConn {
 	// Connecting to service.
 	conn, err := grpc.Dial(cfg.Addr, transportOption...)
 	if err != nil {
-		log.Error().Msgf("error connecting to service: %s", err.Error())
+		log.Error().Err(err).Msg("error connecting to service")
 	}
 
 	return conn

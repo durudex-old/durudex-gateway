@@ -40,20 +40,34 @@ type (
 		Name string `mapstructure:"name"`
 	}
 
+	// TLS config variables.
+	TLSConfig struct {
+		Enable bool   `mapstructure:"enable"`
+		CACert string `mapstructure:"ca-cert"`
+		Cert   string `mapstructure:"cert"`
+		Key    string `mapstructure:"key"`
+	}
+
 	// Auth config variables.
-	AuthConfig struct{ JWT JWTConfig }
+	AuthConfig struct {
+		JWT JWTConfig `mapstructure:"jwt"`
+	}
 
 	// JWT config variables.
 	JWTConfig struct{ SigningKey string }
 
 	// Service base config.
 	Service struct {
-		Addr string `mapstructure:"addr"`
-		TLS  bool   `mapstructure:"tls"`
+		Addr string    `mapstructure:"addr"`
+		TLS  TLSConfig `mapstructure:"tls"`
 	}
 
 	// Services config variables.
-	ServiceConfig struct{ Auth, Code, User Service }
+	ServiceConfig struct {
+		Auth Service `mapstructure:"auth"`
+		Code Service `mapstructure:"code"`
+		User Service `mapstructure:"user"`
+	}
 )
 
 // Initialize config.
@@ -110,16 +124,8 @@ func unmarshal(cfg *Config) error {
 	if err := viper.UnmarshalKey("server", &cfg.Server); err != nil {
 		return err
 	}
-	// Unmarshal user service keys.
-	if err := viper.UnmarshalKey("service.user", &cfg.Service.User); err != nil {
-		return err
-	}
-	// Unmarshal code service keys.
-	if err := viper.UnmarshalKey("service.code", &cfg.Service.Code); err != nil {
-		return err
-	}
-	// Unmarshal auth service keys.
-	return viper.UnmarshalKey("service.auth", &cfg.Service.Auth)
+	// Unmarshal service keys.
+	return viper.UnmarshalKey("service", &cfg.Service)
 }
 
 // Seting environment variables from .env file.

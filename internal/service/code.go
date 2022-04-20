@@ -51,6 +51,7 @@ func (s *CodeService) GetByEmail(ctx context.Context, input domain.GetCodeByEmai
 	return true, nil
 }
 
+// Checking code by email address.
 func (s *CodeService) CheckByEmail(ctx context.Context, email string, input uint64) (bool, error) {
 	code, err := s.grpcHandler.GetCodeByEmail(ctx, &pb.GetCodeByEmailRequest{Email: email})
 	if err != nil {

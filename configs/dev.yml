@@ -21,10 +21,22 @@ server:
 service:
   auth:
     addr: auth.service.durudex.local:8001
-    tls: false
+    tls:
+      enable: false
+      ca-cert: ./certs/rootCA.pem
+      cert: ./certs/client-cert.pem
+      key: ./certs/client-key.pem
   code:
     addr: code.service.durudex.local:8003
-    tls: false
+    tls:
+      enable: false
+      ca-cert: ./certs/rootCA.pem
+      cert: ./certs/client-cert.pem
+      key: ./certs/client-key.pem
   user:
     addr: user.service.durudex.local:8004
-    tls: false
+    tls:
+      enable: false
+      ca-cert: ./certs/rootCA.pem
+      cert: ./certs/client-cert.pem
+      key: ./certs/client-key.pem

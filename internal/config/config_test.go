@@ -57,15 +57,30 @@ func TestInit(t *testing.T) {
 				Service: ServiceConfig{
 					Auth: Service{
 						Addr: defaultServiceAuthAddr,
-						TLS:  defaultServiceAuthTLS,
+						TLS: TLSConfig{
+							Enable: true,
+							CACert: "./certs/rootCA.pem",
+							Cert:   "./certs/client-cert.pem",
+							Key:    "./certs/client-key.pem",
+						},
 					},
 					Code: Service{
 						Addr: defaultServiceCodeAddr,
-						TLS:  defaultServiceCodeTLS,
+						TLS: TLSConfig{
+							Enable: true,
+							CACert: "./certs/rootCA.pem",
+							Cert:   "./certs/client-cert.pem",
+							Key:    "./certs/client-key.pem",
+						},
 					},
 					User: Service{
 						Addr: defaultServiceUserAddr,
-						TLS:  defaultServiceUserTLS,
+						TLS: TLSConfig{
+							Enable: true,
+							CACert: "./certs/rootCA.pem",
+							Cert:   "./certs/client-cert.pem",
+							Key:    "./certs/client-key.pem",
+						},
 					},
 				},
 			},
