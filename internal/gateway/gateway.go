@@ -29,11 +29,19 @@ import (
 	"github.com/durudex/durudex-gateway/internal/service"
 	"github.com/durudex/durudex-gateway/pkg/auth"
 
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 // A function that running the API gateway.
 func Run() {
+	// Set logger mode.
+	if os.Getenv("DEBUG") == "true" {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	} else {
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	}
+
 	// Initialize config.
 	cfg, err := config.Init()
 	if err != nil {

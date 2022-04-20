@@ -17,6 +17,11 @@
 
 package config
 
+import (
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
+)
+
 const (
 	// Config defaults.
 	defaultConfigPath string = "configs/main"
@@ -32,9 +37,27 @@ const (
 
 	// Code service defaults.
 	defaultServiceCodeAddr string = "code.service.durudex.local:8003"
-	defaultServiceCodeTLS  bool   = true
 
 	// User service defaults.
 	defaultServiceUserAddr string = "user.service.durudex.local:8004"
-	defaultServiceUserTLS  bool   = true
 )
+
+// Populate defaults config variables.
+func populateDefaults() {
+	log.Debug().Msg("Populate defaults config variables.")
+
+	// Server defaults.
+	viper.SetDefault("server.host", defaultServerHost)
+	viper.SetDefault("server.port", defaultServerPort)
+	viper.SetDefault("server.name", defaultServerName)
+
+	// Auth service defaults.
+	viper.SetDefault("service.auth.addr", defaultServiceAuthAddr)
+	viper.SetDefault("service.auth.tls", defaultServiceAuthTLS)
+
+	// Code service defaults.
+	viper.SetDefault("service.code.addr", defaultServiceCodeAddr)
+
+	// User service defaults.
+	viper.SetDefault("service.user.addr", defaultServiceUserAddr)
+}

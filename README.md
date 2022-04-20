@@ -29,6 +29,9 @@ GraphQL API Gateway that integrates many services.
 ## ⚙️ Build & Run
 1) Create an `.env` file in the root directory and add the following values from `.env.example`:
 ```env
+# Debug mode.
+DEBUG=false
+
 # Config variables:
 CONFIG_PATH=configs/main
 

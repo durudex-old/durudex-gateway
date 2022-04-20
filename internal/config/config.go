@@ -135,25 +135,3 @@ func setFromEnv(cfg *Config) {
 	// Auth variables.
 	cfg.Auth.JWT.SigningKey = os.Getenv("JWT_SIGNING_KEY")
 }
-
-// Populate defaults config variables.
-func populateDefaults() {
-	log.Debug().Msg("Populate defaults config variables.")
-
-	// Server defaults.
-	viper.SetDefault("server.host", defaultServerHost)
-	viper.SetDefault("server.port", defaultServerPort)
-	viper.SetDefault("server.name", defaultServerName)
-
-	// Auth service defaults.
-	viper.SetDefault("service.auth.addr", defaultServiceAuthAddr)
-	viper.SetDefault("service.auth.tls", defaultServiceAuthTLS)
-
-	// Code service defaults.
-	viper.SetDefault("service.code.addr", defaultServiceCodeAddr)
-	viper.SetDefault("service.code.tls", defaultServiceCodeTLS)
-
-	// User service defaults.
-	viper.SetDefault("service.user.addr", defaultServiceUserAddr)
-	viper.SetDefault("service.user.tls", defaultServiceUserTLS)
-}
