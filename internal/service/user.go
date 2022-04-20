@@ -21,7 +21,6 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
-	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	"github.com/durudex/durudex-gateway/internal/domain"
 
 	"github.com/gofrs/uuid"
@@ -50,7 +49,7 @@ func (s *UserService) Get(ctx context.Context, id string) (*domain.User, error) 
 	}
 
 	// Get user by uuid.
-	user, err := s.grpcHandler.GetByID(ctx, &types.UUID{Value: userID.Bytes()})
+	user, err := s.grpcHandler.GetUserByID(ctx, &pb.GetUserByIDRequest{Id: userID.Bytes()})
 	if err != nil {
 		return nil, err
 	}
@@ -61,19 +60,19 @@ func (s *UserService) Get(ctx context.Context, id string) (*domain.User, error) 
 		CreatedAt: user.CreatedAt.AsTime(),
 		LastVisit: user.LastVisit.AsTime(),
 		Verified:  user.Verified,
-		AvatarURL: &user.AvatarUrl,
+		AvatarURL: user.AvatarUrl,
 	}, nil
 }
 
 // Forgot user password.
 func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
-	status, err := s.grpcHandler.ForgotPassword(ctx, &pb.ForgotPasswordRequest{
+	_, err := s.grpcHandler.ForgotPassword(ctx, &pb.ForgotPasswordRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	})
 	if err != nil {
-		return status.Status, err
+		return false, err
 	}
 
-	return status.Status, nil
+	return true, nil
 }

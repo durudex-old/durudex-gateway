@@ -22,7 +22,6 @@ import (
 	"errors"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
-	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	"github.com/durudex/durudex-gateway/internal/domain"
 )
 
@@ -44,16 +43,16 @@ func NewCodeService(grpcHandler pb.CodeServiceClient) *CodeService {
 
 // Getting code by email address.
 func (s *CodeService) GetByEmail(ctx context.Context, input domain.GetCodeByEmailInput) (bool, error) {
-	status, err := s.grpcHandler.CreateByEmail(ctx, &types.Email{Email: input.Email})
+	_, err := s.grpcHandler.CreateCodeByEmail(ctx, &pb.CreateCodeByEmailRequest{Email: input.Email})
 	if err != nil {
-		return status.Status, err
+		return false, err
 	}
 
-	return status.Status, nil
+	return true, nil
 }
 
 func (s *CodeService) CheckByEmail(ctx context.Context, email string, input uint64) (bool, error) {
-	code, err := s.grpcHandler.GetByEmail(ctx, &types.Email{Email: email})
+	code, err := s.grpcHandler.GetCodeByEmail(ctx, &pb.GetCodeByEmailRequest{Email: email})
 	if err != nil {
 		return false, err
 	}

@@ -29,15 +29,15 @@ import (
 type Auth interface {
 	SignUp(ctx context.Context, input domain.SignUpInput) (string, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
-	RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error)
-	Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
+	SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
+	RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error)
 }
 
 // User auth service structure.
-type AuthService struct{ grpcHandler pb.AuthUserServiceClient }
+type AuthService struct{ grpcHandler pb.AuthServiceClient }
 
 // Creating a new auth service.
-func NewAuthService(grpcHandler pb.AuthUserServiceClient) *AuthService {
+func NewAuthService(grpcHandler pb.AuthServiceClient) *AuthService {
 	return &AuthService{grpcHandler: grpcHandler}
 }
 
@@ -53,7 +53,7 @@ func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (str
 	}
 
 	// Get user uuid from bytes.
-	userID, err := uuid.FromBytes(id.Value)
+	userID, err := uuid.FromBytes(id.Id)
 	if err != nil {
 		return "", err
 	}
@@ -75,28 +75,28 @@ func (s *AuthService) SignIn(ctx context.Context, input domain.SignInInput) (*do
 	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil
 }
 
-// Refresh user auth tokens by refresh token.
-func (s *AuthService) RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error) {
-	tokens, err := s.grpcHandler.RefreshTokens(ctx, &pb.RefreshTokenRequest{
+// Sign Out user.
+func (s *AuthService) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
+	_, err := s.grpcHandler.SignOut(ctx, &pb.SignOutRequest{
 		RefreshToken: input.Token,
 		Ip:           input.IP,
 	})
 	if err != nil {
-		return &domain.Tokens{}, err
+		return false, err
 	}
 
-	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil
+	return true, nil
 }
 
-// Logout user session by refresh token.
-func (s *AuthService) Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
-	status, err := s.grpcHandler.Logout(ctx, &pb.RefreshTokenRequest{
+// Refresh user auth tokens by refresh token.
+func (s *AuthService) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
+	token, err := s.grpcHandler.RefreshToken(ctx, &pb.RefreshTokenRequest{
 		RefreshToken: input.Token,
 		Ip:           input.IP,
 	})
 	if err != nil {
-		return status.Status, err
+		return "", err
 	}
 
-	return status.Status, nil
+	return token.Access, nil
 }

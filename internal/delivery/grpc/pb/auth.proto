@@ -17,18 +17,15 @@
 
 syntax = "proto3";
 
-package durudex.user;
+package durudex;
 
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
-import "internal/delivery/grpc/pb/types/uuid.proto";
-import "internal/delivery/grpc/pb/types/status.proto";
-
-service AuthUserService {
-  rpc SignUp (SignUpRequest) returns (types.UUID);
-  rpc SignIn (SignInRequest) returns (Tokens);
-  rpc RefreshTokens (RefreshTokenRequest) returns (Tokens);
-  rpc Logout (RefreshTokenRequest) returns (types.Status);
+service AuthService {
+  rpc SignUp(SignUpRequest) returns (SignUpResponse);
+  rpc SignIn(SignInRequest) returns (SignInResponse);
+  rpc SignOut(SignOutRequest) returns (SignOutResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (RefreshTokenResponse);
 }
 
 message SignUpRequest {
@@ -37,18 +34,33 @@ message SignUpRequest {
   string password = 3;
 }
 
+message SignUpResponse {
+  bytes id = 1;
+}
+
 message SignInRequest {
   string username = 1;
   string password = 2;
   string ip = 3;
 }
 
-message RefreshTokenRequest {
-  string refreshToken = 1;
+message SignInResponse {
+  string access = 1;
+  string refresh = 2;
+}
+
+message SignOutRequest {
+  string refresh_token = 1;
   string ip = 2;
 }
 
-message Tokens {
+message SignOutResponse {}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+  string ip = 2;
+}
+
+message RefreshTokenResponse {
   string access = 1;
-  string refresh = 2;
 }

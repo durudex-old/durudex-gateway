@@ -44,13 +44,6 @@ protoc:
 		--go-grpc_opt=paths=source_relative \
 		internal/delivery/grpc/pb/*.proto
 
-.PHONY: protoc-types
-protoc-types:
-	protoc \
-		--go_out=. \
-		--go_opt=paths=source_relative \
-		internal/delivery/grpc/pb/types/*.proto
-
 .PHONY: cert
 cert:
 	scripts/generate-cert.sh

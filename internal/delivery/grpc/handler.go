@@ -35,7 +35,7 @@ const (
 
 // GRPC handler structure.
 type Handler struct {
-	Auth pb.AuthUserServiceClient
+	Auth pb.AuthServiceClient
 	Code pb.CodeServiceClient
 	User pb.UserServiceClient
 }
@@ -43,7 +43,7 @@ type Handler struct {
 // Creating a new grpc handler.
 func NewGRPCHandler(cfg *config.Config) *Handler {
 	return &Handler{
-		Auth: pb.NewAuthUserServiceClient(connectToService(cfg.Service.Auth)),
+		Auth: pb.NewAuthServiceClient(connectToService(cfg.Service.Auth)),
 		Code: pb.NewCodeServiceClient(connectToService(cfg.Service.Code)),
 		User: pb.NewUserServiceClient(connectToService(cfg.Service.User)),
 	}

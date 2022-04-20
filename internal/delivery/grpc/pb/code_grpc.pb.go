@@ -4,7 +4,6 @@ package pb
 
 import (
 	context "context"
-	types "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb/types"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -19,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type CodeServiceClient interface {
-	CreateByEmail(ctx context.Context, in *types.Email, opts ...grpc.CallOption) (*types.Status, error)
-	GetByEmail(ctx context.Context, in *types.Email, opts ...grpc.CallOption) (*types.Code, error)
+	GetCodeByEmail(ctx context.Context, in *GetCodeByEmailRequest, opts ...grpc.CallOption) (*GetCodeByEmailResponse, error)
+	CreateCodeByEmail(ctx context.Context, in *CreateCodeByEmailRequest, opts ...grpc.CallOption) (*CreateCodeByEmailResponse, error)
 }
 
 type codeServiceClient struct {
@@ -31,18 +30,18 @@ func NewCodeServiceClient(cc grpc.ClientConnInterface) CodeServiceClient {
 	return &codeServiceClient{cc}
 }
 
-func (c *codeServiceClient) CreateByEmail(ctx context.Context, in *types.Email, opts ...grpc.CallOption) (*types.Status, error) {
-	out := new(types.Status)
-	err := c.cc.Invoke(ctx, "/durudex.code.CodeService/CreateByEmail", in, out, opts...)
+func (c *codeServiceClient) GetCodeByEmail(ctx context.Context, in *GetCodeByEmailRequest, opts ...grpc.CallOption) (*GetCodeByEmailResponse, error) {
+	out := new(GetCodeByEmailResponse)
+	err := c.cc.Invoke(ctx, "/durudex.CodeService/GetCodeByEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *codeServiceClient) GetByEmail(ctx context.Context, in *types.Email, opts ...grpc.CallOption) (*types.Code, error) {
-	out := new(types.Code)
-	err := c.cc.Invoke(ctx, "/durudex.code.CodeService/GetByEmail", in, out, opts...)
+func (c *codeServiceClient) CreateCodeByEmail(ctx context.Context, in *CreateCodeByEmailRequest, opts ...grpc.CallOption) (*CreateCodeByEmailResponse, error) {
+	out := new(CreateCodeByEmailResponse)
+	err := c.cc.Invoke(ctx, "/durudex.CodeService/CreateCodeByEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -53,8 +52,8 @@ func (c *codeServiceClient) GetByEmail(ctx context.Context, in *types.Email, opt
 // All implementations must embed UnimplementedCodeServiceServer
 // for forward compatibility
 type CodeServiceServer interface {
-	CreateByEmail(context.Context, *types.Email) (*types.Status, error)
-	GetByEmail(context.Context, *types.Email) (*types.Code, error)
+	GetCodeByEmail(context.Context, *GetCodeByEmailRequest) (*GetCodeByEmailResponse, error)
+	CreateCodeByEmail(context.Context, *CreateCodeByEmailRequest) (*CreateCodeByEmailResponse, error)
 	mustEmbedUnimplementedCodeServiceServer()
 }
 
@@ -62,11 +61,11 @@ type CodeServiceServer interface {
 type UnimplementedCodeServiceServer struct {
 }
 
-func (UnimplementedCodeServiceServer) CreateByEmail(context.Context, *types.Email) (*types.Status, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateByEmail not implemented")
+func (UnimplementedCodeServiceServer) GetCodeByEmail(context.Context, *GetCodeByEmailRequest) (*GetCodeByEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCodeByEmail not implemented")
 }
-func (UnimplementedCodeServiceServer) GetByEmail(context.Context, *types.Email) (*types.Code, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetByEmail not implemented")
+func (UnimplementedCodeServiceServer) CreateCodeByEmail(context.Context, *CreateCodeByEmailRequest) (*CreateCodeByEmailResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateCodeByEmail not implemented")
 }
 func (UnimplementedCodeServiceServer) mustEmbedUnimplementedCodeServiceServer() {}
 
@@ -81,38 +80,38 @@ func RegisterCodeServiceServer(s grpc.ServiceRegistrar, srv CodeServiceServer) {
 	s.RegisterService(&CodeService_ServiceDesc, srv)
 }
 
-func _CodeService_CreateByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(types.Email)
+func _CodeService_GetCodeByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCodeByEmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CodeServiceServer).CreateByEmail(ctx, in)
+		return srv.(CodeServiceServer).GetCodeByEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.code.CodeService/CreateByEmail",
+		FullMethod: "/durudex.CodeService/GetCodeByEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CodeServiceServer).CreateByEmail(ctx, req.(*types.Email))
+		return srv.(CodeServiceServer).GetCodeByEmail(ctx, req.(*GetCodeByEmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _CodeService_GetByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(types.Email)
+func _CodeService_CreateCodeByEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateCodeByEmailRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(CodeServiceServer).GetByEmail(ctx, in)
+		return srv.(CodeServiceServer).CreateCodeByEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.code.CodeService/GetByEmail",
+		FullMethod: "/durudex.CodeService/CreateCodeByEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(CodeServiceServer).GetByEmail(ctx, req.(*types.Email))
+		return srv.(CodeServiceServer).CreateCodeByEmail(ctx, req.(*CreateCodeByEmailRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -121,16 +120,16 @@ func _CodeService_GetByEmail_Handler(srv interface{}, ctx context.Context, dec f
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var CodeService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "durudex.code.CodeService",
+	ServiceName: "durudex.CodeService",
 	HandlerType: (*CodeServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateByEmail",
-			Handler:    _CodeService_CreateByEmail_Handler,
+			MethodName: "GetCodeByEmail",
+			Handler:    _CodeService_GetCodeByEmail_Handler,
 		},
 		{
-			MethodName: "GetByEmail",
-			Handler:    _CodeService_GetByEmail_Handler,
+			MethodName: "CreateCodeByEmail",
+			Handler:    _CodeService_CreateCodeByEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

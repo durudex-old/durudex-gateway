@@ -26,14 +26,14 @@ func (r *mutationResolver) SignIn(ctx context.Context, input domain.SignInInput)
 	return r.service.Auth.SignIn(ctx, input)
 }
 
-func (r *mutationResolver) RefreshTokens(ctx context.Context, input domain.RefreshTokenInput) (*domain.Tokens, error) {
+func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
 	input.IP = ctx.Value(domain.IPCtx).(string)
 
-	return r.service.Auth.RefreshTokens(ctx, input)
+	return r.service.Auth.SignOut(ctx, input)
 }
 
-func (r *mutationResolver) Logout(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
+func (r *mutationResolver) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
 	input.IP = ctx.Value(domain.IPCtx).(string)
 
-	return r.service.Auth.Logout(ctx, input)
+	return r.service.Auth.RefreshToken(ctx, input)
 }
