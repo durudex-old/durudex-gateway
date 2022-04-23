@@ -10,6 +10,8 @@ import (
 )
 
 func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error) {
+	input.AuthorID = ctx.Value(domain.UserCtx).(string)
+
 	return r.service.Post.CreatePost(ctx, input)
 }
 

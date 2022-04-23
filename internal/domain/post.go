@@ -32,5 +32,6 @@ func (Post) IsNode() {}
 
 // Create post input.
 type CreatePostInput struct {
-	Text string `json:"text"`
+	AuthorID string
+	Text     string `json:"text"`
 }

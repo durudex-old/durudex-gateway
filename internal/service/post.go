@@ -43,19 +43,27 @@ func NewPostService(grpcHandler pb.PostServiceClient) *PostService {
 
 // Creating a new post.
 func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error) {
+	// Get author uuid from string.
+	authorID, err := uuid.FromString(input.AuthorID)
+	if err != nil {
+		return "", err
+	}
+
 	// Create post.
-	id, err := s.grpcHandler.CreatePost(ctx, &pb.CreatePostRequest{Text: input.Text})
+	id, err := s.grpcHandler.CreatePost(ctx, &pb.CreatePostRequest{
+		AuthorId: authorID.Bytes(), Text: input.Text,
+	})
 	if err != nil {
 		return "", err
 	}
 
-	// Get user uuid from bytes.
-	userID, err := uuid.FromBytes(id.Id)
+	// Get post uuid from bytes.
+	postID, err := uuid.FromBytes(id.Id)
 	if err != nil {
 		return "", err
 	}
 
-	return userID.String(), err
+	return postID.String(), err
 }
 
 // Deleting a post.

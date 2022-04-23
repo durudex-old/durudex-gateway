@@ -30,7 +30,8 @@ service PostService {
 }
 
 message CreatePostRequest {
-  string text = 1;
+  bytes author_id = 1;
+  string text = 2;
 }
 
 message CreatePostResponse {
