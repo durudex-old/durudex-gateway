@@ -67,6 +67,7 @@ type (
 		Auth Service `mapstructure:"auth"`
 		Code Service `mapstructure:"code"`
 		User Service `mapstructure:"user"`
+		Post Service `mapstructure:"post"`
 	}
 )
 

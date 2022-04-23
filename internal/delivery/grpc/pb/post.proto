@@ -23,26 +23,33 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
-service UserService {
-  rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse);
-  rpc ForgotPassword(ForgotPasswordRequest) returns (ForgotPasswordResponse);
+service PostService {
+  rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
+  rpc GetPostByID(GetPostByIDRequest) returns (GetPostByIDResponse);
+  rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
 }
 
-message GetUserByIDRequest {
+message CreatePostRequest {
+  string text = 1;
+}
+
+message CreatePostResponse {
   bytes id = 1;
 }
 
-message GetUserByIDResponse {
-  string username = 1;
-  google.protobuf.Timestamp created_at = 2;
-  google.protobuf.Timestamp last_visit = 3;
-  bool verified = 4;
-  optional string avatar_url = 5;
+message GetPostByIDRequest {
+  bytes id = 1;
 }
 
-message ForgotPasswordRequest {
-  string email = 1;
-  string password = 2;
+message GetPostByIDResponse {
+  bytes author_id = 1;
+  string text = 2;
+  google.protobuf.Timestamp created_at = 3;
+  optional google.protobuf.Timestamp updated_at = 4;
 }
 
-message ForgotPasswordResponse {}
+message DeletePostRequest {
+  bytes id = 1;
+}
+
+message DeletePostResponse {}

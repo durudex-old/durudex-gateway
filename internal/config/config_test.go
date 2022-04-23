@@ -37,6 +37,14 @@ func TestInit(t *testing.T) {
 		os.Setenv("JWT_SIGNING_KEY", env.jwtSigningKey)
 	}
 
+	// Default service tls config.
+	serviceTLS := TLSConfig{
+		Enable: true,
+		CACert: "./certs/rootCA.pem",
+		Cert:   "./certs/client-cert.pem",
+		Key:    "./certs/client-key.pem",
+	}
+
 	// Testing structures.
 	tests := []struct {
 		name    string
@@ -57,30 +65,19 @@ func TestInit(t *testing.T) {
 				Service: ServiceConfig{
 					Auth: Service{
 						Addr: defaultServiceAuthAddr,
-						TLS: TLSConfig{
-							Enable: true,
-							CACert: "./certs/rootCA.pem",
-							Cert:   "./certs/client-cert.pem",
-							Key:    "./certs/client-key.pem",
-						},
+						TLS:  serviceTLS,
 					},
 					Code: Service{
 						Addr: defaultServiceCodeAddr,
-						TLS: TLSConfig{
-							Enable: true,
-							CACert: "./certs/rootCA.pem",
-							Cert:   "./certs/client-cert.pem",
-							Key:    "./certs/client-key.pem",
-						},
+						TLS:  serviceTLS,
 					},
 					User: Service{
 						Addr: defaultServiceUserAddr,
-						TLS: TLSConfig{
-							Enable: true,
-							CACert: "./certs/rootCA.pem",
-							Cert:   "./certs/client-cert.pem",
-							Key:    "./certs/client-key.pem",
-						},
+						TLS:  serviceTLS,
+					},
+					Post: Service{
+						Addr: defaultServicePostAddr,
+						TLS:  serviceTLS,
 					},
 				},
 			},

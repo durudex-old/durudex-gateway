@@ -24,6 +24,7 @@ type Service struct {
 	Auth
 	Code
 	User
+	Post
 }
 
 // Creating a new service.
@@ -32,5 +33,6 @@ func NewService(grpcHandler *grpc.Handler) *Service {
 		Auth: NewAuthService(grpcHandler.Auth),
 		Code: NewCodeService(grpcHandler.Code),
 		User: NewUserService(grpcHandler.User),
+		Post: NewPostService(grpcHandler.Post),
 	}
 }

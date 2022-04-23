@@ -40,3 +40,10 @@ service:
       ca-cert: ./certs/rootCA.pem
       cert: ./certs/client-cert.pem
       key: ./certs/client-key.pem
+  post:
+    addr: post.service.durudex.local:8005
+    tls:
+      enable: false
+      ca-cert: ./certs/rootCA.pem
+      cert: ./certs/client-cert.pem
+      key: ./certs/client-key.pem

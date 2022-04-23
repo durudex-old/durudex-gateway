@@ -69,7 +69,7 @@ func (s *AuthService) SignIn(ctx context.Context, input domain.SignInInput) (*do
 		Ip:       input.IP,
 	})
 	if err != nil {
-		return &domain.Tokens{}, err
+		return nil, err
 	}
 
 	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil

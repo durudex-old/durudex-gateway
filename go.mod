@@ -3,20 +3,20 @@ module github.com/durudex/durudex-gateway
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.17.2
+	github.com/99designs/gqlgen v0.17.3
 	github.com/gofiber/adaptor/v2 v2.1.16
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/rs/zerolog v1.26.1
 	github.com/spf13/viper v1.10.1
-	github.com/vektah/gqlparser/v2 v2.4.0
+	github.com/vektah/gqlparser/v2 v2.4.2
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
 )
 
 require (
-	github.com/agnivade/levenshtein v1.1.0 // indirect
+	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/andybalholm/brotli v1.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gofiber/utils v0.1.2 // indirect

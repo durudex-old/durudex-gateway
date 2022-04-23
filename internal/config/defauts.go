@@ -39,6 +39,9 @@ const (
 
 	// User service defaults.
 	defaultServiceUserAddr string = "user.service.durudex.local:8004"
+
+	// Postgres defaults.
+	defaultServicePostAddr string = "post.service.durudex.local:8005"
 )
 
 // Populate defaults config variables.
@@ -58,4 +61,7 @@ func populateDefaults() {
 
 	// User service defaults.
 	viper.SetDefault("service.user.addr", defaultServiceUserAddr)
+
+	// Post service defaults.
+	viper.SetDefault("service.post.addr", defaultServicePostAddr)
 }

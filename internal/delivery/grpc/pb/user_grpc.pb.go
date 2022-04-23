@@ -32,7 +32,7 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 
 func (c *userServiceClient) GetUserByID(ctx context.Context, in *GetUserByIDRequest, opts ...grpc.CallOption) (*GetUserByIDResponse, error) {
 	out := new(GetUserByIDResponse)
-	err := c.cc.Invoke(ctx, "/durudex.user.UserService/GetUserByID", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/durudex.UserService/GetUserByID", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func (c *userServiceClient) GetUserByID(ctx context.Context, in *GetUserByIDRequ
 
 func (c *userServiceClient) ForgotPassword(ctx context.Context, in *ForgotPasswordRequest, opts ...grpc.CallOption) (*ForgotPasswordResponse, error) {
 	out := new(ForgotPasswordResponse)
-	err := c.cc.Invoke(ctx, "/durudex.user.UserService/ForgotPassword", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/durudex.UserService/ForgotPassword", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +90,7 @@ func _UserService_GetUserByID_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.user.UserService/GetUserByID",
+		FullMethod: "/durudex.UserService/GetUserByID",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).GetUserByID(ctx, req.(*GetUserByIDRequest))
@@ -108,7 +108,7 @@ func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, d
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.user.UserService/ForgotPassword",
+		FullMethod: "/durudex.UserService/ForgotPassword",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).ForgotPassword(ctx, req.(*ForgotPasswordRequest))
@@ -120,7 +120,7 @@ func _UserService_ForgotPassword_Handler(srv interface{}, ctx context.Context, d
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "durudex.user.UserService",
+	ServiceName: "durudex.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

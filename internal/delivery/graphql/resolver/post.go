@@ -10,9 +10,13 @@ import (
 )
 
 func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error) {
-	return "", nil
+	return r.service.Post.CreatePost(ctx, input)
+}
+
+func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
+	return r.service.Post.DeletePost(ctx, id)
 }
 
 func (r *queryResolver) GetPost(ctx context.Context, id string) (*domain.Post, error) {
-	return &domain.Post{}, nil
+	return r.service.Post.GetPost(ctx, id)
 }
