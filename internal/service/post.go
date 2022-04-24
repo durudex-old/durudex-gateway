@@ -19,6 +19,7 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/domain"
@@ -97,13 +98,22 @@ func (s *PostService) GetPost(ctx context.Context, id string) (*domain.Post, err
 		return nil, err
 	}
 
-	updatedAt := post.UpdatedAt.AsTime()
-
 	return &domain.Post{
 		ID:        id,
 		AuthorID:  uuid.FromBytesOrNil(post.AuthorId).String(),
 		Text:      post.Text,
 		CreatedAt: post.CreatedAt.AsTime(),
-		UpdatedAt: &updatedAt,
+		UpdatedAt: checkOptionalTime(post.UpdatedAt.GetSeconds(), int64(post.UpdatedAt.GetNanos())),
 	}, nil
+}
+
+// TODO: delete or move to another file.
+func checkOptionalTime(sec int64, nsec int64) *time.Time {
+	if sec == 0 {
+		return nil
+	}
+
+	val := time.Unix(sec, nsec).UTC()
+
+	return &val
 }
