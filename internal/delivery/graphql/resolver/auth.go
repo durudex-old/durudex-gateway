@@ -14,7 +14,7 @@ func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput)
 	// Checking user input code.
 	status, err := r.service.Code.CheckByEmail(ctx, input.Email, input.Code)
 	if err != nil || !status {
-		return "", &gqlerror.Error{Message: "Error sending email"}
+		return "", &gqlerror.Error{Message: "error code failed"}
 	}
 
 	return r.service.Auth.SignUp(ctx, input)
