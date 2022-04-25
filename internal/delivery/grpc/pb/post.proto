@@ -19,7 +19,7 @@ syntax = "proto3";
 
 package durudex;
 
-import "google/protobuf/timestamp.proto";
+import "durudex/types/timestamp.proto";
 
 option go_package = "github.com/durudex/durudex-gateway/internal/delivery/grpc/pb;pb";
 
@@ -45,8 +45,8 @@ message GetPostByIDRequest {
 message GetPostByIDResponse {
   bytes author_id = 1;
   string text = 2;
-  google.protobuf.Timestamp created_at = 3;
-  optional google.protobuf.Timestamp updated_at = 4;
+  durudex.types.Timestamp created_at = 3;
+  optional durudex.types.Timestamp updated_at = 4;
 }
 
 message DeletePostRequest {
