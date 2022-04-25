@@ -27,6 +27,7 @@ service PostService {
   rpc CreatePost(CreatePostRequest) returns (CreatePostResponse);
   rpc GetPostByID(GetPostByIDRequest) returns (GetPostByIDResponse);
   rpc DeletePost(DeletePostRequest) returns (DeletePostResponse);
+  rpc UpdatePost(UpdatePostRequest) returns (UpdatePostResponse);
 }
 
 message CreatePostRequest {
@@ -54,3 +55,11 @@ message DeletePostRequest {
 }
 
 message DeletePostResponse {}
+
+message UpdatePostRequest {
+  bytes id = 1;
+  bytes author_id = 2;
+  string text = 3;
+}
+
+message UpdatePostResponse {}

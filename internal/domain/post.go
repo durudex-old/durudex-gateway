@@ -35,3 +35,10 @@ type CreatePostInput struct {
 	AuthorID string
 	Text     string `json:"text"`
 }
+
+// Update post input.
+type UpdatePostInput struct {
+	ID       string `json:"id"`
+	AuthorID string
+	Text     string `json:"text"`
+}

@@ -31,6 +31,7 @@ type Post interface {
 	CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error)
 	DeletePost(ctx context.Context, id string) (bool, error)
 	GetPost(ctx context.Context, id string) (*domain.Post, error)
+	UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error)
 }
 
 // Post service structure.
@@ -104,4 +105,32 @@ func (s *PostService) GetPost(ctx context.Context, id string) (*domain.Post, err
 		CreatedAt: post.CreatedAt.AsTime(),
 		UpdatedAt: post.UpdatedAt.AsOptionalTime(),
 	}, nil
+}
+
+// Updating a post.
+func (s *PostService) UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error) {
+	postID, err := uuid.FromString(input.ID)
+	if err != nil {
+		return false, err
+	}
+
+	// Get author uuid from string.
+	authorId, err := uuid.FromString(input.AuthorID)
+	if err != nil {
+		return false, err
+	}
+
+	// TODO: check text length.
+
+	// Update post.
+	_, err = s.grpcHandler.UpdatePost(ctx, &pb.UpdatePostRequest{
+		Id:       postID.Bytes(),
+		AuthorId: authorId.Bytes(),
+		Text:     input.Text,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
