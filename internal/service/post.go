@@ -69,14 +69,14 @@ func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInp
 
 // Deleting a post.
 func (s *PostService) DeletePost(ctx context.Context, id string) (bool, error) {
-	// Get user uuid from string.
-	userID, err := uuid.FromString(id)
+	// Get post uuid from string.
+	postID, err := uuid.FromString(id)
 	if err != nil {
 		return false, err
 	}
 
 	// Delete post.
-	_, err = s.grpcHandler.DeletePost(ctx, &pb.DeletePostRequest{Id: userID.Bytes()})
+	_, err = s.grpcHandler.DeletePost(ctx, &pb.DeletePostRequest{Id: postID.Bytes()})
 	if err != nil {
 		return false, err
 	}
@@ -114,19 +114,10 @@ func (s *PostService) UpdatePost(ctx context.Context, input domain.UpdatePostInp
 		return false, err
 	}
 
-	// Get author uuid from string.
-	authorId, err := uuid.FromString(input.AuthorID)
-	if err != nil {
-		return false, err
-	}
-
-	// TODO: check text length.
-
 	// Update post.
 	_, err = s.grpcHandler.UpdatePost(ctx, &pb.UpdatePostRequest{
-		Id:       postID.Bytes(),
-		AuthorId: authorId.Bytes(),
-		Text:     input.Text,
+		Id:   postID.Bytes(),
+		Text: input.Text,
 	})
 	if err != nil {
 		return false, err

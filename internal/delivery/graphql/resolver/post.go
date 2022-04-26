@@ -16,14 +16,10 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePo
 }
 
 func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
-	// TODO: fix bug.
-
 	return r.service.Post.DeletePost(ctx, id)
 }
 
 func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error) {
-	input.AuthorID = ctx.Value(domain.UserCtx).(string)
-
 	return r.service.Post.UpdatePost(ctx, input)
 }
 

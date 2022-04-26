@@ -58,7 +58,6 @@ message DeletePostResponse {}
 
 message UpdatePostRequest {
   bytes id = 1;
-  bytes author_id = 2;
   string text = 3;
 }
 
