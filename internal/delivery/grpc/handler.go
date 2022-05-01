@@ -30,7 +30,6 @@ import (
 // GRPC handler structure.
 type Handler struct {
 	Auth pb.AuthServiceClient
-	Code pb.CodeServiceClient
 	User pb.UserServiceClient
 	Post pb.PostServiceClient
 }
@@ -39,7 +38,6 @@ type Handler struct {
 func NewGRPCHandler(cfg *config.Config) *Handler {
 	return &Handler{
 		Auth: pb.NewAuthServiceClient(connectToService(cfg.Service.Auth)),
-		Code: pb.NewCodeServiceClient(connectToService(cfg.Service.Code)),
 		User: pb.NewUserServiceClient(connectToService(cfg.Service.User)),
 		Post: pb.NewPostServiceClient(connectToService(cfg.Service.Post)),
 	}

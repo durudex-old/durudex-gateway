@@ -12,12 +12,12 @@ import (
 )
 
 func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
-	return true, nil
+	return r.service.User.CreateVerifyEmailCode(ctx, email)
 }
 
 func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
 	// Checking user input code.
-	status, err := r.service.Code.CheckByEmail(ctx, input.Email, input.Code)
+	status, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
 	if err != nil || !status {
 		return false, &gqlerror.Error{Message: "Error sending email"}
 	}

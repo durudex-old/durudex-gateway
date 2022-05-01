@@ -30,6 +30,8 @@ import (
 type User interface {
 	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error)
+	CreateVerifyEmailCode(ctx context.Context, email string) (bool, error)
+	VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error)
 }
 
 // User service structure.
@@ -66,7 +68,7 @@ func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User,
 
 // Forgot user password.
 func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
-	_, err := s.grpcHandler.ForgotPassword(ctx, &pb.ForgotPasswordRequest{
+	_, err := s.grpcHandler.ForgotUserPassword(ctx, &pb.ForgotUserPasswordRequest{
 		Email:    input.Email,
 		Password: input.Password,
 	})
@@ -75,4 +77,29 @@ func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPas
 	}
 
 	return true, nil
+}
+
+// Creating a new verify user email code.
+func (s *UserService) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
+	_, err := s.grpcHandler.CreateVerifyUserEmailCode(ctx, &pb.CreateVerifyUserEmailCodeRequest{
+		Email: email,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+// Verifying user email code.
+func (s *UserService) VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error) {
+	status, err := s.grpcHandler.VerifyUserEmailCode(ctx, &pb.VerifyUserEmailCodeRequest{
+		Email: email,
+		Code:  code,
+	})
+	if err != nil {
+		return status.Status, err
+	}
+
+	return status.Status, nil
 }

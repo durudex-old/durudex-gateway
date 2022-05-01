@@ -12,9 +12,9 @@ import (
 
 func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
 	// Checking user input code.
-	status, err := r.service.Code.CheckByEmail(ctx, input.Email, input.Code)
+	status, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
 	if err != nil || !status {
-		return "", &gqlerror.Error{Message: "error code failed"}
+		return "", &gqlerror.Error{Message: "Error code failed"}
 	}
 
 	return r.service.Auth.SignUp(ctx, input)

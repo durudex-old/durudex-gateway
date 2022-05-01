@@ -22,7 +22,6 @@ import "github.com/durudex/durudex-gateway/internal/delivery/grpc"
 // Service structure.
 type Service struct {
 	Auth
-	Code
 	User
 	Post
 }
@@ -31,7 +30,6 @@ type Service struct {
 func NewService(grpcHandler *grpc.Handler) *Service {
 	return &Service{
 		Auth: NewAuthService(grpcHandler.Auth),
-		Code: NewCodeService(grpcHandler.Code),
 		User: NewUserService(grpcHandler.User),
 		Post: NewPostService(grpcHandler.Post),
 	}
