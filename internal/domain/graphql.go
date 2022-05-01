@@ -17,7 +17,15 @@
 
 package domain
 
+import "github.com/99designs/gqlgen/graphql"
+
 // GraphQL Node interface.
 type Node interface {
 	IsNode()
+}
+
+// Upload files input.
+type UploadFile struct {
+	ID   int            `json:"id"`
+	File graphql.Upload `json:"file"`
 }

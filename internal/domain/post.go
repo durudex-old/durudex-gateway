@@ -21,19 +21,21 @@ import "time"
 
 // Post type.
 type Post struct {
-	ID        string     `json:"id"`
-	AuthorID  string     `json:"authorId"`
-	Text      string     `json:"text"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt *time.Time `json:"updatedAt"`
+	ID          string     `json:"id"`
+	AuthorID    string     `json:"authorId"`
+	Text        string     `json:"text"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   *time.Time `json:"updatedAt"`
+	Attachments []string   `json:"attachments"`
 }
 
 func (Post) IsNode() {}
 
 // Create post input.
 type CreatePostInput struct {
-	AuthorID string
-	Text     string `json:"text"`
+	AuthorID    string
+	Text        string `json:"text"`
+	Attachments []*UploadFile
 }
 
 // Update post input.

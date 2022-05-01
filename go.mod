@@ -3,7 +3,7 @@ module github.com/durudex/durudex-gateway
 go 1.17
 
 require (
-	github.com/99designs/gqlgen v0.17.3
+	github.com/99designs/gqlgen v0.17.5
 	github.com/durudex/dugopb v0.0.0-20220425140104-bf229217bf34
 	github.com/gofiber/adaptor/v2 v2.1.16
 	github.com/gofiber/fiber/v2 v2.24.0
@@ -22,7 +22,7 @@ require (
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/gofiber/utils v0.1.2 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/klauspost/compress v1.13.4 // indirect

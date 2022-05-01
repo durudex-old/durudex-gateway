@@ -6,9 +6,14 @@ package resolver
 import (
 	"context"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/durudex/durudex-gateway/internal/domain"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
+	return true, nil
+}
 
 func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
 	// Checking user input code.
@@ -18,6 +23,10 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.Forg
 	}
 
 	return r.service.User.ForgotPassword(ctx, input)
+}
+
+func (r *mutationResolver) UpdateAvatar(ctx context.Context, file graphql.Upload) (string, error) {
+	return "", nil
 }
 
 func (r *queryResolver) GetUser(ctx context.Context, id string) (*domain.User, error) {
