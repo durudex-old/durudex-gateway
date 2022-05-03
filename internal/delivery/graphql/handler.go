@@ -23,6 +23,7 @@ import (
 
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/resolver"
+	"github.com/durudex/durudex-gateway/internal/domain"
 	"github.com/durudex/durudex-gateway/internal/service"
 
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -71,5 +72,8 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 
 // GraphQL recover handler.
 func (h *Handler) recoverHandler(ctx context.Context, err interface{}) error {
-	return nil
+	return &gqlerror.Error{
+		Message:    "Internal server error",
+		Extensions: map[string]interface{}{"code": domain.CodeInternalServerError},
+	}
 }

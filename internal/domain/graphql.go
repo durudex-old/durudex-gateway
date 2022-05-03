@@ -19,6 +19,11 @@ package domain
 
 import "github.com/99designs/gqlgen/graphql"
 
+// GraphQL error status codes.
+const (
+	CodeInternalServerError string = "INTERNAL_SERVER_ERROR"
+)
+
 // GraphQL Node interface.
 type Node interface {
 	IsNode()
