@@ -18,6 +18,7 @@
 package graphql
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
@@ -26,6 +27,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // GraphQL handler structure.
@@ -36,13 +38,21 @@ func NewHandler(service *service.Service) *Handler {
 	return &Handler{service: service}
 }
 
+// GraphQL handler.
 func (h *Handler) GraphqlHandler() http.HandlerFunc {
+	// GraphQL config.
 	config := generated.Config{
 		Resolvers:  resolver.NewResolver(h.service),
 		Directives: generated.DirectiveRoot{IsAuth: h.isAuth},
 	}
 
+	// Creating a new graphql handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))
+
+	// Set graphql error handler.
+	handler.SetErrorPresenter(h.errorHandler)
+	// Set graphql panic handler.
+	handler.SetRecoverFunc(h.recoverHandler)
 
 	return func(w http.ResponseWriter, r *http.Request) {
 		handler.ServeHTTP(w, r)
@@ -52,4 +62,14 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 // GraphQL playground handler.
 func (h *Handler) PlaygroundHandler() http.HandlerFunc {
 	return playground.Handler("GraphQL", "/graph/query")
+}
+
+// GraphQL error handler.
+func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
+	return &gqlerror.Error{}
+}
+
+// GraphQL recover handler.
+func (h *Handler) recoverHandler(ctx context.Context, err interface{}) error {
+	return nil
 }
