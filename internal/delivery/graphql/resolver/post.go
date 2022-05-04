@@ -23,6 +23,6 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePo
 	return r.service.Post.UpdatePost(ctx, input)
 }
 
-func (r *queryResolver) GetPost(ctx context.Context, id string) (*domain.Post, error) {
+func (r *queryResolver) Post(ctx context.Context, id string) (*domain.Post, error) {
 	return r.service.Post.GetPost(ctx, id)
 }

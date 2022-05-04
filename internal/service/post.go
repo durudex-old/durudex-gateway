@@ -51,7 +51,7 @@ func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInp
 	}
 
 	// Create post.
-	id, err := s.grpcHandler.CreatePost(ctx, &pb.CreatePostRequest{
+	response, err := s.grpcHandler.CreatePost(ctx, &pb.CreatePostRequest{
 		AuthorId: authorID.Bytes(), Text: input.Text,
 	})
 	if err != nil {
@@ -59,12 +59,12 @@ func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInp
 	}
 
 	// Get post uuid from bytes.
-	postID, err := uuid.FromBytes(id.Id)
+	id, err := uuid.FromBytes(response.Id)
 	if err != nil {
 		return "", err
 	}
 
-	return postID.String(), err
+	return id.String(), err
 }
 
 // Deleting a post.
@@ -87,20 +87,20 @@ func (s *PostService) DeletePost(ctx context.Context, id string) (bool, error) {
 // Getting a post.
 func (s *PostService) GetPost(ctx context.Context, id string) (*domain.Post, error) {
 	// Get user uuid from string.
-	userID, err := uuid.FromString(id)
+	postID, err := uuid.FromString(id)
 	if err != nil {
 		return nil, err
 	}
 
 	// Get post by id.
-	post, err := s.grpcHandler.GetPostByID(ctx, &pb.GetPostByIDRequest{Id: userID.Bytes()})
+	post, err := s.grpcHandler.GetPostByID(ctx, &pb.GetPostByIDRequest{Id: postID.Bytes()})
 	if err != nil {
 		return nil, err
 	}
 
 	return &domain.Post{
 		ID:        id,
-		AuthorID:  uuid.FromBytesOrNil(post.AuthorId).String(),
+		Author:    &domain.User{},
 		Text:      post.Text,
 		CreatedAt: post.CreatedAt.AsTime(),
 		UpdatedAt: post.UpdatedAt.AsOptionalTime(),

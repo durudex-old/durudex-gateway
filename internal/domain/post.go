@@ -22,7 +22,7 @@ import "time"
 // Post type.
 type Post struct {
 	ID          string     `json:"id"`
-	AuthorID    string     `json:"authorId"`
+	Author      *User      `json:"author"`
 	Text        string     `json:"text"`
 	CreatedAt   time.Time  `json:"createdAt"`
 	UpdatedAt   *time.Time `json:"updatedAt"`

@@ -12,9 +12,14 @@ import (
 
 func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
 	// Checking user input code.
-	status, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil || !status {
-		return "", &gqlerror.Error{Message: "Error code failed"}
+	verify, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
+	if err != nil {
+		return "", err
+	} else if !verify {
+		return "", &gqlerror.Error{
+			Message:    "Invalid Code",
+			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
+		}
 	}
 
 	return r.service.Auth.SignUp(ctx, input)

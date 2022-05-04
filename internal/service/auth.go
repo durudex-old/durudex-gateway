@@ -22,6 +22,7 @@ import (
 
 	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/domain"
+
 	"github.com/gofrs/uuid"
 )
 
@@ -43,7 +44,8 @@ func NewAuthService(grpcHandler pb.AuthServiceClient) *AuthService {
 
 // Sign Up user.
 func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
-	id, err := s.grpcHandler.SignUp(ctx, &pb.SignUpRequest{
+	// Sign Up user.
+	response, err := s.grpcHandler.SignUp(ctx, &pb.SignUpRequest{
 		Username: input.Username,
 		Email:    input.Email,
 		Password: input.Password,
@@ -53,12 +55,12 @@ func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (str
 	}
 
 	// Get user uuid from bytes.
-	userID, err := uuid.FromBytes(id.Id)
+	id, err := uuid.FromBytes(response.Id)
 	if err != nil {
 		return "", err
 	}
 
-	return userID.String(), err
+	return id.String(), nil
 }
 
 // Sign In user.

@@ -98,7 +98,7 @@ func (s *UserService) VerifyEmailCode(ctx context.Context, email string, code ui
 		Code:  code,
 	})
 	if err != nil {
-		return status.Status, err
+		return false, err
 	}
 
 	return status.Status, nil
