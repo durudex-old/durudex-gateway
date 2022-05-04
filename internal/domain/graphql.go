@@ -21,7 +21,9 @@ import "github.com/99designs/gqlgen/graphql"
 
 // GraphQL error status codes.
 const (
+	CodeServerError         string = "SERVER_ERROR"
 	CodeInternalServerError string = "INTERNAL_SERVER_ERROR"
+	CodeInvalidArgument     string = "INVALID_ARGUMENT"
 )
 
 // GraphQL Node interface.

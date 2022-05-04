@@ -18,17 +18,14 @@
 package graphql
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
 	"github.com/durudex/durudex-gateway/internal/delivery/graphql/resolver"
-	"github.com/durudex/durudex-gateway/internal/domain"
 	"github.com/durudex/durudex-gateway/internal/service"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // GraphQL handler structure.
@@ -63,17 +60,4 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 // GraphQL playground handler.
 func (h *Handler) PlaygroundHandler() http.HandlerFunc {
 	return playground.Handler("GraphQL", "/graph/query")
-}
-
-// GraphQL error handler.
-func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
-	return &gqlerror.Error{}
-}
-
-// GraphQL recover handler.
-func (h *Handler) recoverHandler(ctx context.Context, err interface{}) error {
-	return &gqlerror.Error{
-		Message:    "Internal server error",
-		Extensions: map[string]interface{}{"code": domain.CodeInternalServerError},
-	}
 }
