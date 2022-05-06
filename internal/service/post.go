@@ -30,7 +30,7 @@ import (
 type Post interface {
 	CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error)
 	DeletePost(ctx context.Context, id string) (bool, error)
-	GetPost(ctx context.Context, id string) (*domain.Post, error)
+	GetPost(ctx context.Context, id string) (domain.Post, error)
 	UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error)
 }
 
@@ -85,22 +85,22 @@ func (s *PostService) DeletePost(ctx context.Context, id string) (bool, error) {
 }
 
 // Getting a post.
-func (s *PostService) GetPost(ctx context.Context, id string) (*domain.Post, error) {
+func (s *PostService) GetPost(ctx context.Context, id string) (domain.Post, error) {
 	// Get user uuid from string.
 	postID, err := uuid.FromString(id)
 	if err != nil {
-		return nil, err
+		return domain.Post{}, err
 	}
 
 	// Get post by id.
 	post, err := s.grpcHandler.GetPostByID(ctx, &pb.GetPostByIDRequest{Id: postID.Bytes()})
 	if err != nil {
-		return nil, err
+		return domain.Post{}, err
 	}
 
-	return &domain.Post{
+	return domain.Post{
 		ID:        id,
-		Author:    &domain.User{},
+		Author:    &domain.User{ID: uuid.FromBytesOrNil(post.AuthorId).String()},
 		Text:      post.Text,
 		CreatedAt: post.CreatedAt.AsTime(),
 		UpdatedAt: post.UpdatedAt.AsOptionalTime(),
