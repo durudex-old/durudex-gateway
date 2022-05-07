@@ -41,8 +41,8 @@ JWT_SIGNING_KEY=
 2) Generate certificates, information can be found at [certs/README.md](cert/README.md).
 3) Run services:
 + [durudex-auth-service](https://github.com/durudex/durudex-auth-service)
-+ [durudex-code-service](https://github.com/durudex/durudex-code-service)
 + [durudex-user-service](https://github.com/durudex/durudex-user-service)
++ [durudex-post-service](https://github.com/durudex/durudex-post-service)
 
 Use `make run` to run and `make build` to build project.
 
