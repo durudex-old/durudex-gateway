@@ -1,3 +1,6 @@
 [submodule "schema"]
 	path = schema
 	url = https://github.com/durudex/durudex-graphql-schema.git
+[submodule "proto"]
+	path = proto
+	url = https://github.com/durudex/durudex-protobuf-schema.git

@@ -17,8 +17,6 @@
 
 package service
 
-import "github.com/durudex/durudex-gateway/internal/delivery/grpc"
-
 // Service structure.
 type Service struct {
 	Auth
@@ -27,10 +25,10 @@ type Service struct {
 }
 
 // Creating a new service.
-func NewService(grpcHandler *grpc.Handler) *Service {
+func NewService() *Service {
 	return &Service{
-		Auth: NewAuthService(grpcHandler.Auth),
-		User: NewUserService(grpcHandler.User),
-		Post: NewPostService(grpcHandler.Post),
+		Auth: NewAuthService(),
+		User: NewUserService(),
+		Post: NewPostService(),
 	}
 }

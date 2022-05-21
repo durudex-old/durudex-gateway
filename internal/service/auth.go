@@ -20,10 +20,7 @@ package service
 import (
 	"context"
 
-	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/domain"
-
-	"github.com/gofrs/uuid"
 )
 
 // User auth interface.
@@ -35,70 +32,29 @@ type Auth interface {
 }
 
 // User auth service structure.
-type AuthService struct{ grpcHandler pb.AuthServiceClient }
+type AuthService struct{}
 
 // Creating a new auth service.
-func NewAuthService(grpcHandler pb.AuthServiceClient) *AuthService {
-	return &AuthService{grpcHandler: grpcHandler}
+func NewAuthService() *AuthService {
+	return &AuthService{}
 }
 
 // Sign Up user.
 func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
-	// Sign Up user.
-	response, err := s.grpcHandler.SignUp(ctx, &pb.SignUpRequest{
-		Username: input.Username,
-		Email:    input.Email,
-		Password: input.Password,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	// Get user uuid from bytes.
-	id, err := uuid.FromBytes(response.Id)
-	if err != nil {
-		return "", err
-	}
-
-	return id.String(), nil
+	return "", nil
 }
 
 // Sign In user.
 func (s *AuthService) SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error) {
-	tokens, err := s.grpcHandler.SignIn(ctx, &pb.SignInRequest{
-		Username: input.Username,
-		Password: input.Password,
-		Ip:       input.IP,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.Tokens{Access: tokens.Access, Refresh: tokens.Refresh}, nil
+	return nil, nil
 }
 
 // Sign Out user.
 func (s *AuthService) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
-	_, err := s.grpcHandler.SignOut(ctx, &pb.SignOutRequest{
-		RefreshToken: input.Token,
-		Ip:           input.IP,
-	})
-	if err != nil {
-		return false, err
-	}
-
 	return true, nil
 }
 
 // Refresh user auth tokens by refresh token.
 func (s *AuthService) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
-	token, err := s.grpcHandler.RefreshToken(ctx, &pb.RefreshTokenRequest{
-		RefreshToken: input.Token,
-		Ip:           input.IP,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	return token.Access, nil
+	return "", nil
 }

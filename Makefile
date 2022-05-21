@@ -35,14 +35,17 @@ gqlgen:
 	go run github.com/99designs/gqlgen generate --config ./gqlgen.yml
 	go mod tidy
 
-.PHONY: protoc
-protoc:
-	protoc \
-		--go_out=. \
-		--go_opt=paths=source_relative \
-		--go-grpc_out=. \
-		--go-grpc_opt=paths=source_relative \
-		internal/delivery/grpc/pb/*.proto
+.PHONY: buf
+buf:
+	buf generate proto/src/api --path proto/src/api/durudex/v1/auth.proto
+	buf generate proto/src/api --path proto/src/api/durudex/v1/user.proto
+	buf generate proto/src/api --path proto/src/api/durudex/v1/post.proto
+
+.PHONY: buf-lint
+buf-lint:
+	buf lint proto/src/api/durudex/v1/auth.proto
+	buf lint proto/src/api/durudex/v1/user.proto
+	buf lint proto/src/api/durudex/v1/post.proto
 
 .PHONY: cert
 cert:

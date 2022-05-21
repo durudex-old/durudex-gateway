@@ -20,10 +20,7 @@ package service
 import (
 	"context"
 
-	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/domain"
-
-	"github.com/gofrs/uuid"
 )
 
 // Post service interface.
@@ -35,93 +32,29 @@ type Post interface {
 }
 
 // Post service structure.
-type PostService struct{ grpcHandler pb.PostServiceClient }
+type PostService struct{}
 
 // Creating a new post service.
-func NewPostService(grpcHandler pb.PostServiceClient) *PostService {
-	return &PostService{grpcHandler: grpcHandler}
+func NewPostService() *PostService {
+	return &PostService{}
 }
 
 // Creating a new post.
 func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error) {
-	// Get author uuid from string.
-	authorID, err := uuid.FromString(input.AuthorID)
-	if err != nil {
-		return "", err
-	}
-
-	// Create post.
-	response, err := s.grpcHandler.CreatePost(ctx, &pb.CreatePostRequest{
-		AuthorId: authorID.Bytes(), Text: input.Text,
-	})
-	if err != nil {
-		return "", err
-	}
-
-	// Get post uuid from bytes.
-	id, err := uuid.FromBytes(response.Id)
-	if err != nil {
-		return "", err
-	}
-
-	return id.String(), err
+	return "", nil
 }
 
 // Deleting a post.
 func (s *PostService) DeletePost(ctx context.Context, id string) (bool, error) {
-	// Get post uuid from string.
-	postID, err := uuid.FromString(id)
-	if err != nil {
-		return false, err
-	}
-
-	// Delete post.
-	_, err = s.grpcHandler.DeletePost(ctx, &pb.DeletePostRequest{Id: postID.Bytes()})
-	if err != nil {
-		return false, err
-	}
-
 	return true, nil
 }
 
 // Getting a post.
 func (s *PostService) GetPost(ctx context.Context, id string) (domain.Post, error) {
-	// Get user uuid from string.
-	postID, err := uuid.FromString(id)
-	if err != nil {
-		return domain.Post{}, err
-	}
-
-	// Get post by id.
-	post, err := s.grpcHandler.GetPostByID(ctx, &pb.GetPostByIDRequest{Id: postID.Bytes()})
-	if err != nil {
-		return domain.Post{}, err
-	}
-
-	return domain.Post{
-		ID:        id,
-		Author:    &domain.User{ID: uuid.FromBytesOrNil(post.AuthorId).String()},
-		Text:      post.Text,
-		CreatedAt: post.CreatedAt.AsTime(),
-		UpdatedAt: post.UpdatedAt.AsOptionalTime(),
-	}, nil
+	return domain.Post{}, nil
 }
 
 // Updating a post.
 func (s *PostService) UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error) {
-	postID, err := uuid.FromString(input.ID)
-	if err != nil {
-		return false, err
-	}
-
-	// Update post.
-	_, err = s.grpcHandler.UpdatePost(ctx, &pb.UpdatePostRequest{
-		Id:   postID.Bytes(),
-		Text: input.Text,
-	})
-	if err != nil {
-		return false, err
-	}
-
 	return true, nil
 }

@@ -20,10 +20,7 @@ package service
 import (
 	"context"
 
-	"github.com/durudex/durudex-gateway/internal/delivery/grpc/pb"
 	"github.com/durudex/durudex-gateway/internal/domain"
-
-	"github.com/gofrs/uuid"
 )
 
 // User interface.
@@ -35,71 +32,29 @@ type User interface {
 }
 
 // User service structure.
-type UserService struct{ grpcHandler pb.UserServiceClient }
+type UserService struct{}
 
 // Creating a new user service.
-func NewUserService(grpcHandler pb.UserServiceClient) *UserService {
-	return &UserService{grpcHandler: grpcHandler}
+func NewUserService() *UserService {
+	return &UserService{}
 }
 
 // Get user by id.
 func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
-	// Get user uuid by string.
-	userID, err := uuid.FromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Get user by uuid.
-	user, err := s.grpcHandler.GetUserByID(ctx, &pb.GetUserByIDRequest{Id: userID.Bytes()})
-	if err != nil {
-		return nil, err
-	}
-
-	return &domain.User{
-		ID:        id,
-		Username:  user.Username,
-		CreatedAt: user.CreatedAt.AsTime(),
-		LastVisit: user.LastVisit.AsTime(),
-		Verified:  user.Verified,
-		AvatarURL: user.AvatarUrl,
-	}, nil
+	return nil, nil
 }
 
 // Forgot user password.
 func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
-	_, err := s.grpcHandler.ForgotUserPassword(ctx, &pb.ForgotUserPasswordRequest{
-		Email:    input.Email,
-		Password: input.Password,
-	})
-	if err != nil {
-		return false, err
-	}
-
 	return true, nil
 }
 
 // Creating a new verify user email code.
 func (s *UserService) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
-	_, err := s.grpcHandler.CreateVerifyUserEmailCode(ctx, &pb.CreateVerifyUserEmailCodeRequest{
-		Email: email,
-	})
-	if err != nil {
-		return false, err
-	}
-
 	return true, nil
 }
 
 // Verifying user email code.
 func (s *UserService) VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error) {
-	status, err := s.grpcHandler.VerifyUserEmailCode(ctx, &pb.VerifyUserEmailCodeRequest{
-		Email: email,
-		Code:  code,
-	})
-	if err != nil {
-		return false, err
-	}
-
-	return status.Status, nil
+	return true, nil
 }
