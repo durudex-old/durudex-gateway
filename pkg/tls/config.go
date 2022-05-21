@@ -19,23 +19,22 @@ package tls
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"errors"
+	"fmt"
 	"io/ioutil"
-
-	"google.golang.org/grpc/credentials"
 )
 
-// Loading TLS credentials.
-func LoadTLSCredentials(caCertPath, certPath, keyPath string) (credentials.TransportCredentials, error) {
+// Loading TLS credentials config.
+func LoadTLSConfig(caCertPath, certPath, keyPath string) (*tls.Config, error) {
 	// Load certificate on the CA who signed client's certificate.
 	pemCA, err := ioutil.ReadFile(caCertPath)
 	if err != nil {
 		return nil, err
 	}
 
+	// Creating a new cert pool.
 	certPool := x509.NewCertPool()
 	if !certPool.AppendCertsFromPEM(pemCA) {
-		return nil, errors.New("error to add server CA's certificate")
+		return nil, fmt.Errorf("error to add server CA's certificate")
 	}
 
 	// Load server's certificate and private key.
@@ -44,12 +43,9 @@ func LoadTLSCredentials(caCertPath, certPath, keyPath string) (credentials.Trans
 		return nil, err
 	}
 
-	// Create the credentials and returning it.
-	config := &tls.Config{
+	return &tls.Config{
 		Certificates: []tls.Certificate{serverCert},
 		ClientAuth:   tls.RequireAndVerifyClientCert,
 		ClientCAs:    certPool,
-	}
-
-	return credentials.NewTLS(config), nil
+	}, nil
 }
