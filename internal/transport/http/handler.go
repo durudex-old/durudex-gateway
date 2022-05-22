@@ -19,12 +19,17 @@ package http
 
 import (
 	"github.com/durudex/durudex-gateway/internal/config"
+	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/internal/transport/graphql"
+
+	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 )
 
 // HTTP handler structure.
 type Handler struct {
-	cfg config.JWTConfig
+	service *service.Service
+	cfg     config.JWTConfig
 }
 
 // Creating a new HTTP handler.
@@ -41,4 +46,13 @@ func (h *Handler) InitRoutes(router fiber.Router) {
 	router.Get("/ping", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("pong")
 	})
+
+	// Creating a new graphql handler.
+	graphql := graphql.NewHandler(h.service)
+
+	graph := router.Group("/graph")
+	{
+		graph.Get("/", adaptor.HTTPHandlerFunc(graphql.PlaygroundHandler()))
+		graph.Post("/query", adaptor.HTTPHandlerFunc(graphql.GraphqlHandler()))
+	}
 }

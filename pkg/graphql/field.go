@@ -31,7 +31,7 @@ func GetSelectionsFields(ctx context.Context, target string) []string {
 	for _, i := range graphql.CollectFieldsCtx(ctx, nil) {
 		// Check is target field.
 		if i.Name == target {
-			reqCtx := graphql.GetRequestContext(ctx)
+			reqCtx := graphql.GetOperationContext(ctx)
 
 			// Getting selections fields.
 			for _, field := range graphql.CollectFields(reqCtx, i.Selections, nil) {
