@@ -22,9 +22,6 @@ GraphQL API Gateway that integrates many services.
 ### 💡 Prerequisites
 + [Go 1.17](https://golang.org/)
 + [Docker](https://www.docker.com)
-+ [grpc](https://grpc.io/docs/languages/go/quickstart/)
-+ [mkcert](https://github.com/FiloSottile/mkcert)
-+ [golangci-lint](https://golangci-lint.run/usage/install/)
 
 ## ⚙️ Build & Run
 1) Create an `.env` file in the root directory and add the following values from `.env.example`:
@@ -38,7 +35,7 @@ CONFIG_PATH=configs/main
 # Auth variables:
 JWT_SIGNING_KEY=
 ```
-2) Generate certificates, information can be found at [certs/README.md](cert/README.md).
+2) Set certificates, information can be found at [certs/README.md](cert/README.md).
 3) Run services:
 + [durudex-auth-service](https://github.com/durudex/durudex-auth-service)
 + [durudex-user-service](https://github.com/durudex/durudex-user-service)
@@ -56,16 +53,3 @@ If you want to say thank you and/or support the active development of [Durudex](
 
 ## ⚠️ License
 Copyright © 2021-2022 [Durudex](https://github.com/Durudex). Released under the [GNU AGPL v3](https://www.gnu.org/licenses/agpl-3.0.html) license.
-
-#### Third-party library licenses
-+ [fiber](https://github.com/gofiber/fiber/blob/master/LICENSE)
-+ [zerolog](https://github.com/rs/zerolog/blob/master/LICENSE)
-+ [viper](https://github.com/spf13/viper/blob/master/LICENSE)
-+ [gqlgen](https://github.com/99designs/gqlgen/blob/master/LICENSE)
-+ [gqlparser](https://github.com/vektah/gqlparser/blob/master/LICENSE)
-+ [adaptor](https://github.com/gofiber/adaptor/blob/master/LICENSE)
-+ [grpc-go](https://github.com/grpc/grpc-go/blob/master/LICENSE)
-+ [protobuf](https://github.com/protocolbuffers/protobuf/blob/master/LICENSE)
-+ [jwt](https://github.com/golang-jwt/jwt/blob/main/LICENSE)
-+ [uuid](https://github.com/gofrs/uuid/blob/master/LICENSE)
-+ [dugopb](https://github.com/durudex/dugopb/blob/main/LICENSE)
