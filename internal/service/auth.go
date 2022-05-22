@@ -21,40 +21,74 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
+	v1 "github.com/durudex/durudex-gateway/pkg/pb/durudex/v1"
+
+	"github.com/gofrs/uuid"
 )
 
 // User auth interface.
 type Auth interface {
-	SignUp(ctx context.Context, input domain.SignUpInput) (string, error)
+	SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
-	SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
+	SignOut(ctx context.Context, input domain.RefreshTokenInput) error
 	RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error)
 }
 
 // User auth service structure.
-type AuthService struct{}
+type AuthService struct{ client v1.AuthServiceClient }
 
 // Creating a new auth service.
-func NewAuthService() *AuthService {
-	return &AuthService{}
+func NewAuthService(client v1.AuthServiceClient) *AuthService {
+	return &AuthService{client: client}
 }
 
-// Sign Up user.
-func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
-	return "", nil
+// User Sign Up.
+func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error) {
+	response, err := s.client.UserSignUp(ctx, &v1.UserSignUpRequest{
+		Username: input.Username,
+		Email:    input.Email,
+		Password: input.Password,
+	})
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return uuid.FromBytesOrNil(response.Id), nil
 }
 
-// Sign In user.
+// User Sign In.
 func (s *AuthService) SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error) {
-	return nil, nil
+	response, err := s.client.UserSignIn(ctx, &v1.UserSignInRequest{
+		Username: input.Username,
+		Password: input.Password,
+		Ip:       input.IP,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Tokens{Access: response.Access, Refresh: response.Refresh}, nil
 }
 
-// Sign Out user.
-func (s *AuthService) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
-	return true, nil
+// User Sign Out.
+func (s *AuthService) SignOut(ctx context.Context, input domain.RefreshTokenInput) error {
+	_, err := s.client.UserSignOut(ctx, &v1.UserSignOutRequest{
+		Refresh: input.Token,
+		Ip:      input.IP,
+	})
+
+	return err
 }
 
 // Refresh user auth tokens by refresh token.
 func (s *AuthService) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
-	return "", nil
+	response, err := s.client.RefreshUserToken(ctx, &v1.RefreshUserTokenRequest{
+		Refresh: input.Token,
+		Ip:      input.IP,
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return response.Access, nil
 }

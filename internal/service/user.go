@@ -21,40 +21,82 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
+	v1 "github.com/durudex/durudex-gateway/pkg/pb/durudex/v1"
+
+	"github.com/gofrs/uuid"
 )
 
 // User interface.
 type User interface {
 	GetUserByID(ctx context.Context, id string) (*domain.User, error)
-	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error)
-	CreateVerifyEmailCode(ctx context.Context, email string) (bool, error)
+	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) error
+	CreateVerifyEmailCode(ctx context.Context, email string) error
 	VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error)
 }
 
 // User service structure.
-type UserService struct{}
+type UserService struct{ client v1.UserServiceClient }
 
 // Creating a new user service.
-func NewUserService() *UserService {
-	return &UserService{}
+func NewUserService(client v1.UserServiceClient) *UserService {
+	return &UserService{client: client}
 }
 
 // Get user by id.
 func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
-	return nil, nil
+	// Getting user uuid from string.
+	userID, err := uuid.FromString(id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Getting user by id.
+	response, err := s.client.GetUserById(ctx, &v1.GetUserByIdRequest{Id: userID.Bytes()})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.User{
+		ID:        id,
+		Username:  response.Username,
+		CreatedAt: response.CreatedAt.AsTime(),
+		LastVisit: response.LastVisit.AsTime(),
+		Verified:  response.Verified,
+		AvatarURL: response.AvatarUrl,
+	}, nil
 }
 
 // Forgot user password.
-func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
-	return true, nil
+func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) error {
+	_, err := s.client.ForgotUserPassword(ctx, &v1.ForgotUserPasswordRequest{
+		Email:    input.Email,
+		Password: input.Password,
+	})
+	if err != nil {
+		return err
+	}
+
+	return err
 }
 
 // Creating a new verify user email code.
-func (s *UserService) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
-	return true, nil
+func (s *UserService) CreateVerifyEmailCode(ctx context.Context, email string) error {
+	_, err := s.client.CreateVerifyUserEmailCode(ctx, &v1.CreateVerifyUserEmailCodeRequest{
+		Email: email,
+	})
+
+	return err
 }
 
 // Verifying user email code.
 func (s *UserService) VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error) {
-	return true, nil
+	response, err := s.client.VerifyUserEmailCode(ctx, &v1.VerifyUserEmailCodeRequest{
+		Email: email,
+		Code:  code,
+	})
+	if err != nil {
+		return false, err
+	}
+
+	return response.Status, nil
 }

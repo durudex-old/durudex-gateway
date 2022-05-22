@@ -5,24 +5,51 @@ package resolver
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/durudex/durudex-gateway/internal/domain"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	if err := r.service.User.CreateVerifyEmailCode(ctx, email); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	// TODO: Add a check to the user service
+	verify, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
+	if err != nil {
+		return false, err
+	} else if !verify {
+		// Return error if email verification code is invalid.
+		return false, &gqlerror.Error{
+			Message:    "Invalid Code",
+			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
+		}
+	}
+
+	// Forgot password.
+	if err := r.service.User.ForgotPassword(ctx, input); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) UpdateAvatar(ctx context.Context, file graphql.Upload) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	return "", nil
 }
 
 func (r *queryResolver) User(ctx context.Context, id string) (*domain.User, error) {
-	panic(fmt.Errorf("not implemented"))
+	user, err := r.service.User.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
 }

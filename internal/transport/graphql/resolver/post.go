@@ -5,23 +5,60 @@ package resolver
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/durudex/durudex-gateway/pkg/graphql"
 )
 
 func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error) {
-	panic(fmt.Errorf("not implemented"))
+	input.AuthorID = ctx.Value(domain.UserCtx).(string)
+
+	// Create post.
+	id, err := r.service.Post.CreatePost(ctx, input)
+	if err != nil {
+		return "", err
+	}
+
+	return id.String(), nil
 }
 
 func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	err := r.service.Post.DeletePost(ctx, id)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error) {
-	panic(fmt.Errorf("not implemented"))
+	if err := r.service.Post.UpdatePost(ctx, input); err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
 
 func (r *queryResolver) Post(ctx context.Context, id string) (*domain.Post, error) {
-	panic(fmt.Errorf("not implemented"))
+	// Getting a post.
+	post, err := r.service.Post.GetPost(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	// Getting author selections fields.
+	fields := graphql.GetSelectionsFields(ctx, "author")
+
+	// Check author selections fields.
+	if len(fields) == 1 && fields[0] != "id" {
+		// Getting post author.
+		user, err := r.service.User.GetUserByID(ctx, post.Author.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		post.Author = user
+	}
+
+	return post, nil
 }

@@ -33,8 +33,8 @@ type Handler struct {
 }
 
 // Creating a new HTTP handler.
-func NewHandler(cfg config.JWTConfig) *Handler {
-	return &Handler{cfg: cfg}
+func NewHandler(service *service.Service, cfg config.JWTConfig) *Handler {
+	return &Handler{service: service, cfg: cfg}
 }
 
 // Initialize http routes.
