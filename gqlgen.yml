@@ -15,19 +15,18 @@
 
 schema:
   - schema/src/*.graphqls
-  - schema/src/types/*.graphqls
 
 exec:
-  filename: internal/delivery/graphql/generated/generated.go
+  filename: internal/transport/graphql/generated/generated.go
   package: generated
 
 model:
-  filename: internal/delivery/graphql/generated/models_gen.go
+  filename: internal/transport/graphql/generated/models_gen.go
   package: generated
 
 resolver:
   layout: follow-schema
-  dir: internal/delivery/graphql/resolver/
+  dir: internal/transport/graphql/resolver/
   package: resolver
   filename_template: "{name}.go"
 

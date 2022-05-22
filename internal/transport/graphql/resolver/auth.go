@@ -5,40 +5,23 @@ package resolver
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
-	// Checking user input code.
-	verify, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil {
-		return "", err
-	} else if !verify {
-		return "", &gqlerror.Error{
-			Message:    "Invalid Code",
-			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
-		}
-	}
-
-	return r.service.Auth.SignUp(ctx, input)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error) {
-	input.IP = ctx.Value(domain.IPCtx).(string)
-
-	return r.service.Auth.SignIn(ctx, input)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
-	input.IP = ctx.Value(domain.IPCtx).(string)
-
-	return r.service.Auth.SignOut(ctx, input)
+	panic(fmt.Errorf("not implemented"))
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
-	input.IP = ctx.Value(domain.IPCtx).(string)
-
-	return r.service.Auth.RefreshToken(ctx, input)
+	panic(fmt.Errorf("not implemented"))
 }

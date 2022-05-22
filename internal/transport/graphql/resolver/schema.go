@@ -4,7 +4,7 @@ package resolver
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
-	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
+	"github.com/durudex/durudex-gateway/internal/transport/graphql/generated"
 )
 
 // Mutation returns generated.MutationResolver implementation.

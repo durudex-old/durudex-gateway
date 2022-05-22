@@ -20,9 +20,9 @@ package graphql
 import (
 	"net/http"
 
-	"github.com/durudex/durudex-gateway/internal/delivery/graphql/generated"
-	"github.com/durudex/durudex-gateway/internal/delivery/graphql/resolver"
 	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/internal/transport/graphql/generated"
+	"github.com/durudex/durudex-gateway/internal/transport/graphql/resolver"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
