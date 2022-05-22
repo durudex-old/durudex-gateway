@@ -15,12 +15,14 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package config
+package config_test
 
 import (
 	"os"
 	"reflect"
 	"testing"
+
+	"github.com/durudex/durudex-gateway/internal/config"
 )
 
 // Testing initialize config.
@@ -38,7 +40,7 @@ func TestInit(t *testing.T) {
 	}
 
 	// Default service tls config.
-	serviceTLS := TLSConfig{
+	serviceTLS := config.TLSConfig{
 		Enable: true,
 		CACert: "./certs/rootCA.pem",
 		Cert:   "./certs/client-cert.pem",
@@ -49,34 +51,30 @@ func TestInit(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    *Config
+		want    *config.Config
 		wantErr bool
 	}{
 		{
 			name: "OK",
 			args: args{env: env{configPath: "fixtures/main", jwtSigningKey: "super-key"}},
-			want: &Config{
-				Server: ServerConfig{
-					Host: defaultServerHost,
-					Port: defaultServerPort,
-					Name: defaultServerName,
+			want: &config.Config{
+				HTTP: config.HTTPConfig{
+					Host: "api.durudex.local",
+					Port: "8000",
+					Name: "Durudex API Gateway",
 				},
-				Auth: AuthConfig{JWT: JWTConfig{SigningKey: "super-key"}},
-				Service: ServiceConfig{
-					Auth: Service{
-						Addr: defaultServiceAuthAddr,
+				Auth: config.AuthConfig{JWT: config.JWTConfig{SigningKey: "super-key"}},
+				Service: config.ServiceConfig{
+					Auth: config.Service{
+						Addr: "auth.service.durudex.local:8001",
 						TLS:  serviceTLS,
 					},
-					Code: Service{
-						Addr: defaultServiceCodeAddr,
+					User: config.Service{
+						Addr: "user.service.durudex.local:8004",
 						TLS:  serviceTLS,
 					},
-					User: Service{
-						Addr: defaultServiceUserAddr,
-						TLS:  serviceTLS,
-					},
-					Post: Service{
-						Addr: defaultServicePostAddr,
+					Post: config.Service{
+						Addr: "post.service.durudex.local:8005",
 						TLS:  serviceTLS,
 					},
 				},
@@ -91,7 +89,7 @@ func TestInit(t *testing.T) {
 			setEnv(tt.args.env)
 
 			// Initialize config.
-			got, err := Init()
+			got, err := config.Init()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error initialize config: %s", err.Error())
 			}

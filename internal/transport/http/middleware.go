@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/durudex/durudex-gateway/pkg/auth"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -56,7 +57,7 @@ func (h *Handler) authMiddleware(ctx *fiber.Ctx) error {
 	}
 
 	// Parsing jwt access token.
-	customClaim, err := h.auth.JWT.Parse(headerParts[1])
+	customClaim, err := auth.Parse(headerParts[1], h.cfg.SigningKey)
 	if err != nil {
 		return err
 	}

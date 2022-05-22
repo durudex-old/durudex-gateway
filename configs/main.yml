@@ -13,37 +13,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
-server:
-  host: api.durudex.local
+http:
+  host: "api.durudex.local"
   port: 8000
-  name: durudex-gateway
+  name: "Durudex API Gateway"
 
 service:
   auth:
-    addr: auth.service.durudex.local:8001
+    addr: "auth.service.durudex.local:8001"
     tls:
       enable: true
-      ca-cert: ./certs/rootCA.pem
-      cert: ./certs/client-cert.pem
-      key: ./certs/client-key.pem
-  code:
-    addr: code.service.durudex.local:8003
-    tls:
-      enable: true
-      ca-cert: ./certs/rootCA.pem
-      cert: ./certs/client-cert.pem
-      key: ./certs/client-key.pem
+      ca-cert: "./certs/rootCA.pem"
+      cert: "./certs/client-cert.pem"
+      key: "./certs/client-key.pem"
   user:
-    addr: user.service.durudex.local:8004
+    addr: "user.service.durudex.local:8004"
     tls:
       enable: true
-      ca-cert: ./certs/rootCA.pem
-      cert: ./certs/client-cert.pem
-      key: ./certs/client-key.pem
+      ca-cert: "./certs/rootCA.pem"
+      cert: "./certs/client-cert.pem"
+      key: "./certs/client-key.pem"
   post:
-    addr: post.service.durudex.local:8005
+    addr: "post.service.durudex.local:8005"
     tls:
       enable: true
-      ca-cert: ./certs/rootCA.pem
-      cert: ./certs/client-cert.pem
-      key: ./certs/client-key.pem
+      ca-cert: "./certs/rootCA.pem"
+      cert: "./certs/client-cert.pem"
+      key: "./certs/client-key.pem"

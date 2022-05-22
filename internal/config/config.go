@@ -25,16 +25,19 @@ import (
 	"github.com/spf13/viper"
 )
 
+// Default config path.
+const defaultConfigPath string = "configs/main"
+
 type (
 	// Config variables.
 	Config struct {
-		Server  ServerConfig  // Server config variables.
-		Service ServiceConfig // Service config variables.
-		Auth    AuthConfig    // Auth config variables.
+		HTTP    HTTPConfig
+		Service ServiceConfig
+		Auth    AuthConfig
 	}
 
-	// Server config variables.
-	ServerConfig struct {
+	// HTTP server config variables.
+	HTTPConfig struct {
 		Host string `mapstructure:"host"`
 		Port string `mapstructure:"port"`
 		Name string `mapstructure:"name"`
@@ -65,7 +68,6 @@ type (
 	// Services config variables.
 	ServiceConfig struct {
 		Auth Service `mapstructure:"auth"`
-		Code Service `mapstructure:"code"`
 		User Service `mapstructure:"user"`
 		Post Service `mapstructure:"post"`
 	}
@@ -74,9 +76,6 @@ type (
 // Initialize config.
 func Init() (*Config, error) {
 	log.Debug().Msg("Initialize config...")
-
-	// Populate defaults config variables.
-	populateDefaults()
 
 	// Parsing config file.
 	if err := parseConfigFile(); err != nil {
@@ -122,14 +121,14 @@ func unmarshal(cfg *Config) error {
 	log.Debug().Msg("Unmarshal config keys...")
 
 	// Unmarshal server keys.
-	if err := viper.UnmarshalKey("server", &cfg.Server); err != nil {
+	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
 		return err
 	}
 	// Unmarshal service keys.
 	return viper.UnmarshalKey("service", &cfg.Service)
 }
 
-// Seting environment variables from .env file.
+// Setting environment variables from .env file.
 func setFromEnv(cfg *Config) {
 	log.Debug().Msg("Set from environment configurations...")
 

@@ -15,11 +15,30 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package auth
+package http
 
-type Auth struct{ JWT }
+import (
+	"github.com/durudex/durudex-gateway/internal/config"
+	"github.com/gofiber/fiber/v2"
+)
 
-// Creating a new auth manager.
-func NewAuthManager(signingKey string) *Auth {
-	return &Auth{JWT: NewJWTManager(signingKey)}
+// HTTP handler structure.
+type Handler struct {
+	cfg config.JWTConfig
+}
+
+// Creating a new HTTP handler.
+func NewHandler(cfg config.JWTConfig) *Handler {
+	return &Handler{cfg: cfg}
+}
+
+// Initialize http routes.
+func (h *Handler) InitRoutes(router fiber.Router) {
+	// Set auth middleware.
+	router.Use(h.authMiddleware)
+
+	// Ping pong route.
+	router.Get("/ping", func(ctx *fiber.Ctx) error {
+		return ctx.SendString("pong")
+	})
 }

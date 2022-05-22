@@ -24,26 +24,18 @@ import (
 )
 
 type JWT interface {
-	Parse(accessToken string) (string, error)
-}
-
-// JWT manager structure.
-type JWTManager struct{ SigningKey string }
-
-// Creating a new JWT manager.
-func NewJWTManager(signingKey string) *JWTManager {
-	return &JWTManager{SigningKey: signingKey}
+	Parse(accessToken, signingKey string) (string, error)
 }
 
 // Parsing jwt access token.
-func (m *JWTManager) Parse(accessToken string) (string, error) {
+func Parse(accessToken, signingKey string) (string, error) {
 	// Parsing and validation token.
 	token, err := jwt.Parse(accessToken, func(t *jwt.Token) (i interface{}, err error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 		}
 
-		return []byte(m.SigningKey), nil
+		return []byte(signingKey), nil
 	})
 	if err != nil {
 		return "", err

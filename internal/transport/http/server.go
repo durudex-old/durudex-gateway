@@ -1,5 +1,5 @@
 /*
- * Copyright © 2021-2022 Durudex
+ * Copyright © 2022 Durudex
 
  * This file is part of Durudex: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -15,47 +15,46 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package server
+package http
 
 import (
 	"github.com/durudex/durudex-gateway/internal/config"
-	"github.com/durudex/durudex-gateway/internal/delivery/http"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
 
-// Server structure.
+// HTTP server structure.
 type Server struct {
-	httpApp     *fiber.App
-	httpHandler *http.Handler
+	app *fiber.App
+	cfg config.HTTPConfig
 }
 
 // Creating a new application http server.
-func NewServer(cfg *config.Config, httpHandler *http.Handler) *Server {
+func NewServer(cfg config.HTTPConfig) *Server {
 	return &Server{
-		httpApp:     fiber.New(fiber.Config{AppName: cfg.Server.Name}),
-		httpHandler: httpHandler,
+		app: fiber.New(fiber.Config{AppName: cfg.Name}),
+		cfg: cfg,
 	}
 }
 
-// Running application server.
-func (s *Server) Run(addr string) {
-	log.Debug().Msg("Running server...")
+// Running application http server.
+func (s *Server) Run() {
+	log.Debug().Msg("Running http server...")
 
-	// Initialize http routes.
-	s.httpHandler.InitRoutes(s.httpApp)
+	addr := s.cfg.Host + ":" + s.cfg.Port
 
-	if err := s.httpApp.Listen(addr); err != nil {
-		log.Fatal().Err(err).Msg("error running http application")
+	// Listen serves HTTP requests from the given addr.
+	if err := s.app.Listen(addr); err != nil {
+		log.Fatal().Err(err).Msg("failed to start http server")
 	}
 }
 
-// Stoping application server.
+// Stopping application http server.
 func (s *Server) Stop() {
-	log.Info().Msg("Stoping server...")
+	log.Info().Msg("Stopping http server...")
 
-	if err := s.httpApp.Shutdown(); err != nil {
-		log.Fatal().Err(err).Msg("error stoping http application")
+	if err := s.app.Shutdown(); err != nil {
+		log.Fatal().Err(err).Msg("failed to stop http server")
 	}
 }

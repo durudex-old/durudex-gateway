@@ -15,17 +15,19 @@
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package auth
+package auth_test
 
 import (
 	"reflect"
 	"testing"
+
+	"github.com/durudex/durudex-gateway/pkg/auth"
 )
 
 // Testing parsing jwt access token.
-func TestJWTManager_Parse(t *testing.T) {
+func Test_Parse(t *testing.T) {
 	// Testing args.
-	type args struct{ accessToken string }
+	type args struct{ accessToken, signingKey string }
 
 	// Tests structures.
 	tests := []struct {
@@ -36,12 +38,15 @@ func TestJWTManager_Parse(t *testing.T) {
 	}{
 		{
 			name: "OK",
-			args: args{accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQzMzI3NjMsInN1YiI6IjEifQ.xEKQVpR4-IGc13wz43LN0TeDfXhBbX57Qe_DVloyJvM"},
+			args: args{
+				accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2ODQzMzI3NjMsInN1YiI6IjEifQ.xEKQVpR4-IGc13wz43LN0TeDfXhBbX57Qe_DVloyJvM",
+				signingKey:  "super-key",
+			},
 			want: "1",
 		},
 		{
 			name:    "Inavalid Access Token",
-			args:    args{accessToken: ""},
+			args:    args{accessToken: "", signingKey: "super-key"},
 			wantErr: true,
 		},
 	}
@@ -49,11 +54,8 @@ func TestJWTManager_Parse(t *testing.T) {
 	// Conducting tests in various structures.
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Creating a new manager.
-			manager := NewJWTManager("super-key")
-
 			// Parsing jwt access token
-			got, err := manager.Parse(tt.args.accessToken)
+			got, err := auth.Parse(tt.args.accessToken, tt.args.signingKey)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error parsing access token: %s", err.Error())
 			}
