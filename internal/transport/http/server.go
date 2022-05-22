@@ -26,21 +26,26 @@ import (
 
 // HTTP server structure.
 type Server struct {
-	app *fiber.App
-	cfg config.HTTPConfig
+	app     *fiber.App
+	handler *Handler
+	cfg     config.HTTPConfig
 }
 
 // Creating a new application http server.
-func NewServer(cfg config.HTTPConfig) *Server {
+func NewServer(cfg config.HTTPConfig, handler *Handler) *Server {
 	return &Server{
-		app: fiber.New(fiber.Config{AppName: cfg.Name}),
-		cfg: cfg,
+		app:     fiber.New(fiber.Config{AppName: cfg.Name}),
+		handler: handler,
+		cfg:     cfg,
 	}
 }
 
 // Running application http server.
 func (s *Server) Run() {
 	log.Debug().Msg("Running http server...")
+
+	// Initialize http routes.
+	s.handler.InitRoutes(s.app)
 
 	addr := s.cfg.Host + ":" + s.cfg.Port
 
