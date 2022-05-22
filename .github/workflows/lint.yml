@@ -1,4 +1,4 @@
-# Copyright © 2021 Durudex
+# Copyright © 2021-2022 Durudex
 
 # This file is part of Durudex: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,20 +19,18 @@ on:
   push:
     branches:
       - '**'
-      - '!main'
-      - '!dev'
   pull_request:
     branches:
       - '**'
-      - '!main'
-      - '!dev'
 
 jobs:
-  linter:
+  go-lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: golangci-lint
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install Golang CI Lint
         uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.43.0
+          version: v1.46.0
