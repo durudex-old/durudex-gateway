@@ -18,8 +18,6 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthServiceClient interface {
-	// User Sign Up.
-	UserSignUp(ctx context.Context, in *UserSignUpRequest, opts ...grpc.CallOption) (*UserSignUpResponse, error)
 	// User Sign In.
 	UserSignIn(ctx context.Context, in *UserSignInRequest, opts ...grpc.CallOption) (*UserSignInResponse, error)
 	// User Sign Out.
@@ -34,15 +32,6 @@ type authServiceClient struct {
 
 func NewAuthServiceClient(cc grpc.ClientConnInterface) AuthServiceClient {
 	return &authServiceClient{cc}
-}
-
-func (c *authServiceClient) UserSignUp(ctx context.Context, in *UserSignUpRequest, opts ...grpc.CallOption) (*UserSignUpResponse, error) {
-	out := new(UserSignUpResponse)
-	err := c.cc.Invoke(ctx, "/durudex.v1.AuthService/UserSignUp", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *authServiceClient) UserSignIn(ctx context.Context, in *UserSignInRequest, opts ...grpc.CallOption) (*UserSignInResponse, error) {
@@ -76,8 +65,6 @@ func (c *authServiceClient) RefreshUserToken(ctx context.Context, in *RefreshUse
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility
 type AuthServiceServer interface {
-	// User Sign Up.
-	UserSignUp(context.Context, *UserSignUpRequest) (*UserSignUpResponse, error)
 	// User Sign In.
 	UserSignIn(context.Context, *UserSignInRequest) (*UserSignInResponse, error)
 	// User Sign Out.
@@ -91,9 +78,6 @@ type AuthServiceServer interface {
 type UnimplementedAuthServiceServer struct {
 }
 
-func (UnimplementedAuthServiceServer) UserSignUp(context.Context, *UserSignUpRequest) (*UserSignUpResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UserSignUp not implemented")
-}
 func (UnimplementedAuthServiceServer) UserSignIn(context.Context, *UserSignInRequest) (*UserSignInResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserSignIn not implemented")
 }
@@ -114,24 +98,6 @@ type UnsafeAuthServiceServer interface {
 
 func RegisterAuthServiceServer(s grpc.ServiceRegistrar, srv AuthServiceServer) {
 	s.RegisterService(&AuthService_ServiceDesc, srv)
-}
-
-func _AuthService_UserSignUp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserSignUpRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AuthServiceServer).UserSignUp(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/durudex.v1.AuthService/UserSignUp",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthServiceServer).UserSignUp(ctx, req.(*UserSignUpRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _AuthService_UserSignIn_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -195,10 +161,6 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "durudex.v1.AuthService",
 	HandlerType: (*AuthServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "UserSignUp",
-			Handler:    _AuthService_UserSignUp_Handler,
-		},
 		{
 			MethodName: "UserSignIn",
 			Handler:    _AuthService_UserSignIn_Handler,

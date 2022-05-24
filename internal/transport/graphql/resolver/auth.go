@@ -7,31 +7,7 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
-
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
-
-func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
-	// TODO: Add a check to the user service
-	verify, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil {
-		return "", err
-	} else if !verify {
-		// Return error if email verification code is invalid.
-		return "", &gqlerror.Error{
-			Message:    "Invalid Code",
-			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
-		}
-	}
-
-	// Sign Up.
-	id, err := r.service.Auth.SignUp(ctx, input)
-	if err != nil {
-		return "", err
-	}
-
-	return id.String(), nil
-}
 
 func (r *mutationResolver) SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error) {
 	input.IP = ctx.Value(domain.IPCtx).(string)

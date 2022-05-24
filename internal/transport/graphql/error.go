@@ -50,7 +50,7 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 		// Get gRPC status code from error.
 		if e, ok := fromGRPCError(gqlErr.Unwrap()); ok {
 			// GRPC error handler.
-			return h.grpcErrorHandler(e.Code())
+			return h.grpcErrorHandler(e.Code(), e.Proto().Message)
 		} else {
 			return gqlErr
 		}
@@ -64,8 +64,14 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 }
 
 // gRPC error handler.
-func (h *Handler) grpcErrorHandler(code codes.Code) *gqlerror.Error {
+func (h *Handler) grpcErrorHandler(code codes.Code, msg string) *gqlerror.Error {
 	switch code {
+	case codes.InvalidArgument:
+		// Set invalid argument error.
+		return &gqlerror.Error{
+			Message:    msg,
+			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
+		}
 	case codes.Internal:
 		// Set internal server error.
 		return &gqlerror.Error{

@@ -6,11 +6,18 @@ package resolver
 import (
 	"context"
 
-	"github.com/durudex/durudex-gateway/internal/domain"
-
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/vektah/gqlparser/v2/gqlerror"
+	"github.com/durudex/durudex-gateway/internal/domain"
 )
+
+func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
+	id, err := r.service.User.SignUp(ctx, input)
+	if err != nil {
+		return "", err
+	}
+
+	return id.String(), nil
+}
 
 func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
 	if err := r.service.User.CreateVerifyEmailCode(ctx, email); err != nil {
@@ -21,19 +28,6 @@ func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email stri
 }
 
 func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
-	// TODO: Add a check to the user service
-	verify, err := r.service.User.VerifyEmailCode(ctx, input.Email, input.Code)
-	if err != nil {
-		return false, err
-	} else if !verify {
-		// Return error if email verification code is invalid.
-		return false, &gqlerror.Error{
-			Message:    "Invalid Code",
-			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
-		}
-	}
-
-	// Forgot password.
 	if err := r.service.User.ForgotPassword(ctx, input); err != nil {
 		return false, err
 	}

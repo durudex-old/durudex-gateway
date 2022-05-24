@@ -22,13 +22,10 @@ import (
 
 	"github.com/durudex/durudex-gateway/internal/domain"
 	v1 "github.com/durudex/durudex-gateway/pkg/pb/durudex/v1"
-
-	"github.com/gofrs/uuid"
 )
 
 // User auth interface.
 type Auth interface {
-	SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
 	SignOut(ctx context.Context, input domain.RefreshTokenInput) error
 	RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error)
@@ -40,20 +37,6 @@ type AuthService struct{ client v1.AuthServiceClient }
 // Creating a new auth service.
 func NewAuthService(client v1.AuthServiceClient) *AuthService {
 	return &AuthService{client: client}
-}
-
-// User Sign Up.
-func (s *AuthService) SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error) {
-	response, err := s.client.UserSignUp(ctx, &v1.UserSignUpRequest{
-		Username: input.Username,
-		Email:    input.Email,
-		Password: input.Password,
-	})
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return uuid.FromBytesOrNil(response.Id), nil
 }
 
 // User Sign In.

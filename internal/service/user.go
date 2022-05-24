@@ -28,6 +28,7 @@ import (
 
 // User interface.
 type User interface {
+	SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error)
 	GetUserByID(ctx context.Context, id string) (*domain.User, error)
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) error
 	CreateVerifyEmailCode(ctx context.Context, email string) error
@@ -40,6 +41,21 @@ type UserService struct{ client v1.UserServiceClient }
 // Creating a new user service.
 func NewUserService(client v1.UserServiceClient) *UserService {
 	return &UserService{client: client}
+}
+
+// User Sign Up.
+func (s *UserService) SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error) {
+	response, err := s.client.UserSignUp(ctx, &v1.UserSignUpRequest{
+		Username: input.Username,
+		Email:    input.Email,
+		Password: input.Password,
+		Code:     input.Code,
+	})
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return uuid.FromBytesOrNil(response.Id), nil
 }
 
 // Get user by id.
@@ -71,6 +87,7 @@ func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPas
 	_, err := s.client.ForgotUserPassword(ctx, &v1.ForgotUserPasswordRequest{
 		Email:    input.Email,
 		Password: input.Password,
+		Code:     input.Code,
 	})
 	if err != nil {
 		return err

@@ -18,8 +18,8 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserServiceClient interface {
-	// Creating a new user.
-	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	// User Sign Up.
+	UserSignUp(ctx context.Context, in *UserSignUpRequest, opts ...grpc.CallOption) (*UserSignUpResponse, error)
 	// Getting a user by id.
 	GetUserById(ctx context.Context, in *GetUserByIdRequest, opts ...grpc.CallOption) (*GetUserByIdResponse, error)
 	// Getting a user by credentials.
@@ -42,9 +42,9 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 	return &userServiceClient{cc}
 }
 
-func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
-	out := new(CreateUserResponse)
-	err := c.cc.Invoke(ctx, "/durudex.v1.UserService/CreateUser", in, out, opts...)
+func (c *userServiceClient) UserSignUp(ctx context.Context, in *UserSignUpRequest, opts ...grpc.CallOption) (*UserSignUpResponse, error) {
+	out := new(UserSignUpResponse)
+	err := c.cc.Invoke(ctx, "/durudex.v1.UserService/UserSignUp", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -109,8 +109,8 @@ func (c *userServiceClient) VerifyUserEmailCode(ctx context.Context, in *VerifyU
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
-	// Creating a new user.
-	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	// User Sign Up.
+	UserSignUp(context.Context, *UserSignUpRequest) (*UserSignUpResponse, error)
 	// Getting a user by id.
 	GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error)
 	// Getting a user by credentials.
@@ -130,8 +130,8 @@ type UserServiceServer interface {
 type UnimplementedUserServiceServer struct {
 }
 
-func (UnimplementedUserServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+func (UnimplementedUserServiceServer) UserSignUp(context.Context, *UserSignUpRequest) (*UserSignUpResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UserSignUp not implemented")
 }
 func (UnimplementedUserServiceServer) GetUserById(context.Context, *GetUserByIdRequest) (*GetUserByIdResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserById not implemented")
@@ -164,20 +164,20 @@ func RegisterUserServiceServer(s grpc.ServiceRegistrar, srv UserServiceServer) {
 	s.RegisterService(&UserService_ServiceDesc, srv)
 }
 
-func _UserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateUserRequest)
+func _UserService_UserSignUp_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserSignUpRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserServiceServer).CreateUser(ctx, in)
+		return srv.(UserServiceServer).UserSignUp(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.v1.UserService/CreateUser",
+		FullMethod: "/durudex.v1.UserService/UserSignUp",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServiceServer).CreateUser(ctx, req.(*CreateUserRequest))
+		return srv.(UserServiceServer).UserSignUp(ctx, req.(*UserSignUpRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -298,8 +298,8 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "CreateUser",
-			Handler:    _UserService_CreateUser_Handler,
+			MethodName: "UserSignUp",
+			Handler:    _UserService_UserSignUp_Handler,
 		},
 		{
 			MethodName: "GetUserById",

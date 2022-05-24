@@ -88,13 +88,13 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	SignUp(ctx context.Context, input domain.SignUpInput) (string, error)
 	SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error)
 	SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error)
 	RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error)
 	CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error)
 	DeletePost(ctx context.Context, id string) (bool, error)
 	UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error)
+	SignUp(ctx context.Context, input domain.SignUpInput) (string, error)
 	CreateVerifyEmailCode(ctx context.Context, email string) (bool, error)
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error)
 	UpdateAvatar(ctx context.Context, file graphql.Upload) (string, error)
@@ -436,7 +436,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 }
 
 var sources = []*ast.Source{
-	{Name: "schema/src/auth.graphqls", Input: `# Copyright © 2022 Durudex
+	{Name: "../../../../schema/src/auth.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -458,11 +458,6 @@ type Tokens {
 
 extend type Mutation {
   """
-  User Sign Up
-  """
-  signUp(input: SignUpInput!): ID!
-
-  """
   User Sign In.
   """
   signIn(input: SignInInput!): Tokens!
@@ -476,31 +471,6 @@ extend type Mutation {
   Refresh authorization token.
   """
   refreshToken(input: RefreshTokenInput!): String!
-}
-
-"""
-User Sign Up input.
-"""
-input SignUpInput {
-  """
-  Account username.
-  """
-  username: String!
-
-  """
-  User email.
-  """
-  email: String!
-
-  """
-  User password.
-  """
-  password: String!
-
-  """
-  User verification code.
-  """
-  code: Uint64!
 }
 
 """
@@ -528,7 +498,7 @@ input RefreshTokenInput {
   token: String!
 }
 `, BuiltIn: false},
-	{Name: "schema/src/directive.graphqls", Input: `# Copyright © 2022 Durudex
+	{Name: "../../../../schema/src/directive.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -538,7 +508,7 @@ Authorization directive.
 """
 directive @isAuth on FIELD_DEFINITION
 `, BuiltIn: false},
-	{Name: "schema/src/post.graphqls", Input: `# Copyright © 2022 Durudex
+	{Name: "../../../../schema/src/post.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -632,7 +602,7 @@ input UpdatePostInput {
   text: String!
 }
 `, BuiltIn: false},
-	{Name: "schema/src/scalar.graphqls", Input: `# Copyright © 2022 Durudex
+	{Name: "../../../../schema/src/scalar.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -652,7 +622,7 @@ Upload file.
 """
 scalar Upload
 `, BuiltIn: false},
-	{Name: "schema/src/schema.graphqls", Input: `# Copyright © 2022 Durudex
+	{Name: "../../../../schema/src/schema.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -697,7 +667,7 @@ input UploadFile {
   file: Upload!
 }
 `, BuiltIn: false},
-	{Name: "schema/src/user.graphqls", Input: `# Copyright © 2022 Durudex
+	{Name: "../../../../schema/src/user.graphqls", Input: `# Copyright © 2022 Durudex
 
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
@@ -746,6 +716,11 @@ extend type Query {
 
 extend type Mutation {
   """
+  User Sign Up
+  """
+  signUp(input: SignUpInput!): ID!
+
+  """
   Creating a new verification code to email.
   """
   createVerifyEmailCode(email: String!): Boolean!
@@ -759,6 +734,31 @@ extend type Mutation {
   Update user avatar.
   """
   updateAvatar(file: Upload!): String! @isAuth
+}
+
+"""
+User Sign Up input.
+"""
+input SignUpInput {
+  """
+  Account username.
+  """
+  username: String!
+
+  """
+  User email.
+  """
+  email: String!
+
+  """
+  User password.
+  """
+  password: String!
+
+  """
+  User verification code.
+  """
+  code: Uint64!
 }
 
 """
@@ -1020,61 +1020,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
-
-func (ec *executionContext) _Mutation_signUp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_signUp(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().SignUp(rctx, fc.Args["input"].(domain.SignUpInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Mutation_signUp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_signUp_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Mutation_signIn(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_signIn(ctx, field)
@@ -1486,6 +1431,61 @@ func (ec *executionContext) fieldContext_Mutation_updatePost(ctx context.Context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updatePost_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_signUp(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_signUp(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().SignUp(rctx, fc.Args["input"].(domain.SignUpInput))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNID2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_signUp(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_signUp_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return
 	}
@@ -4615,15 +4615,6 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
-		case "signUp":
-
-			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_signUp(ctx, field)
-			})
-
-			if out.Values[i] == graphql.Null {
-				invalids++
-			}
 		case "signIn":
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -4673,6 +4664,15 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updatePost(ctx, field)
+			})
+
+			if out.Values[i] == graphql.Null {
+				invalids++
+			}
+		case "signUp":
+
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_signUp(ctx, field)
 			})
 
 			if out.Values[i] == graphql.Null {
