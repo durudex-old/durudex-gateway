@@ -52,5 +52,8 @@ func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshToke
 }
 
 func (r *mutationResolver) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
+	input.IP = ctx.Value(domain.IPCtx).(string)
+
+	// Refresh token.
 	return r.service.Auth.RefreshToken(ctx, input)
 }
