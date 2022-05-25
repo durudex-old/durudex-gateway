@@ -48,9 +48,9 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 	// Check if error is a gqlerror.Error.
 	if errors.As(err, &gqlErr) {
 		// Get gRPC status code from error.
-		if e, ok := fromGRPCError(gqlErr.Unwrap()); ok {
-			// GRPC error handler.
-			return h.grpcErrorHandler(e.Code(), e.Proto().Message)
+		if s, ok := fromGRPCError(gqlErr.Unwrap()); ok {
+			// Getting gqlerror.Error from gRPC status.Status.
+			return h.getErrorFromStatus(s)
 		} else {
 			return gqlErr
 		}
@@ -63,13 +63,23 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 	}
 }
 
-// gRPC error handler.
-func (h *Handler) grpcErrorHandler(code codes.Code, msg string) *gqlerror.Error {
-	switch code {
+// Getting gqlerror.Error from gRPC status.Status.
+func (h *Handler) getErrorFromStatus(s *status.Status) *gqlerror.Error {
+	switch s.Code() {
+	case codes.NotFound:
+		return &gqlerror.Error{
+			Message:    s.Proto().Message,
+			Extensions: map[string]interface{}{"code": domain.CodeNotFound},
+		}
+	case codes.AlreadyExists:
+		return &gqlerror.Error{
+			Message:    s.Proto().Message,
+			Extensions: map[string]interface{}{"code": domain.CodeAlreadyExists},
+		}
 	case codes.InvalidArgument:
 		// Set invalid argument error.
 		return &gqlerror.Error{
-			Message:    msg,
+			Message:    s.Proto().Message,
 			Extensions: map[string]interface{}{"code": domain.CodeInvalidArgument},
 		}
 	case codes.Internal:
