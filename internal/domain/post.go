@@ -40,6 +40,7 @@ type CreatePostInput struct {
 
 // Update post input.
 type UpdatePostInput struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
+	ID       string `json:"id"`
+	AuthorID string
+	Text     string `json:"text"`
 }

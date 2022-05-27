@@ -29,7 +29,7 @@ import (
 // Post service interface.
 type Post interface {
 	CreatePost(ctx context.Context, input domain.CreatePostInput) (uuid.UUID, error)
-	DeletePost(ctx context.Context, id string) error
+	DeletePost(ctx context.Context, id, authorId string) error
 	UpdatePost(ctx context.Context, input domain.UpdatePostInput) error
 	GetPost(ctx context.Context, id string) (*domain.Post, error)
 }
@@ -63,15 +63,18 @@ func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInp
 }
 
 // Deleting a post.
-func (s *PostService) DeletePost(ctx context.Context, id string) error {
-	// Getting author uuid from string.
-	authorID, err := uuid.FromString(id)
+func (s *PostService) DeletePost(ctx context.Context, id, authorId string) error {
+	// Getting post uuid from string.
+	postID, err := uuid.FromString(id)
 	if err != nil {
 		return err
 	}
 
 	// Delete post.
-	_, err = s.client.DeletePost(ctx, &v1.DeletePostRequest{Id: authorID.Bytes()})
+	_, err = s.client.DeletePost(ctx, &v1.DeletePostRequest{
+		Id:       postID.Bytes(),
+		AuthorId: uuid.FromStringOrNil(authorId).Bytes(),
+	})
 	if err != nil {
 		return err
 	}

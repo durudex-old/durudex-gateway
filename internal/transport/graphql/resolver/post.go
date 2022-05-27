@@ -23,7 +23,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePo
 }
 
 func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
-	err := r.service.Post.DeletePost(ctx, id)
+	err := r.service.Post.DeletePost(ctx, id, ctx.Value(domain.UserCtx).(string))
 	if err != nil {
 		return false, err
 	}
@@ -32,6 +32,9 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, err
 }
 
 func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error) {
+	input.AuthorID = ctx.Value(domain.UserCtx).(string)
+
+	// Update post.
 	if err := r.service.Post.UpdatePost(ctx, input); err != nil {
 		return false, err
 	}
