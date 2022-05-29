@@ -53,7 +53,7 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*domain.Post, erro
 	fields := graphql.GetSelectionsFields(ctx, "author")
 
 	// Check author selections fields.
-	if len(fields) == 1 && fields[0] != "id" {
+	if !(len(fields) == 1 && fields[0] == "id") {
 		// Getting post author.
 		user, err := r.service.User.GetUserByID(ctx, post.Author.ID)
 		if err != nil {
