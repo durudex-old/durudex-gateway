@@ -39,6 +39,15 @@ func (r *mutationResolver) UpdateAvatar(ctx context.Context, file graphql.Upload
 	return "", nil
 }
 
+func (r *queryResolver) Me(ctx context.Context) (*domain.User, error) {
+	user, err := r.service.User.GetUserByID(ctx, ctx.Value(domain.UserCtx).(string))
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func (r *queryResolver) User(ctx context.Context, id string) (*domain.User, error) {
 	user, err := r.service.User.GetUserByID(ctx, id)
 	if err != nil {
