@@ -26,6 +26,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// Authorization http header.
 const authorizationHeader string = "Authorization"
 
 // HTTP authorization middleware.

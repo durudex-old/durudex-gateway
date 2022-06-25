@@ -24,6 +24,7 @@ import (
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 // HTTP handler structure.
@@ -39,8 +40,18 @@ func NewHandler(service *service.Service, cfg config.JWTConfig) *Handler {
 
 // Initialize http routes.
 func (h *Handler) InitRoutes(router fiber.Router) {
-	// Set auth middleware.
-	router.Use(h.authMiddleware)
+	// CORS configuration.
+	corsConfig := cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "*",
+		AllowHeaders: "*",
+	}
+
+	// Set http middleware.
+	router.Use(
+		cors.New(corsConfig),
+		h.authMiddleware,
+	)
 
 	// Ping pong route.
 	router.Get("/ping", func(ctx *fiber.Ctx) error {
