@@ -1,17 +1,18 @@
 module github.com/durudex/durudex-gateway
 
-go 1.17
+go 1.18
 
 require (
-	github.com/99designs/gqlgen v0.17.9
+	github.com/99designs/gqlgen v0.17.13
 	github.com/durudex/dugopb v0.0.0-20220515113850-1a71150497b9
 	github.com/gofiber/adaptor/v2 v2.1.23
 	github.com/gofiber/fiber/v2 v2.32.0
 	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/rs/zerolog v1.26.1
+	github.com/segmentio/ksuid v1.0.4
 	github.com/spf13/viper v1.10.1
-	github.com/vektah/gqlparser/v2 v2.4.4
+	github.com/vektah/gqlparser/v2 v2.4.6
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.28.0
 )
