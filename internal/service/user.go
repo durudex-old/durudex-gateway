@@ -23,82 +23,55 @@ import (
 	"github.com/durudex/durudex-gateway/internal/domain"
 	v1 "github.com/durudex/durudex-gateway/pkg/pb/durudex/v1"
 
-	"github.com/gofrs/uuid"
+	"github.com/segmentio/ksuid"
 )
 
 // User interface.
 type User interface {
-	SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error)
-	GetUserByID(ctx context.Context, id string) (*domain.User, error)
+	GetUserByID(ctx context.Context, id ksuid.KSUID) (*domain.User, error)
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) error
 	CreateVerifyEmailCode(ctx context.Context, email string) error
 	VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error)
 }
 
 // User service structure.
-type UserService struct{ client v1.UserServiceClient }
+type UserService struct {
+	user v1.UserServiceClient
+	code v1.UserCodeServiceClient
+}
 
 // Creating a new user service.
-func NewUserService(client v1.UserServiceClient) *UserService {
-	return &UserService{client: client}
+func NewUserService(user v1.UserServiceClient, code v1.UserCodeServiceClient) *UserService {
+	return &UserService{user: user, code: code}
 }
 
-// User Sign Up.
-func (s *UserService) SignUp(ctx context.Context, input domain.SignUpInput) (uuid.UUID, error) {
-	response, err := s.client.UserSignUp(ctx, &v1.UserSignUpRequest{
-		Username: input.Username,
-		Email:    input.Email,
-		Password: input.Password,
-		Code:     input.Code,
-	})
-	if err != nil {
-		return uuid.Nil, err
-	}
-
-	return uuid.FromBytesOrNil(response.Id), nil
-}
-
-// Get user by id.
-func (s *UserService) GetUserByID(ctx context.Context, id string) (*domain.User, error) {
-	// Getting user uuid from string.
-	userID, err := uuid.FromString(id)
-	if err != nil {
-		return nil, err
-	}
-
-	// Getting user by id.
-	response, err := s.client.GetUserById(ctx, &v1.GetUserByIdRequest{Id: userID.Bytes()})
-	if err != nil {
-		return nil, err
-	}
+// Getting user by id.
+func (s *UserService) GetUserByID(ctx context.Context, id ksuid.KSUID) (*domain.User, error) {
+	response, err := s.user.GetUserById(ctx, &v1.GetUserByIdRequest{Id: id.Bytes()})
 
 	return &domain.User{
-		ID:        id,
+		Id:        id,
 		Username:  response.Username,
-		CreatedAt: response.CreatedAt.AsTime(),
 		LastVisit: response.LastVisit.AsTime(),
 		Verified:  response.Verified,
-		AvatarURL: response.AvatarUrl,
-	}, nil
+		AvatarUrl: response.AvatarUrl,
+	}, err
 }
 
 // Forgot user password.
 func (s *UserService) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) error {
-	_, err := s.client.ForgotUserPassword(ctx, &v1.ForgotUserPasswordRequest{
+	_, err := s.user.ForgotUserPassword(ctx, &v1.ForgotUserPasswordRequest{
 		Email:    input.Email,
 		Password: input.Password,
 		Code:     input.Code,
 	})
-	if err != nil {
-		return err
-	}
 
 	return err
 }
 
 // Creating a new verify user email code.
 func (s *UserService) CreateVerifyEmailCode(ctx context.Context, email string) error {
-	_, err := s.client.CreateVerifyUserEmailCode(ctx, &v1.CreateVerifyUserEmailCodeRequest{
+	_, err := s.code.CreateVerifyUserEmailCode(ctx, &v1.CreateVerifyUserEmailCodeRequest{
 		Email: email,
 	})
 
@@ -107,7 +80,7 @@ func (s *UserService) CreateVerifyEmailCode(ctx context.Context, email string) e
 
 // Verifying user email code.
 func (s *UserService) VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error) {
-	response, err := s.client.VerifyUserEmailCode(ctx, &v1.VerifyUserEmailCodeRequest{
+	response, err := s.code.VerifyUserEmailCode(ctx, &v1.VerifyUserEmailCodeRequest{
 		Email: email,
 		Code:  code,
 	})

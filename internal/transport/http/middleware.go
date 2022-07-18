@@ -32,7 +32,7 @@ const authorizationHeader string = "Authorization"
 // HTTP authorization middleware.
 func (h *Handler) authMiddleware(ctx *fiber.Ctx) error {
 	// Set ip to context value.
-	ctx.Context().SetUserValue(domain.IPCtx, ctx.IP())
+	ctx.Context().SetUserValue(domain.IpCtx, ctx.IP())
 
 	// Getting authorization header.
 	header := ctx.Get(authorizationHeader)

@@ -7,7 +7,6 @@ require (
 	github.com/durudex/dugopb v0.0.0-20220515113850-1a71150497b9
 	github.com/gofiber/adaptor/v2 v2.1.23
 	github.com/gofiber/fiber/v2 v2.32.0
-	github.com/gofrs/uuid v4.2.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/rs/zerolog v1.26.1
 	github.com/segmentio/ksuid v1.0.4

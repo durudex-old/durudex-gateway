@@ -9,15 +9,25 @@ import (
 	"github.com/durudex/durudex-gateway/internal/domain"
 )
 
+// SignUp is the resolver for the signUp field.
+func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (*domain.Tokens, error) {
+	input.Ip = ctx.Value(domain.IpCtx).(string)
+
+	// Sign Up.
+	return r.service.Auth.SignUp(ctx, input)
+}
+
+// SignIn is the resolver for the signIn field.
 func (r *mutationResolver) SignIn(ctx context.Context, input domain.SignInInput) (*domain.Tokens, error) {
-	input.IP = ctx.Value(domain.IPCtx).(string)
+	input.Ip = ctx.Value(domain.IpCtx).(string)
 
 	// Sign In.
 	return r.service.Auth.SignIn(ctx, input)
 }
 
+// SignOut is the resolver for the signOut field.
 func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
-	input.IP = ctx.Value(domain.IPCtx).(string)
+	input.Ip = ctx.Value(domain.IpCtx).(string)
 
 	// Sign Out.
 	if err := r.service.Auth.SignOut(ctx, input); err != nil {
@@ -27,8 +37,9 @@ func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshToke
 	return true, nil
 }
 
+// RefreshToken is the resolver for the refreshToken field.
 func (r *mutationResolver) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
-	input.IP = ctx.Value(domain.IPCtx).(string)
+	input.Ip = ctx.Value(domain.IpCtx).(string)
 
 	// Refresh token.
 	return r.service.Auth.RefreshToken(ctx, input)

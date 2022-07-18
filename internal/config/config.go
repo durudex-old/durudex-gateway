@@ -67,7 +67,6 @@ type (
 
 	// Services config variables.
 	ServiceConfig struct {
-		Auth Service `mapstructure:"auth"`
 		User Service `mapstructure:"user"`
 		Post Service `mapstructure:"post"`
 	}

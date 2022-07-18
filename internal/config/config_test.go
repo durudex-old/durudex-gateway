@@ -65,10 +65,6 @@ func TestInit(t *testing.T) {
 				},
 				Auth: config.AuthConfig{JWT: config.JWTConfig{SigningKey: "super-key"}},
 				Service: config.ServiceConfig{
-					Auth: config.Service{
-						Addr: "auth.service.durudex.local:8001",
-						TLS:  serviceTLS,
-					},
 					User: config.Service{
 						Addr: "user.service.durudex.local:8004",
 						TLS:  serviceTLS,

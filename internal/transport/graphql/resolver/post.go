@@ -7,32 +7,54 @@ import (
 	"context"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
-	"github.com/durudex/durudex-gateway/pkg/graphql"
+	"github.com/durudex/durudex-gateway/pkg/gql"
+	"github.com/segmentio/ksuid"
 )
 
-func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePostInput) (string, error) {
-	input.AuthorID = ctx.Value(domain.UserCtx).(string)
+// CreatePost is the resolver for the createPost field.
+func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePostInput) (ksuid.KSUID, error) {
+	var err error
+
+	// Parsing author id.
+	input.AuthorId, err = ksuid.Parse(ctx.Value(domain.UserCtx).(string))
+	if err != nil {
+		return ksuid.Nil, err
+	}
 
 	// Create post.
 	id, err := r.service.Post.CreatePost(ctx, input)
 	if err != nil {
-		return "", err
+		return ksuid.Nil, err
 	}
 
-	return id.String(), nil
+	return id, nil
 }
 
-func (r *mutationResolver) DeletePost(ctx context.Context, id string) (bool, error) {
-	err := r.service.Post.DeletePost(ctx, id, ctx.Value(domain.UserCtx).(string))
+// DeletePost is the resolver for the deletePost field.
+func (r *mutationResolver) DeletePost(ctx context.Context, id ksuid.KSUID) (bool, error) {
+	// Parsing post id.
+	postId, err := ksuid.Parse(ctx.Value(domain.UserCtx).(string))
 	if err != nil {
+		return false, err
+	}
+
+	// Delete post.
+	if err := r.service.Post.DeletePost(ctx, id, postId); err != nil {
 		return false, err
 	}
 
 	return true, nil
 }
 
+// UpdatePost is the resolver for the updatePost field.
 func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePostInput) (bool, error) {
-	input.AuthorID = ctx.Value(domain.UserCtx).(string)
+	var err error
+
+	// Parsing author id from string.
+	input.AuthorId, err = ksuid.Parse(ctx.Value(domain.UserCtx).(string))
+	if err != nil {
+		return false, err
+	}
 
 	// Update post.
 	if err := r.service.Post.UpdatePost(ctx, input); err != nil {
@@ -42,7 +64,8 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePo
 	return true, nil
 }
 
-func (r *queryResolver) Post(ctx context.Context, id string) (*domain.Post, error) {
+// Post is the resolver for the post field.
+func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
 	// Getting a post.
 	post, err := r.service.Post.GetPost(ctx, id)
 	if err != nil {
@@ -50,12 +73,12 @@ func (r *queryResolver) Post(ctx context.Context, id string) (*domain.Post, erro
 	}
 
 	// Getting author selections fields.
-	fields := graphql.GetSelectionsFields(ctx, "author")
+	fields := gql.GetSelectionsFields(ctx, "author")
 
 	// Check author selections fields.
 	if !(len(fields) == 1 && fields[0] == "id") {
 		// Getting post author.
-		user, err := r.service.User.GetUserByID(ctx, post.Author.ID)
+		user, err := r.service.User.GetUserByID(ctx, post.Author.Id)
 		if err != nil {
 			return nil, err
 		}

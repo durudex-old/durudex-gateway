@@ -18,6 +18,6 @@
 package domain
 
 const (
-	UserCtx string = "userID"
-	IPCtx   string = "IP"
+	UserCtx string = "userId"
+	IpCtx   string = "Ip"
 )

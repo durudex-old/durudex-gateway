@@ -29,8 +29,8 @@ type Service struct {
 // Creating a new service.
 func NewService(client *grpc.Client) *Service {
 	return &Service{
-		Auth: NewAuthService(client.Auth),
-		User: NewUserService(client.User),
-		Post: NewPostService(client.Post),
+		Auth: NewAuthService(client.User.Auth),
+		User: NewUserService(client.User.User, client.User.Code),
+		Post: NewPostService(client.Post.Post),
 	}
 }

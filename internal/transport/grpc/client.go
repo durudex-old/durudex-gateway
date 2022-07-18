@@ -28,10 +28,21 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-// gRPC client structure.
+// gRPC clients structure.
 type Client struct {
-	Auth v1.AuthServiceClient
+	User *UserClient
+	Post *PostClient
+}
+
+// User clients structure.
+type UserClient struct {
+	Auth v1.UserAuthServiceClient
 	User v1.UserServiceClient
+	Code v1.UserCodeServiceClient
+}
+
+// Post clients structure.
+type PostClient struct {
 	Post v1.PostServiceClient
 }
 
@@ -40,9 +51,16 @@ func NewClient(cfg config.ServiceConfig) *Client {
 	log.Debug().Msg("Creating a new gRPC client")
 
 	return &Client{
-		Auth: v1.NewAuthServiceClient(connectToService(cfg.Auth)),
-		User: v1.NewUserServiceClient(connectToService(cfg.User)),
-		Post: v1.NewPostServiceClient(connectToService(cfg.Post)),
+		// Creating a new user clients.
+		User: &UserClient{
+			Auth: v1.NewUserAuthServiceClient(connectToService(cfg.User)),
+			User: v1.NewUserServiceClient(connectToService(cfg.User)),
+			Code: v1.NewUserCodeServiceClient(connectToService(cfg.User)),
+		},
+		// Creating a new post clients.
+		Post: &PostClient{
+			Post: v1.NewPostServiceClient(connectToService(cfg.Post)),
+		},
 	}
 }
 

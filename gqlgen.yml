@@ -36,7 +36,7 @@ autobind:
 models:
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/durudex/durudex-gateway/pkg/gql.KSUID
   Int:
     model:
       - github.com/99designs/gqlgen/graphql.Int

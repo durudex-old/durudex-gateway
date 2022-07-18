@@ -8,17 +8,10 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/segmentio/ksuid"
 )
 
-func (r *mutationResolver) SignUp(ctx context.Context, input domain.SignUpInput) (string, error) {
-	id, err := r.service.User.SignUp(ctx, input)
-	if err != nil {
-		return "", err
-	}
-
-	return id.String(), nil
-}
-
+// CreateVerifyEmailCode is the resolver for the createVerifyEmailCode field.
 func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email string) (bool, error) {
 	if err := r.service.User.CreateVerifyEmailCode(ctx, email); err != nil {
 		return false, err
@@ -27,6 +20,7 @@ func (r *mutationResolver) CreateVerifyEmailCode(ctx context.Context, email stri
 	return true, nil
 }
 
+// ForgotPassword is the resolver for the forgotPassword field.
 func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error) {
 	if err := r.service.User.ForgotPassword(ctx, input); err != nil {
 		return false, err
@@ -35,12 +29,21 @@ func (r *mutationResolver) ForgotPassword(ctx context.Context, input domain.Forg
 	return true, nil
 }
 
+// UpdateAvatar is the resolver for the updateAvatar field.
 func (r *mutationResolver) UpdateAvatar(ctx context.Context, file graphql.Upload) (string, error) {
 	return "", nil
 }
 
+// Me is the resolver for the me field.
 func (r *queryResolver) Me(ctx context.Context) (*domain.User, error) {
-	user, err := r.service.User.GetUserByID(ctx, ctx.Value(domain.UserCtx).(string))
+	// Parsing id from string.
+	id, err := ksuid.Parse(ctx.Value(domain.UserCtx).(string))
+	if err != nil {
+		return nil, err
+	}
+
+	// Getting user.
+	user, err := r.service.User.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +51,8 @@ func (r *queryResolver) Me(ctx context.Context) (*domain.User, error) {
 	return user, nil
 }
 
-func (r *queryResolver) User(ctx context.Context, id string) (*domain.User, error) {
+// User is the resolver for the user field.
+func (r *queryResolver) User(ctx context.Context, id ksuid.KSUID) (*domain.User, error) {
 	user, err := r.service.User.GetUserByID(ctx, id)
 	if err != nil {
 		return nil, err
