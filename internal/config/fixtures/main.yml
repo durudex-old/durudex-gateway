@@ -18,6 +18,9 @@ http:
   port: 8000
   name: "Durudex API Gateway"
 
+graphql:
+  complexity-limit: 500
+
 service:
   user:
     addr: "user.service.durudex.local:8004"

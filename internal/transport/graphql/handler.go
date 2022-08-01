@@ -20,20 +20,25 @@ package graphql
 import (
 	"net/http"
 
+	"github.com/durudex/durudex-gateway/internal/config"
 	"github.com/durudex/durudex-gateway/internal/service"
 	"github.com/durudex/durudex-gateway/internal/transport/graphql/generated"
 	"github.com/durudex/durudex-gateway/internal/transport/graphql/resolver"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 // GraphQL handler structure.
-type Handler struct{ service *service.Service }
+type Handler struct {
+	service *service.Service
+	cfg     *config.GraphQLConfig
+}
 
 // Creating a new graphql handler.
-func NewHandler(service *service.Service) *Handler {
-	return &Handler{service: service}
+func NewHandler(service *service.Service, cfg *config.GraphQLConfig) *Handler {
+	return &Handler{service: service, cfg: cfg}
 }
 
 // GraphQL handler.
@@ -44,8 +49,14 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 		Directives: generated.DirectiveRoot{IsAuth: h.isAuth},
 	}
 
+	// Setting the complexity of the query.
+	setComplexity(config.Complexity)
+
 	// Creating a new graphql handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))
+
+	// Set graphql fixed complexity limit.
+	handler.Use(extension.FixedComplexityLimit(h.cfg.ComplexityLimit))
 
 	// Set graphql error handler.
 	handler.SetErrorPresenter(h.errorHandler)

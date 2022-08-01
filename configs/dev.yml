@@ -14,9 +14,12 @@
 # along with Durudex. If not, see <https://www.gnu.org/licenses/>.
 
 http:
-  host: "api.durudex.local"
+  host: ""
   port: 8000
   name: "Durudex API Gateway"
+
+graphql:
+  complexity-limit: 1000
 
 service:
   user:

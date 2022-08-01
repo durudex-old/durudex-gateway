@@ -33,6 +33,7 @@ type (
 	Config struct {
 		HTTP    HTTPConfig
 		Service ServiceConfig
+		GraphQL GraphQLConfig
 		Auth    AuthConfig
 	}
 
@@ -41,6 +42,11 @@ type (
 		Host string `mapstructure:"host"`
 		Port string `mapstructure:"port"`
 		Name string `mapstructure:"name"`
+	}
+
+	// GraphQL config variables.
+	GraphQLConfig struct {
+		ComplexityLimit int `mapstructure:"complexity-limit"`
 	}
 
 	// TLS config variables.
@@ -121,6 +127,10 @@ func unmarshal(cfg *Config) error {
 
 	// Unmarshal server keys.
 	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
+		return err
+	}
+	// Unmarshal graphql keys.
+	if err := viper.UnmarshalKey("graphql", &cfg.GraphQL); err != nil {
 		return err
 	}
 	// Unmarshal service keys.

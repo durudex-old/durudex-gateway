@@ -31,9 +31,7 @@ import (
 // Getting gRPC status code from gRPC error.
 func fromGRPCError(err error) (*status.Status, bool) {
 	// Check if error is gRPC error.
-	if se, ok := err.(interface {
-		GRPCStatus() *status.Status
-	}); ok {
+	if se, ok := err.(interface{ GRPCStatus() *status.Status }); ok {
 		// Return gRPC status code.
 		return se.GRPCStatus(), true
 	} else {
@@ -50,7 +48,7 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 		// Get gRPC status code from error.
 		if s, ok := fromGRPCError(gqlErr.Unwrap()); ok {
 			// Getting gqlerror.Error from gRPC status.Status.
-			return h.getErrorFromStatus(s)
+			return getErrorFromStatus(s)
 		} else {
 			return gqlErr
 		}
@@ -64,7 +62,7 @@ func (h *Handler) errorHandler(ctx context.Context, err error) *gqlerror.Error {
 }
 
 // Getting gqlerror.Error from gRPC status.Status.
-func (h *Handler) getErrorFromStatus(s *status.Status) *gqlerror.Error {
+func getErrorFromStatus(s *status.Status) *gqlerror.Error {
 	switch s.Code() {
 	case codes.NotFound:
 		return &gqlerror.Error{

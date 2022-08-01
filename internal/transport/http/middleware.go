@@ -52,7 +52,7 @@ func (h *Handler) authMiddleware(ctx *fiber.Ctx) error {
 	}
 
 	// Parsing jwt access token.
-	customClaim, err := auth.Parse(headerParts[1], h.cfg.SigningKey)
+	customClaim, err := auth.Parse(headerParts[1], h.cfg.Auth.JWT.SigningKey)
 	if err != nil {
 		return ctx.Status(fiber.StatusBadRequest).SendString("Authorization token is invalid")
 	}

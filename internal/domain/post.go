@@ -32,6 +32,11 @@ type Post struct {
 	Attachments []string    `json:"attachments"`
 }
 
+// List of post owned by the subject.
+type PostConnection struct {
+	Nodes []*Post `json:"nodes"`
+}
+
 func (Post) IsNode() {}
 
 // Create post input.

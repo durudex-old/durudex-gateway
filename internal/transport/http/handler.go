@@ -30,11 +30,11 @@ import (
 // HTTP handler structure.
 type Handler struct {
 	service *service.Service
-	cfg     config.JWTConfig
+	cfg     *config.Config
 }
 
 // Creating a new HTTP handler.
-func NewHandler(service *service.Service, cfg config.JWTConfig) *Handler {
+func NewHandler(service *service.Service, cfg *config.Config) *Handler {
 	return &Handler{service: service, cfg: cfg}
 }
 
@@ -59,7 +59,7 @@ func (h *Handler) InitRoutes(router fiber.Router) {
 	})
 
 	// Creating a new graphql handler.
-	graphql := graphql.NewHandler(h.service)
+	graphql := graphql.NewHandler(h.service, &h.cfg.GraphQL)
 
 	graph := router.Group("/graph")
 	{

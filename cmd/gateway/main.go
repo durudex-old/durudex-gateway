@@ -54,7 +54,7 @@ func main() {
 	// Creating a new service.
 	service := service.NewService(client)
 	// Creating a new http handler.
-	handler := http.NewHandler(service, cfg.Auth.JWT)
+	handler := http.NewHandler(service, cfg)
 
 	// Create a new server.
 	srv := http.NewServer(cfg.HTTP, handler)

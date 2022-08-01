@@ -63,7 +63,8 @@ func TestInit(t *testing.T) {
 					Port: "8000",
 					Name: "Durudex API Gateway",
 				},
-				Auth: config.AuthConfig{JWT: config.JWTConfig{SigningKey: "super-key"}},
+				GraphQL: config.GraphQLConfig{ComplexityLimit: 500},
+				Auth:    config.AuthConfig{JWT: config.JWTConfig{SigningKey: "super-key"}},
 				Service: config.ServiceConfig{
 					User: config.Service{
 						Addr: "user.service.durudex.local:8004",
