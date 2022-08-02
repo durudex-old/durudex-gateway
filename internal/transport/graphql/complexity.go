@@ -20,7 +20,7 @@ package graphql
 import "github.com/durudex/durudex-gateway/internal/transport/graphql/generated"
 
 // Setting the complexity of the query.
-func setComplexity(root generated.ComplexityRoot) {
+func setComplexity(root *generated.ComplexityRoot) {
 	root.User.Posts = filterComplexity
 	root.Post.Author = doubleComplexity
 }

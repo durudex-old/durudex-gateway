@@ -50,7 +50,7 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 	}
 
 	// Setting the complexity of the query.
-	setComplexity(config.Complexity)
+	setComplexity(&config.Complexity)
 
 	// Creating a new graphql handler.
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))
