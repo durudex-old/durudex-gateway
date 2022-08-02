@@ -23,7 +23,9 @@ import (
 	"github.com/durudex/durudex-gateway/internal/domain"
 	"github.com/durudex/durudex-gateway/pkg/auth"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/gofiber/fiber/v2"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Authorization http header.
@@ -43,18 +45,31 @@ func (h *Handler) authMiddleware(ctx *fiber.Ctx) error {
 	// Checking header parts.
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		return ctx.Status(fiber.StatusBadRequest).SendString("Invalid authorization header")
-	}
-
-	// Check the second part of the header.
-	if len(headerParts[1]) == 0 {
-		return ctx.Status(fiber.StatusBadRequest).SendString("Authorization token is empty")
+		return ctx.Status(fiber.StatusBadRequest).JSON(
+			graphql.Response{
+				Errors: []*gqlerror.Error{
+					{
+						Message:    "Invalid authorization header",
+						Extensions: map[string]interface{}{"code": domain.CodeUnauthorized},
+					},
+				},
+			},
+		)
 	}
 
 	// Parsing jwt access token.
 	customClaim, err := auth.Parse(headerParts[1], h.signingKey)
 	if err != nil {
-		return ctx.Status(fiber.StatusBadRequest).SendString("Authorization token is invalid")
+		return ctx.Status(fiber.StatusBadRequest).JSON(
+			graphql.Response{
+				Errors: []*gqlerror.Error{
+					{
+						Message:    "Authorization token is invalid",
+						Extensions: map[string]interface{}{"code": domain.CodeUnauthorized},
+					},
+				},
+			},
+		)
 	}
 
 	ctx.Context().SetUserValue(domain.UserCtx, customClaim)
