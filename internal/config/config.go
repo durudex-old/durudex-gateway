@@ -31,17 +31,26 @@ const defaultConfigPath string = "configs/main"
 type (
 	// Config variables.
 	Config struct {
-		HTTP    HTTPConfig
-		Service ServiceConfig
-		GraphQL GraphQLConfig
+		HTTP    HTTPConfig    `mapstructure:"http"`
+		Service ServiceConfig `mapstructure:"service"`
+		GraphQL GraphQLConfig `mapstructure:"graphql"`
 		Auth    AuthConfig
 	}
 
 	// HTTP server config variables.
 	HTTPConfig struct {
-		Host string `mapstructure:"host"`
-		Port string `mapstructure:"port"`
-		Name string `mapstructure:"name"`
+		Host string     `mapstructure:"host"`
+		Port string     `mapstructure:"port"`
+		Name string     `mapstructure:"name"`
+		Cors CorsConfig `mapstructure:"cors"`
+	}
+
+	// CORS config variables.
+	CorsConfig struct {
+		Enable       bool   `mapstructure:"enable"`
+		AllowOrigins string `mapstructure:"allow-origins"`
+		AllowMethods string `mapstructure:"allow-methods"`
+		AllowHeaders string `mapstructure:"allow-headers"`
 	}
 
 	// GraphQL config variables.
@@ -78,9 +87,9 @@ type (
 	}
 )
 
-// Initialize config.
-func Init() (*Config, error) {
-	log.Debug().Msg("Initialize config...")
+// Creating a new config.
+func NewConfig() (*Config, error) {
+	log.Debug().Msg("Creating a new config...")
 
 	// Parsing config file.
 	if err := parseConfigFile(); err != nil {
@@ -88,8 +97,9 @@ func Init() (*Config, error) {
 	}
 
 	var cfg Config
+
 	// Unmarshal config keys.
-	if err := unmarshal(&cfg); err != nil {
+	if err := viper.Unmarshal(&cfg); err != nil {
 		return nil, err
 	}
 
@@ -119,22 +129,6 @@ func parseConfigFile() error {
 
 	// Read config file.
 	return viper.ReadInConfig()
-}
-
-// Unmarshal config keys.
-func unmarshal(cfg *Config) error {
-	log.Debug().Msg("Unmarshal config keys...")
-
-	// Unmarshal server keys.
-	if err := viper.UnmarshalKey("http", &cfg.HTTP); err != nil {
-		return err
-	}
-	// Unmarshal graphql keys.
-	if err := viper.UnmarshalKey("graphql", &cfg.GraphQL); err != nil {
-		return err
-	}
-	// Unmarshal service keys.
-	return viper.UnmarshalKey("service", &cfg.Service)
 }
 
 // Setting environment variables from .env file.

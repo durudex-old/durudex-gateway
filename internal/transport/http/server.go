@@ -28,15 +28,15 @@ import (
 type Server struct {
 	app     *fiber.App
 	handler *Handler
-	cfg     config.HTTPConfig
+	config  *config.HTTPConfig
 }
 
 // Creating a new application http server.
-func NewServer(cfg config.HTTPConfig, handler *Handler) *Server {
+func NewServer(config *config.HTTPConfig, handler *Handler) *Server {
 	return &Server{
-		app:     fiber.New(fiber.Config{AppName: cfg.Name}),
+		app:     fiber.New(fiber.Config{AppName: config.Name}),
 		handler: handler,
-		cfg:     cfg,
+		config:  config,
 	}
 }
 
@@ -44,10 +44,13 @@ func NewServer(cfg config.HTTPConfig, handler *Handler) *Server {
 func (s *Server) Run() {
 	log.Debug().Msg("Running http server...")
 
+	// Initialize http middleware.
+	s.handler.InitMiddleware(s.app)
+
 	// Initialize http routes.
 	s.handler.InitRoutes(s.app)
 
-	addr := s.cfg.Host + ":" + s.cfg.Port
+	addr := s.config.Host + ":" + s.config.Port
 
 	// Listen serves HTTP requests from the given addr.
 	if err := s.app.Listen(addr); err != nil {

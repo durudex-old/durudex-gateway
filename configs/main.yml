@@ -17,11 +17,17 @@ http:
   host: "api.durudex.local"
   port: 8000
   name: "Durudex API Gateway"
+  cors:
+    enable: true
+    allow-origins: "*"
+    allow-methods: "GET,POST"
+    allow-headers: "*"
 
 graphql:
   complexity-limit: 500
 
 service:
+  # User Service (https://github.com/durudex/durudex-user-service)
   user:
     addr: "user.service.durudex.local:8004"
     tls:
@@ -29,6 +35,7 @@ service:
       ca-cert: "./certs/rootCA.pem"
       cert: "./certs/client-cert.pem"
       key: "./certs/client-key.pem"
+  # Post Service (https://github.com/durudex/durudex-post-service)
   post:
     addr: "post.service.durudex.local:8005"
     tls:

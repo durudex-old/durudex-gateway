@@ -29,7 +29,10 @@ import (
 // GraphQL directive for user authorization.
 func (h *Handler) isAuth(ctx context.Context, obj interface{}, next graphql.Resolver) (interface{}, error) {
 	if ctx.Value(domain.UserCtx) == nil {
-		return nil, &gqlerror.Error{Message: "Authorization token failed"}
+		return nil, &gqlerror.Error{
+			Message:    "Authorization token failed",
+			Extensions: map[string]interface{}{"code": domain.CodeUnauthorized},
+		}
 	}
 
 	return next(ctx)

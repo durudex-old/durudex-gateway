@@ -26,6 +26,7 @@ const (
 	CodeInvalidArgument     string = "INVALID_ARGUMENT"
 	CodeNotFound            string = "NOT_FOUND"
 	CodeAlreadyExists       string = "ALREADY_EXISTS"
+	CodeUnauthorized        string = "UNAUTHORIZED"
 )
 
 // GraphQL Node interface.

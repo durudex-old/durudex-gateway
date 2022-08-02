@@ -24,6 +24,7 @@ import (
 
 	"github.com/durudex/durudex-gateway/internal/config"
 	"github.com/durudex/durudex-gateway/internal/service"
+	"github.com/durudex/durudex-gateway/internal/transport/graphql"
 	"github.com/durudex/durudex-gateway/internal/transport/grpc"
 	"github.com/durudex/durudex-gateway/internal/transport/http"
 
@@ -44,7 +45,7 @@ func init() {
 // A function that running the application.
 func main() {
 	// Initialize config.
-	cfg, err := config.Init()
+	cfg, err := config.NewConfig()
 	if err != nil {
 		log.Error().Err(err).Msg("error initialize config")
 	}
@@ -53,11 +54,13 @@ func main() {
 	client := grpc.NewClient(cfg.Service)
 	// Creating a new service.
 	service := service.NewService(client)
+	// Creating a new graphql handler.
+	graphqlHandler := graphql.NewHandler(service, &cfg.GraphQL)
 	// Creating a new http handler.
-	handler := http.NewHandler(service, cfg)
+	httpHandler := http.NewHandler(&cfg.HTTP, graphqlHandler, cfg.Auth.JWT.SigningKey)
 
 	// Create a new server.
-	srv := http.NewServer(cfg.HTTP, handler)
+	srv := http.NewServer(&cfg.HTTP, httpHandler)
 
 	// Run server.
 	go srv.Run()

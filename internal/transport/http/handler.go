@@ -19,7 +19,6 @@ package http
 
 import (
 	"github.com/durudex/durudex-gateway/internal/config"
-	"github.com/durudex/durudex-gateway/internal/service"
 	"github.com/durudex/durudex-gateway/internal/transport/graphql"
 
 	"github.com/gofiber/adaptor/v2"
@@ -29,41 +28,41 @@ import (
 
 // HTTP handler structure.
 type Handler struct {
-	service *service.Service
-	cfg     *config.Config
+	config     *config.HTTPConfig
+	graphql    *graphql.Handler
+	signingKey string
 }
 
 // Creating a new HTTP handler.
-func NewHandler(service *service.Service, cfg *config.Config) *Handler {
-	return &Handler{service: service, cfg: cfg}
+func NewHandler(config *config.HTTPConfig, graphql *graphql.Handler, signingKey string) *Handler {
+	return &Handler{config: config, graphql: graphql, signingKey: signingKey}
+}
+
+// Initialize http middleware.
+func (h *Handler) InitMiddleware(router fiber.Router) {
+	if h.config.Cors.Enable {
+		// CORS configuration.
+		corsConfig := cors.Config{
+			AllowOrigins: h.config.Cors.AllowOrigins,
+			AllowMethods: h.config.Cors.AllowMethods,
+			AllowHeaders: h.config.Cors.AllowHeaders,
+		}
+
+		// Initialize middleware.
+		router.Use(cors.New(corsConfig))
+	}
 }
 
 // Initialize http routes.
 func (h *Handler) InitRoutes(router fiber.Router) {
-	// CORS configuration.
-	corsConfig := cors.Config{
-		AllowOrigins: "*",
-		AllowMethods: "*",
-		AllowHeaders: "*",
-	}
-
-	// Set http middleware.
-	router.Use(
-		cors.New(corsConfig),
-		h.authMiddleware,
-	)
-
 	// Ping pong route.
 	router.Get("/ping", func(ctx *fiber.Ctx) error {
 		return ctx.SendString("pong")
 	})
 
-	// Creating a new graphql handler.
-	graphql := graphql.NewHandler(h.service, &h.cfg.GraphQL)
-
-	graph := router.Group("/graph")
+	graph := router.Group("/graph", h.authMiddleware)
 	{
-		graph.Get("/", adaptor.HTTPHandlerFunc(graphql.PlaygroundHandler()))
-		graph.Post("/query", adaptor.HTTPHandlerFunc(graphql.GraphqlHandler()))
+		graph.Get("/", adaptor.HTTPHandlerFunc(h.graphql.PlaygroundHandler()))
+		graph.Post("/query", adaptor.HTTPHandlerFunc(h.graphql.GraphqlHandler()))
 	}
 }

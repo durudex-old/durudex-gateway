@@ -33,12 +33,12 @@ import (
 // GraphQL handler structure.
 type Handler struct {
 	service *service.Service
-	cfg     *config.GraphQLConfig
+	config  *config.GraphQLConfig
 }
 
 // Creating a new graphql handler.
-func NewHandler(service *service.Service, cfg *config.GraphQLConfig) *Handler {
-	return &Handler{service: service, cfg: cfg}
+func NewHandler(service *service.Service, config *config.GraphQLConfig) *Handler {
+	return &Handler{service: service, config: config}
 }
 
 // GraphQL handler.
@@ -56,7 +56,7 @@ func (h *Handler) GraphqlHandler() http.HandlerFunc {
 	handler := handler.NewDefaultServer(generated.NewExecutableSchema(config))
 
 	// Set graphql fixed complexity limit.
-	handler.Use(extension.FixedComplexityLimit(h.cfg.ComplexityLimit))
+	handler.Use(extension.FixedComplexityLimit(h.config.ComplexityLimit))
 
 	// Set graphql error handler.
 	handler.SetErrorPresenter(h.errorHandler)

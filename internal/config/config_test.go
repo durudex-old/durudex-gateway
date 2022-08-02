@@ -25,8 +25,8 @@ import (
 	"github.com/durudex/durudex-gateway/internal/config"
 )
 
-// Testing initialize config.
-func TestInit(t *testing.T) {
+// Testing creating a new config.
+func Test_NewConfig(t *testing.T) {
 	// Environment configurations.
 	type env struct{ configPath, jwtSigningKey string }
 
@@ -62,6 +62,12 @@ func TestInit(t *testing.T) {
 					Host: "api.durudex.local",
 					Port: "8000",
 					Name: "Durudex API Gateway",
+					Cors: config.CorsConfig{
+						Enable:       true,
+						AllowOrigins: "*",
+						AllowMethods: "GET,POST",
+						AllowHeaders: "*",
+					},
 				},
 				GraphQL: config.GraphQLConfig{ComplexityLimit: 500},
 				Auth:    config.AuthConfig{JWT: config.JWTConfig{SigningKey: "super-key"}},
@@ -85,8 +91,8 @@ func TestInit(t *testing.T) {
 			// Set environment configurations.
 			setEnv(tt.args.env)
 
-			// Initialize config.
-			got, err := config.Init()
+			// Creating a new config.
+			got, err := config.NewConfig()
 			if (err != nil) != tt.wantErr {
 				t.Errorf("error initialize config: %s", err.Error())
 			}
