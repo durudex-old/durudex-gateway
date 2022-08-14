@@ -14,19 +14,20 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with Durudex. If not, see <https://www.gnu.org/licenses/>.
  */
+
 package tls
 
 import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 // Loading TLS credentials config.
 func LoadTLSConfig(caCertPath, certPath, keyPath string) (*tls.Config, error) {
 	// Load certificate on the CA who signed client's certificate.
-	pemCA, err := ioutil.ReadFile(caCertPath)
+	pemCA, err := os.ReadFile(caCertPath)
 	if err != nil {
 		return nil, err
 	}
