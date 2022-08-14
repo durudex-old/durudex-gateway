@@ -26,11 +26,12 @@ func (r *mutationResolver) SignIn(ctx context.Context, input domain.SignInInput)
 }
 
 // SignOut is the resolver for the signOut field.
-func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshTokenInput) (bool, error) {
-	input.Ip = ctx.Value(domain.IpCtx).(string)
-
+func (r *mutationResolver) SignOut(ctx context.Context, token string) (bool, error) {
 	// Sign Out.
-	if err := r.service.Auth.SignOut(ctx, input); err != nil {
+	if err := r.service.Auth.SignOut(ctx, domain.RefreshTokenInput{
+		Token: token,
+		Ip:    ctx.Value(domain.IpCtx).(string),
+	}); err != nil {
 		return false, err
 	}
 
@@ -38,9 +39,10 @@ func (r *mutationResolver) SignOut(ctx context.Context, input domain.RefreshToke
 }
 
 // RefreshToken is the resolver for the refreshToken field.
-func (r *mutationResolver) RefreshToken(ctx context.Context, input domain.RefreshTokenInput) (string, error) {
-	input.Ip = ctx.Value(domain.IpCtx).(string)
-
+func (r *mutationResolver) RefreshToken(ctx context.Context, token string) (string, error) {
 	// Refresh token.
-	return r.service.Auth.RefreshToken(ctx, input)
+	return r.service.Auth.RefreshToken(ctx, domain.RefreshTokenInput{
+		Token: token,
+		Ip:    ctx.Value(domain.IpCtx).(string),
+	})
 }

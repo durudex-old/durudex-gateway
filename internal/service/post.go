@@ -28,10 +28,11 @@ import (
 
 // Post service interface.
 type Post interface {
-	CreatePost(ctx context.Context, input domain.CreatePostInput) (ksuid.KSUID, error)
-	DeletePost(ctx context.Context, id, authorId ksuid.KSUID) error
-	UpdatePost(ctx context.Context, input domain.UpdatePostInput) error
-	GetPost(ctx context.Context, id ksuid.KSUID) (*domain.Post, error)
+	Create(ctx context.Context, input domain.CreatePostInput) (ksuid.KSUID, error)
+	Delete(ctx context.Context, id, authorId ksuid.KSUID) error
+	Update(ctx context.Context, input domain.UpdatePostInput) error
+	Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, error)
+	GetPosts(ctx context.Context, authorId ksuid.KSUID, first, last *int32) ([]*domain.Post, error)
 }
 
 // Post service structure.
@@ -43,7 +44,7 @@ func NewPostService(client v1.PostServiceClient) *PostService {
 }
 
 // Creating a new post.
-func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInput) (ksuid.KSUID, error) {
+func (s *PostService) Create(ctx context.Context, input domain.CreatePostInput) (ksuid.KSUID, error) {
 	response, err := s.client.CreatePost(ctx, &v1.CreatePostRequest{
 		AuthorId: input.AuthorId.Bytes(),
 		Text:     input.Text,
@@ -56,7 +57,7 @@ func (s *PostService) CreatePost(ctx context.Context, input domain.CreatePostInp
 }
 
 // Deleting a post.
-func (s *PostService) DeletePost(ctx context.Context, id, authorId ksuid.KSUID) error {
+func (s *PostService) Delete(ctx context.Context, id, authorId ksuid.KSUID) error {
 	if _, err := s.client.DeletePost(ctx, &v1.DeletePostRequest{
 		Id:       id.Bytes(),
 		AuthorId: authorId.Bytes(),
@@ -68,7 +69,7 @@ func (s *PostService) DeletePost(ctx context.Context, id, authorId ksuid.KSUID) 
 }
 
 // Updating a post.
-func (s *PostService) UpdatePost(ctx context.Context, input domain.UpdatePostInput) error {
+func (s *PostService) Update(ctx context.Context, input domain.UpdatePostInput) error {
 	if _, err := s.client.UpdatePost(ctx, &v1.UpdatePostRequest{
 		Id:       input.Id.Bytes(),
 		AuthorId: input.AuthorId.Bytes(),
@@ -81,7 +82,7 @@ func (s *PostService) UpdatePost(ctx context.Context, input domain.UpdatePostInp
 }
 
 // Getting a post.
-func (s *PostService) GetPost(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
+func (s *PostService) Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
 	post, err := s.client.GetPostById(ctx, &v1.GetPostByIdRequest{Id: id.Bytes()})
 	if err != nil {
 		return nil, err
@@ -99,4 +100,37 @@ func (s *PostService) GetPost(ctx context.Context, id ksuid.KSUID) (*domain.Post
 		Text:      post.Text,
 		UpdatedAt: post.UpdatedAt.AsOptionalTime(),
 	}, nil
+}
+
+// Getting author posts.
+func (s *PostService) GetPosts(ctx context.Context, authorId ksuid.KSUID, first, last *int32) ([]*domain.Post, error) {
+	// Getting author posts.
+	response, err := s.client.GetAuthorPosts(ctx, &v1.GetAuthorPostsRequest{
+		AuthorId: authorId.Bytes(),
+		First:    first,
+		Last:     last,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	posts := make([]*domain.Post, len(response.Posts))
+
+	for i, post := range response.Posts {
+		// Getting post ksuid from bytes.
+		id, err := ksuid.FromBytes(post.Id)
+		if err != nil {
+			return nil, err
+		}
+
+		posts[i] = &domain.Post{
+			Id:          id,
+			Author:      &domain.User{Id: authorId},
+			Text:        post.Text,
+			UpdatedAt:   post.UpdatedAt.AsOptionalTime(),
+			Attachments: nil,
+		}
+	}
+
+	return posts, nil
 }

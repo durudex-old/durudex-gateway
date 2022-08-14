@@ -28,7 +28,7 @@ import (
 
 // User interface.
 type User interface {
-	GetUserByID(ctx context.Context, id ksuid.KSUID) (*domain.User, error)
+	GetById(ctx context.Context, id ksuid.KSUID) (*domain.User, error)
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) error
 	CreateVerifyEmailCode(ctx context.Context, email string) error
 	VerifyEmailCode(ctx context.Context, email string, code uint64) (bool, error)
@@ -46,7 +46,7 @@ func NewUserService(user v1.UserServiceClient, code v1.UserCodeServiceClient) *U
 }
 
 // Getting user by id.
-func (s *UserService) GetUserByID(ctx context.Context, id ksuid.KSUID) (*domain.User, error) {
+func (s *UserService) GetById(ctx context.Context, id ksuid.KSUID) (*domain.User, error) {
 	response, err := s.user.GetUserById(ctx, &v1.GetUserByIdRequest{Id: id.Bytes()})
 
 	return &domain.User{

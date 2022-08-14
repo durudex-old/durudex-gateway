@@ -44,7 +44,7 @@ func (r *queryResolver) Me(ctx context.Context) (*domain.User, error) {
 	}
 
 	// Getting user.
-	user, err := r.service.User.GetUserByID(ctx, id)
+	user, err := r.service.User.GetById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (r *queryResolver) Me(ctx context.Context) (*domain.User, error) {
 
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id ksuid.KSUID) (*domain.User, error) {
-	user, err := r.service.User.GetUserByID(ctx, id)
+	user, err := r.service.User.GetById(ctx, id)
 	if err != nil {
 		return nil, err
 	}

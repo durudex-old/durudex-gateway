@@ -22,7 +22,7 @@ func (r *mutationResolver) CreatePost(ctx context.Context, input domain.CreatePo
 	}
 
 	// Create post.
-	id, err := r.service.Post.CreatePost(ctx, input)
+	id, err := r.service.Post.Create(ctx, input)
 	if err != nil {
 		return ksuid.Nil, err
 	}
@@ -39,7 +39,7 @@ func (r *mutationResolver) DeletePost(ctx context.Context, id ksuid.KSUID) (bool
 	}
 
 	// Delete post.
-	if err := r.service.Post.DeletePost(ctx, id, postId); err != nil {
+	if err := r.service.Post.Delete(ctx, id, postId); err != nil {
 		return false, err
 	}
 
@@ -57,7 +57,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePo
 	}
 
 	// Update post.
-	if err := r.service.Post.UpdatePost(ctx, input); err != nil {
+	if err := r.service.Post.Update(ctx, input); err != nil {
 		return false, err
 	}
 
@@ -67,7 +67,7 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePo
 // Post is the resolver for the post field.
 func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
 	// Getting a post.
-	post, err := r.service.Post.GetPost(ctx, id)
+	post, err := r.service.Post.Get(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -78,7 +78,7 @@ func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post,
 	// Check author selections fields.
 	if !(len(fields) == 1 && fields[0] == "id") {
 		// Getting post author.
-		user, err := r.service.User.GetUserByID(ctx, post.Author.Id)
+		user, err := r.service.User.GetById(ctx, post.Author.Id)
 		if err != nil {
 			return nil, err
 		}
