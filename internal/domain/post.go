@@ -25,30 +25,54 @@ import (
 
 // Post type.
 type Post struct {
-	Id          ksuid.KSUID `json:"id"`
-	Author      *User       `json:"author"`
-	Text        string      `json:"text"`
-	UpdatedAt   *time.Time  `json:"updatedAt"`
-	Attachments []string    `json:"attachments"`
-}
-
-// List of post owned by the subject.
-type PostConnection struct {
-	Nodes []*Post `json:"nodes"`
+	// Post id.
+	Id ksuid.KSUID `json:"id"`
+	// Post author.
+	Author *User `json:"author"`
+	// Post text.
+	Text string `json:"text"`
+	// Post updated date.
+	UpdatedAt *time.Time `json:"updatedAt"`
+	// Post attachments.
+	Attachments []string `json:"attachments"`
 }
 
 func (Post) IsNode() {}
 
+// List of post owned by the subject.
+type PostConnection struct {
+	// A list of nodes.
+	Nodes []*Post `json:"nodes"`
+	// A list of edges.
+	Edges []*PostEdge `json:"edges"`
+	// Information to aid in pagination.
+	PageInfo *PageInfo `json:"pageInfo"`
+}
+
+// An edge in a post connection.
+type PostEdge struct {
+	// A cursor for use in pagination.
+	Cursor string `json:"cursor"`
+	// The item at the end of the edge.
+	Node *Post `json:"node"`
+}
+
 // Create post input.
 type CreatePostInput struct {
-	AuthorId    ksuid.KSUID
-	Text        string `json:"text"`
-	Attachments []*UploadFile
+	// Author id.
+	AuthorId ksuid.KSUID
+	// Post text.
+	Text string `json:"text"`
+	// Post attachments.
+	Attachments []*UploadFile `json:"attachments"`
 }
 
 // Update post input.
 type UpdatePostInput struct {
-	Id       ksuid.KSUID `json:"id"`
+	// Post id.
+	Id ksuid.KSUID `json:"id"`
+	// Author id.
 	AuthorId ksuid.KSUID
-	Text     string `json:"text"`
+	// Post text.
+	Text string `json:"text"`
 }

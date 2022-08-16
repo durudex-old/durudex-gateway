@@ -34,8 +34,18 @@ type Node interface {
 	IsNode()
 }
 
+// Information about pagination in a connection.
+type PageInfo struct {
+	// When paginating backwards, the cursor to continue.
+	StartCursor *string `json:"startCursor"`
+	// When paginating forwards, the cursor to continue.
+	EndCursor *string `json:"endCursor"`
+}
+
 // Upload files input.
 type UploadFile struct {
-	ID   int            `json:"id"`
+	// File id.
+	Id int `json:"id"`
+	// File data.
 	File graphql.Upload `json:"file"`
 }

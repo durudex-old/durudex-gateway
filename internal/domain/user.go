@@ -23,20 +23,30 @@ import (
 	"github.com/segmentio/ksuid"
 )
 
-// User structure.
+// User type.
 type User struct {
-	Id        ksuid.KSUID `json:"id"`
-	Username  string      `json:"username"`
-	LastVisit time.Time   `json:"lastVisit"`
-	Verified  bool        `json:"verified"`
-	AvatarUrl *string     `json:"avatarUrl"`
+	// Getting user posts.
+	Posts *PostConnection `json:"posts"`
+	// User id.
+	Id ksuid.KSUID `json:"id"`
+	// Username.
+	Username string `json:"username"`
+	// User last visit date.
+	LastVisit time.Time `json:"lastVisit"`
+	// User verified status.
+	Verified bool `json:"verified"`
+	// User avatar url.
+	AvatarUrl *string `json:"avatarUrl"`
 }
 
 func (User) IsNode() {}
 
-// User forgot password input.
+// Forgot user password input.
 type ForgotPasswordInput struct {
-	Email    string `json:"email"`
+	// User email.
+	Email string `json:"email"`
+	// New user password.
 	Password string `json:"password"`
-	Code     uint64 `json:"code"`
+	// User verification code.
+	Code uint64 `json:"code"`
 }

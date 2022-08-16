@@ -88,15 +88,9 @@ func (s *PostService) Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, er
 		return nil, err
 	}
 
-	// Getting post author ksuid from bytes.
-	authorId, err := ksuid.FromBytes(post.AuthorId)
-	if err != nil {
-		return nil, err
-	}
-
 	return &domain.Post{
 		Id:        id,
-		Author:    &domain.User{Id: authorId},
+		Author:    &domain.User{Id: ksuid.FromBytesOrNil(post.AuthorId)},
 		Text:      post.Text,
 		UpdatedAt: post.UpdatedAt.AsOptionalTime(),
 	}, nil
@@ -117,14 +111,8 @@ func (s *PostService) GetPosts(ctx context.Context, authorId ksuid.KSUID, first,
 	posts := make([]*domain.Post, len(response.Posts))
 
 	for i, post := range response.Posts {
-		// Getting post ksuid from bytes.
-		id, err := ksuid.FromBytes(post.Id)
-		if err != nil {
-			return nil, err
-		}
-
 		posts[i] = &domain.Post{
-			Id:          id,
+			Id:          ksuid.FromBytesOrNil(post.Id),
 			Author:      &domain.User{Id: authorId},
 			Text:        post.Text,
 			UpdatedAt:   post.UpdatedAt.AsOptionalTime(),

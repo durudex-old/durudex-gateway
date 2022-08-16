@@ -8,7 +8,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/durudex/durudex-gateway/internal/domain"
-	"github.com/durudex/durudex-gateway/internal/transport/graphql/generated"
 	"github.com/segmentio/ksuid"
 )
 
@@ -61,13 +60,3 @@ func (r *queryResolver) User(ctx context.Context, id ksuid.KSUID) (*domain.User,
 
 	return user, nil
 }
-
-// Posts is the resolver for the posts field.
-func (r *userResolver) Posts(ctx context.Context, obj *domain.User, first *int, last *int) (*domain.PostConnection, error) {
-	return &domain.PostConnection{}, nil
-}
-
-// User returns generated.UserResolver implementation.
-func (r *Resolver) User() generated.UserResolver { return &userResolver{r} }
-
-type userResolver struct{ *Resolver }

@@ -9,7 +9,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.32.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/rs/zerolog v1.26.1
-	github.com/segmentio/ksuid v1.0.4
+	github.com/segmentio/ksuid v1.0.5-0.20220816194758-874a68afca39
 	github.com/spf13/viper v1.10.1
 	github.com/vektah/gqlparser/v2 v2.4.6
 	google.golang.org/grpc v1.43.0

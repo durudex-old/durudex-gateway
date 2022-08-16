@@ -19,28 +19,40 @@ package domain
 
 // Authorization tokens.
 type Tokens struct {
-	Access  string `json:"access"`
+	// JWT access token.
+	Access string `json:"access"`
+	// Refresh token.
 	Refresh string `json:"refresh"`
-}
-
-// User Sign Up input.
-type SignUpInput struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-	Code     uint64 `json:"code"`
-	Ip       string `json:"ip"`
 }
 
 // User Sign In input.
 type SignInInput struct {
+	// Account username.
 	Username string `json:"username"`
+	// User password
 	Password string `json:"password"`
-	Ip       string
+	// User ip address.
+	Ip string
+}
+
+// User Sign Up input.
+type SignUpInput struct {
+	// Account username.
+	Username string `json:"username"`
+	// User email.
+	Email string `json:"email"`
+	// User password.
+	Password string `json:"password"`
+	// User verification code.
+	Code uint64 `json:"code"`
+	// User ip address.
+	Ip string
 }
 
 // Refresh tokens input.
 type RefreshTokenInput struct {
+	// Refresh token.
 	Token string `json:"token"`
-	Ip    string
+	// User ip address.
+	Ip string
 }

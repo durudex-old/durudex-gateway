@@ -26,7 +26,7 @@ func setComplexity(root *generated.ComplexityRoot) {
 }
 
 // Filter the complexity of the query.
-func filterComplexity(childComplexity int, first, last *int) int {
+func filterComplexity(childComplexity int, first *int, last *int, before *string, after *string) int {
 	switch {
 	case first != nil:
 		return childComplexity * *first
