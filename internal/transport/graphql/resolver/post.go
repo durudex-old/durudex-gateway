@@ -5,8 +5,10 @@ package resolver
 
 import (
 	"context"
+	"encoding/base64"
 
 	"github.com/durudex/durudex-gateway/internal/domain"
+	"github.com/durudex/durudex-gateway/internal/transport/graphql/generated"
 	"github.com/durudex/durudex-gateway/pkg/gql"
 	"github.com/segmentio/ksuid"
 )
@@ -64,6 +66,31 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePo
 	return true, nil
 }
 
+// Edges is the resolver for the edges field.
+func (r *postConnectionResolver) Edges(ctx context.Context, obj *domain.PostConnection) ([]*domain.PostEdge, error) {
+	edges := make([]*domain.PostEdge, len(obj.Nodes))
+
+	for i, node := range obj.Nodes {
+		edges[i] = &domain.PostEdge{
+			Cursor: base64.StdEncoding.EncodeToString(node.Id.Bytes()),
+			Node:   node,
+		}
+	}
+
+	return edges, nil
+}
+
+// PageInfo is the resolver for the pageInfo field.
+func (r *postConnectionResolver) PageInfo(ctx context.Context, obj *domain.PostConnection) (*domain.PageInfo, error) {
+	start := base64.StdEncoding.EncodeToString(obj.Nodes[0].Id.Bytes())
+	end := base64.StdEncoding.EncodeToString(obj.Nodes[len(obj.Nodes)-1].Id.Bytes())
+
+	return &domain.PageInfo{
+		StartCursor: &start,
+		EndCursor:   &end,
+	}, nil
+}
+
 // Post is the resolver for the post field.
 func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
 	// Getting a post.
@@ -88,3 +115,10 @@ func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post,
 
 	return post, nil
 }
+
+// PostConnection returns generated.PostConnectionResolver implementation.
+func (r *Resolver) PostConnection() generated.PostConnectionResolver {
+	return &postConnectionResolver{r}
+}
+
+type postConnectionResolver struct{ *Resolver }

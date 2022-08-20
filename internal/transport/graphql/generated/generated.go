@@ -40,7 +40,9 @@ type Config struct {
 
 type ResolverRoot interface {
 	Mutation() MutationResolver
+	PostConnection() PostConnectionResolver
 	Query() QueryResolver
+	User() UserResolver
 }
 
 type DirectiveRoot struct {
@@ -97,7 +99,7 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		AvatarURL func(childComplexity int) int
+		AvatarUrl func(childComplexity int) int
 		Id        func(childComplexity int) int
 		LastVisit func(childComplexity int) int
 		Posts     func(childComplexity int, first *int, last *int, before *string, after *string) int
@@ -118,10 +120,17 @@ type MutationResolver interface {
 	ForgotPassword(ctx context.Context, input domain.ForgotPasswordInput) (bool, error)
 	UpdateAvatar(ctx context.Context, file graphql.Upload) (string, error)
 }
+type PostConnectionResolver interface {
+	Edges(ctx context.Context, obj *domain.PostConnection) ([]*domain.PostEdge, error)
+	PageInfo(ctx context.Context, obj *domain.PostConnection) (*domain.PageInfo, error)
+}
 type QueryResolver interface {
 	Post(ctx context.Context, id ksuid.KSUID) (*domain.Post, error)
 	Me(ctx context.Context) (*domain.User, error)
 	User(ctx context.Context, id ksuid.KSUID) (*domain.User, error)
+}
+type UserResolver interface {
+	Posts(ctx context.Context, obj *domain.User, first *int, last *int, before *string, after *string) (*domain.PostConnection, error)
 }
 
 type executableSchema struct {
@@ -389,11 +398,11 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		return e.complexity.Tokens.Refresh(childComplexity), true
 
 	case "User.avatarUrl":
-		if e.complexity.User.AvatarURL == nil {
+		if e.complexity.User.AvatarUrl == nil {
 			break
 		}
 
-		return e.complexity.User.AvatarURL(childComplexity), true
+		return e.complexity.User.AvatarUrl(childComplexity), true
 
 	case "User.id":
 		if e.complexity.User.Id == nil {
@@ -2235,7 +2244,7 @@ func (ec *executionContext) _PostConnection_edges(ctx context.Context, field gra
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Edges, nil
+		return ec.resolvers.PostConnection().Edges(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2253,8 +2262,8 @@ func (ec *executionContext) fieldContext_PostConnection_edges(ctx context.Contex
 	fc = &graphql.FieldContext{
 		Object:     "PostConnection",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "cursor":
@@ -2282,7 +2291,7 @@ func (ec *executionContext) _PostConnection_pageInfo(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.PageInfo, nil
+		return ec.resolvers.PostConnection().PageInfo(rctx, obj)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2303,8 +2312,8 @@ func (ec *executionContext) fieldContext_PostConnection_pageInfo(ctx context.Con
 	fc = &graphql.FieldContext{
 		Object:     "PostConnection",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "startCursor":
@@ -2854,7 +2863,7 @@ func (ec *executionContext) _User_posts(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Posts, nil
+		return ec.resolvers.User().Posts(rctx, obj, fc.Args["first"].(*int), fc.Args["last"].(*int), fc.Args["before"].(*string), fc.Args["after"].(*string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2875,8 +2884,8 @@ func (ec *executionContext) fieldContext_User_posts(ctx context.Context, field g
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "nodes":
@@ -3093,7 +3102,7 @@ func (ec *executionContext) _User_avatarUrl(ctx context.Context, field graphql.C
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.AvatarURL, nil
+		return obj.AvatarUrl, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -5378,16 +5387,42 @@ func (ec *executionContext) _PostConnection(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._PostConnection_nodes(ctx, field, obj)
 
 		case "edges":
+			field := field
 
-			out.Values[i] = ec._PostConnection_edges(ctx, field, obj)
-
-		case "pageInfo":
-
-			out.Values[i] = ec._PostConnection_pageInfo(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PostConnection_edges(ctx, field, obj)
+				return res
 			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
+		case "pageInfo":
+			field := field
+
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._PostConnection_pageInfo(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
+			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -5582,39 +5617,52 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("User")
 		case "posts":
+			field := field
 
-			out.Values[i] = ec._User_posts(ctx, field, obj)
-
-			if out.Values[i] == graphql.Null {
-				invalids++
+			innerFunc := func(ctx context.Context) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_posts(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&invalids, 1)
+				}
+				return res
 			}
+
+			out.Concurrently(i, func() graphql.Marshaler {
+				return innerFunc(ctx)
+
+			})
 		case "id":
 
 			out.Values[i] = ec._User_id(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "username":
 
 			out.Values[i] = ec._User_username(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "lastVisit":
 
 			out.Values[i] = ec._User_lastVisit(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "verified":
 
 			out.Values[i] = ec._User_verified(ctx, field, obj)
 
 			if out.Values[i] == graphql.Null {
-				invalids++
+				atomic.AddUint32(&invalids, 1)
 			}
 		case "avatarUrl":
 
@@ -6004,6 +6052,10 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v domain.PageInfo) graphql.Marshaler {
+	return ec._PageInfo(ctx, sel, &v)
+}
+
 func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v *domain.PageInfo) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6012,6 +6064,10 @@ func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋdurudexᚋdurudex
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPostConnection2githubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐPostConnection(ctx context.Context, sel ast.SelectionSet, v domain.PostConnection) graphql.Marshaler {
+	return ec._PostConnection(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNPostConnection2ᚖgithubᚗcomᚋdurudexᚋdurudexᚑgatewayᚋinternalᚋdomainᚐPostConnection(ctx context.Context, sel ast.SelectionSet, v *domain.PostConnection) graphql.Marshaler {

@@ -3,7 +3,7 @@ module github.com/durudex/durudex-gateway
 go 1.18
 
 require (
-	github.com/99designs/gqlgen v0.17.13
+	github.com/99designs/gqlgen v0.17.14
 	github.com/durudex/dugopb v0.0.0-20220515113850-1a71150497b9
 	github.com/gofiber/adaptor/v2 v2.1.23
 	github.com/gofiber/fiber/v2 v2.32.0
@@ -11,7 +11,7 @@ require (
 	github.com/rs/zerolog v1.26.1
 	github.com/segmentio/ksuid v1.0.5-0.20220816194758-874a68afca39
 	github.com/spf13/viper v1.10.1
-	github.com/vektah/gqlparser/v2 v2.4.6
+	github.com/vektah/gqlparser/v2 v2.4.8
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.28.0
 )

@@ -20,10 +20,10 @@ const _ = grpc.SupportPackageIsVersion7
 type PostServiceClient interface {
 	// Create a new post.
 	CreatePost(ctx context.Context, in *CreatePostRequest, opts ...grpc.CallOption) (*CreatePostResponse, error)
-	// Get a post by ID.
-	GetPostById(ctx context.Context, in *GetPostByIdRequest, opts ...grpc.CallOption) (*GetPostByIdResponse, error)
-	// Getting author posts.
-	GetAuthorPosts(ctx context.Context, in *GetAuthorPostsRequest, opts ...grpc.CallOption) (*GetAuthorPostsResponse, error)
+	// Getting a post.
+	GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error)
+	// Getting a posts.
+	GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*GetPostsResponse, error)
 	// Delete a post.
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
 	// Update a post.
@@ -47,18 +47,18 @@ func (c *postServiceClient) CreatePost(ctx context.Context, in *CreatePostReques
 	return out, nil
 }
 
-func (c *postServiceClient) GetPostById(ctx context.Context, in *GetPostByIdRequest, opts ...grpc.CallOption) (*GetPostByIdResponse, error) {
-	out := new(GetPostByIdResponse)
-	err := c.cc.Invoke(ctx, "/durudex.v1.PostService/GetPostById", in, out, opts...)
+func (c *postServiceClient) GetPost(ctx context.Context, in *GetPostRequest, opts ...grpc.CallOption) (*GetPostResponse, error) {
+	out := new(GetPostResponse)
+	err := c.cc.Invoke(ctx, "/durudex.v1.PostService/GetPost", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *postServiceClient) GetAuthorPosts(ctx context.Context, in *GetAuthorPostsRequest, opts ...grpc.CallOption) (*GetAuthorPostsResponse, error) {
-	out := new(GetAuthorPostsResponse)
-	err := c.cc.Invoke(ctx, "/durudex.v1.PostService/GetAuthorPosts", in, out, opts...)
+func (c *postServiceClient) GetPosts(ctx context.Context, in *GetPostsRequest, opts ...grpc.CallOption) (*GetPostsResponse, error) {
+	out := new(GetPostsResponse)
+	err := c.cc.Invoke(ctx, "/durudex.v1.PostService/GetPosts", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -89,10 +89,10 @@ func (c *postServiceClient) UpdatePost(ctx context.Context, in *UpdatePostReques
 type PostServiceServer interface {
 	// Create a new post.
 	CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error)
-	// Get a post by ID.
-	GetPostById(context.Context, *GetPostByIdRequest) (*GetPostByIdResponse, error)
-	// Getting author posts.
-	GetAuthorPosts(context.Context, *GetAuthorPostsRequest) (*GetAuthorPostsResponse, error)
+	// Getting a post.
+	GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error)
+	// Getting a posts.
+	GetPosts(context.Context, *GetPostsRequest) (*GetPostsResponse, error)
 	// Delete a post.
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
 	// Update a post.
@@ -107,11 +107,11 @@ type UnimplementedPostServiceServer struct {
 func (UnimplementedPostServiceServer) CreatePost(context.Context, *CreatePostRequest) (*CreatePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
 }
-func (UnimplementedPostServiceServer) GetPostById(context.Context, *GetPostByIdRequest) (*GetPostByIdResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetPostById not implemented")
+func (UnimplementedPostServiceServer) GetPost(context.Context, *GetPostRequest) (*GetPostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPost not implemented")
 }
-func (UnimplementedPostServiceServer) GetAuthorPosts(context.Context, *GetAuthorPostsRequest) (*GetAuthorPostsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetAuthorPosts not implemented")
+func (UnimplementedPostServiceServer) GetPosts(context.Context, *GetPostsRequest) (*GetPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
 }
 func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePost not implemented")
@@ -150,38 +150,38 @@ func _PostService_CreatePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostService_GetPostById_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetPostByIdRequest)
+func _PostService_GetPost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostServiceServer).GetPostById(ctx, in)
+		return srv.(PostServiceServer).GetPost(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.v1.PostService/GetPostById",
+		FullMethod: "/durudex.v1.PostService/GetPost",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).GetPostById(ctx, req.(*GetPostByIdRequest))
+		return srv.(PostServiceServer).GetPost(ctx, req.(*GetPostRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _PostService_GetAuthorPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetAuthorPostsRequest)
+func _PostService_GetPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPostsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(PostServiceServer).GetAuthorPosts(ctx, in)
+		return srv.(PostServiceServer).GetPosts(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/durudex.v1.PostService/GetAuthorPosts",
+		FullMethod: "/durudex.v1.PostService/GetPosts",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).GetAuthorPosts(ctx, req.(*GetAuthorPostsRequest))
+		return srv.(PostServiceServer).GetPosts(ctx, req.(*GetPostsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -234,12 +234,12 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PostService_CreatePost_Handler,
 		},
 		{
-			MethodName: "GetPostById",
-			Handler:    _PostService_GetPostById_Handler,
+			MethodName: "GetPost",
+			Handler:    _PostService_GetPost_Handler,
 		},
 		{
-			MethodName: "GetAuthorPosts",
-			Handler:    _PostService_GetAuthorPosts_Handler,
+			MethodName: "GetPosts",
+			Handler:    _PostService_GetPosts_Handler,
 		},
 		{
 			MethodName: "DeletePost",

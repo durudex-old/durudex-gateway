@@ -17,7 +17,57 @@
 
 package domain
 
+import (
+	"encoding/base64"
+
+	"github.com/segmentio/ksuid"
+)
+
 const (
 	UserCtx string = "userId"
 	IpCtx   string = "Ip"
 )
+
+// Query sorting options.
+type SortOptions struct {
+	First  *int32
+	Last   *int32
+	Before ksuid.KSUID
+	After  ksuid.KSUID
+}
+
+// Creating a new query sort options.
+func NewSortOptions(first, last *int, before, after *string) (SortOptions, error) {
+	sort := SortOptions{}
+
+	// Check query first sort option.
+	if first != nil {
+		f := int32(*first)
+		sort.First = &f
+	}
+	// Check query last sort option.
+	if last != nil {
+		l := int32(*last)
+		sort.Last = &l
+	}
+	// Check query before sort option.
+	if before != nil {
+		b, err := base64.StdEncoding.DecodeString(*after)
+		if err != nil {
+			return SortOptions{}, err
+		}
+
+		sort.Before = ksuid.FromBytesOrNil(b)
+	}
+	// Check query after sort option.
+	if after != nil {
+		a, err := base64.StdEncoding.DecodeString(*after)
+		if err != nil {
+			return SortOptions{}, err
+		}
+
+		sort.After = ksuid.FromBytesOrNil(a)
+	}
+
+	return sort, nil
+}

@@ -28,11 +28,16 @@ import (
 
 // Post service interface.
 type Post interface {
+	// Creating a new post.
 	Create(ctx context.Context, input domain.CreatePostInput) (ksuid.KSUID, error)
+	// Deleting a post.
 	Delete(ctx context.Context, id, authorId ksuid.KSUID) error
+	// Updating a post.
 	Update(ctx context.Context, input domain.UpdatePostInput) error
+	// Getting a post.
 	Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, error)
-	GetPosts(ctx context.Context, authorId ksuid.KSUID, first, last *int32) ([]*domain.Post, error)
+	// Getting author posts.
+	GetPosts(ctx context.Context, authorId ksuid.KSUID, sort domain.SortOptions) ([]*domain.Post, error)
 }
 
 // Post service structure.
@@ -83,7 +88,7 @@ func (s *PostService) Update(ctx context.Context, input domain.UpdatePostInput) 
 
 // Getting a post.
 func (s *PostService) Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
-	post, err := s.client.GetPostById(ctx, &v1.GetPostByIdRequest{Id: id.Bytes()})
+	post, err := s.client.GetPost(ctx, &v1.GetPostRequest{Id: id.Bytes()})
 	if err != nil {
 		return nil, err
 	}
@@ -97,12 +102,16 @@ func (s *PostService) Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, er
 }
 
 // Getting author posts.
-func (s *PostService) GetPosts(ctx context.Context, authorId ksuid.KSUID, first, last *int32) ([]*domain.Post, error) {
+func (s *PostService) GetPosts(ctx context.Context, authorId ksuid.KSUID, sort domain.SortOptions) ([]*domain.Post, error) {
 	// Getting author posts.
-	response, err := s.client.GetAuthorPosts(ctx, &v1.GetAuthorPostsRequest{
+	response, err := s.client.GetPosts(ctx, &v1.GetPostsRequest{
 		AuthorId: authorId.Bytes(),
-		First:    first,
-		Last:     last,
+		SortOptions: &v1.SortOptions{
+			First:  sort.First,
+			Last:   sort.Last,
+			Before: sort.Before.Bytes(),
+			After:  sort.After.Bytes(),
+		},
 	})
 	if err != nil {
 		return nil, err

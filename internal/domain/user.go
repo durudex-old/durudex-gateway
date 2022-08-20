@@ -25,8 +25,6 @@ import (
 
 // User type.
 type User struct {
-	// Getting user posts.
-	Posts *PostConnection `json:"posts"`
 	// User id.
 	Id ksuid.KSUID `json:"id"`
 	// Username.

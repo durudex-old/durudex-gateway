@@ -43,10 +43,6 @@ func (Post) IsNode() {}
 type PostConnection struct {
 	// A list of nodes.
 	Nodes []*Post `json:"nodes"`
-	// A list of edges.
-	Edges []*PostEdge `json:"edges"`
-	// Information to aid in pagination.
-	PageInfo *PageInfo `json:"pageInfo"`
 }
 
 // An edge in a post connection.
