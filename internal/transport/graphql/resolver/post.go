@@ -66,6 +66,22 @@ func (r *mutationResolver) UpdatePost(ctx context.Context, input domain.UpdatePo
 	return true, nil
 }
 
+// Author is the resolver for the author field.
+func (r *postResolver) Author(ctx context.Context, obj *domain.Post) (*domain.User, error) {
+	// Check author id is single.
+	if gql.IsFieldSingle(ctx, "id") {
+		return &domain.User{Id: obj.AuthorId}, nil
+	}
+
+	// Getting author.
+	author, err := r.service.User.GetById(ctx, obj.AuthorId)
+	if err != nil {
+		return nil, err
+	}
+
+	return author, nil
+}
+
 // Edges is the resolver for the edges field.
 func (r *postConnectionResolver) Edges(ctx context.Context, obj *domain.PostConnection) ([]*domain.PostEdge, error) {
 	edges := make([]*domain.PostEdge, len(obj.Nodes))
@@ -85,10 +101,7 @@ func (r *postConnectionResolver) PageInfo(ctx context.Context, obj *domain.PostC
 	start := base64.StdEncoding.EncodeToString(obj.Nodes[0].Id.Bytes())
 	end := base64.StdEncoding.EncodeToString(obj.Nodes[len(obj.Nodes)-1].Id.Bytes())
 
-	return &domain.PageInfo{
-		StartCursor: &start,
-		EndCursor:   &end,
-	}, nil
+	return &domain.PageInfo{StartCursor: &start, EndCursor: &end}, nil
 }
 
 // Post is the resolver for the post field.
@@ -99,26 +112,16 @@ func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post,
 		return nil, err
 	}
 
-	// Getting author selections fields.
-	fields := gql.GetSelectionsFields(ctx, "author")
-
-	// Check author selections fields.
-	if !(len(fields) == 1 && fields[0] == "id") {
-		// Getting post author.
-		user, err := r.service.User.GetById(ctx, post.Author.Id)
-		if err != nil {
-			return nil, err
-		}
-
-		post.Author = user
-	}
-
 	return post, nil
 }
+
+// Post returns generated.PostResolver implementation.
+func (r *Resolver) Post() generated.PostResolver { return &postResolver{r} }
 
 // PostConnection returns generated.PostConnectionResolver implementation.
 func (r *Resolver) PostConnection() generated.PostConnectionResolver {
 	return &postConnectionResolver{r}
 }
 
+type postResolver struct{ *Resolver }
 type postConnectionResolver struct{ *Resolver }

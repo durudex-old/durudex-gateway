@@ -27,8 +27,8 @@ import (
 type Post struct {
 	// Post id.
 	Id ksuid.KSUID `json:"id"`
-	// Post author.
-	Author *User `json:"author"`
+	// Post author id.
+	AuthorId ksuid.KSUID
 	// Post text.
 	Text string `json:"text"`
 	// Post updated date.

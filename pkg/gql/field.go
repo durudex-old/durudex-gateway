@@ -23,22 +23,19 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-// Getting selections fields.
-func GetSelectionsFields(ctx context.Context, target string) []string {
-	var fields []string
+// Check is field single.
+func IsFieldSingle(ctx context.Context, target string) bool {
+	var res bool
 
-	// Getting selections.
-	for _, i := range graphql.CollectFieldsCtx(ctx, nil) {
-		// Check is target field.
-		if i.Name == target {
-			reqCtx := graphql.GetOperationContext(ctx)
+	for i, field := range graphql.CollectFieldsCtx(ctx, nil) {
+		if field.Name == target {
+			res = true
+		}
 
-			// Getting selections fields.
-			for _, field := range graphql.CollectFields(reqCtx, i.Selections, nil) {
-				fields = append(fields, field.Name)
-			}
+		if i == 1 {
+			return false
 		}
 	}
 
-	return fields
+	return res
 }
