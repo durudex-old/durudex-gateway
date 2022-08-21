@@ -70,6 +70,9 @@ func main() {
 	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
 	<-quit
 
+	// Closing a gRPC client connections.
+	client.Close()
+
 	// Stopping server.
 	srv.Stop()
 

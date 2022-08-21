@@ -39,28 +39,47 @@ type UserClient struct {
 	Auth v1.UserAuthServiceClient
 	User v1.UserServiceClient
 	Code v1.UserCodeServiceClient
+	conn *grpc.ClientConn
 }
 
 // Post clients structure.
 type PostClient struct {
 	Post v1.PostServiceClient
+	conn *grpc.ClientConn
 }
 
 // Creating a new gRPC client.
 func NewClient(cfg config.ServiceConfig) *Client {
 	log.Debug().Msg("Creating a new gRPC client")
 
+	userServiceConn := connectToService(cfg.User)
+	postServiceConn := connectToService(cfg.Post)
+
 	return &Client{
 		// Creating a new user clients.
 		User: &UserClient{
-			Auth: v1.NewUserAuthServiceClient(connectToService(cfg.User)),
-			User: v1.NewUserServiceClient(connectToService(cfg.User)),
-			Code: v1.NewUserCodeServiceClient(connectToService(cfg.User)),
+			Auth: v1.NewUserAuthServiceClient(userServiceConn),
+			User: v1.NewUserServiceClient(userServiceConn),
+			Code: v1.NewUserCodeServiceClient(userServiceConn),
+			conn: userServiceConn,
 		},
 		// Creating a new post clients.
 		Post: &PostClient{
-			Post: v1.NewPostServiceClient(connectToService(cfg.Post)),
+			Post: v1.NewPostServiceClient(postServiceConn),
+			conn: postServiceConn,
 		},
+	}
+}
+
+// Closing a gRPC client connections.
+func (c *Client) Close() {
+	log.Info().Msg("Closing a gRPC client connections")
+
+	if err := c.User.conn.Close(); err != nil {
+		log.Error().Err(err).Msg("failed to close user service connection")
+	}
+	if err := c.Post.conn.Close(); err != nil {
+		log.Error().Err(err).Msg("failed to close post service connection")
 	}
 }
 
