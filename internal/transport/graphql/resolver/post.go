@@ -98,8 +98,14 @@ func (r *postConnectionResolver) Edges(ctx context.Context, obj *domain.PostConn
 
 // PageInfo is the resolver for the pageInfo field.
 func (r *postConnectionResolver) PageInfo(ctx context.Context, obj *domain.PostConnection) (*domain.PageInfo, error) {
+	n := len(obj.Nodes)
+
+	if n == 0 {
+		return &domain.PageInfo{}, nil
+	}
+
 	start := base64.StdEncoding.EncodeToString(obj.Nodes[0].Id.Bytes())
-	end := base64.StdEncoding.EncodeToString(obj.Nodes[len(obj.Nodes)-1].Id.Bytes())
+	end := base64.StdEncoding.EncodeToString(obj.Nodes[n-1].Id.Bytes())
 
 	return &domain.PageInfo{StartCursor: &start, EndCursor: &end}, nil
 }
