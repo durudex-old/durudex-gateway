@@ -23,10 +23,16 @@ import (
 	"github.com/segmentio/ksuid"
 )
 
+// Custom context key type.
+type ContextKey int
+
+// Context keys.
+const AuthorCtx ContextKey = iota
+
+// String context keys.
 const (
-	UserCtx   string = "userId"
-	AuthorCtx string = "authorId"
-	IpCtx     string = "Ip"
+	UserCtx string = "userId"
+	IpCtx   string = "Ip"
 )
 
 // Query sorting options.
