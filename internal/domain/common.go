@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	UserCtx string = "userId"
-	IpCtx   string = "Ip"
+	UserCtx   string = "userId"
+	AuthorCtx string = "authorId"
+	IpCtx     string = "Ip"
 )
 
 // Query sorting options.

@@ -76,6 +76,9 @@ func (r *userResolver) Posts(ctx context.Context, obj *domain.User, first *int, 
 		return nil, err
 	}
 
+	// Setting author context value.
+	ctx = context.WithValue(ctx, domain.AuthorCtx, obj.Id)
+
 	return &domain.PostConnection{Nodes: posts}, nil
 }
 

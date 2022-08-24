@@ -38,6 +38,8 @@ type Post interface {
 	Get(ctx context.Context, id ksuid.KSUID) (*domain.Post, error)
 	// Getting author posts.
 	GetPosts(ctx context.Context, authorId ksuid.KSUID, sort domain.SortOptions) ([]*domain.Post, error)
+	// Getting total author posts count.
+	GetTotalCount(ctx context.Context, authorId ksuid.KSUID) (int32, error)
 }
 
 // Post service structure.
@@ -130,4 +132,16 @@ func (s *PostService) GetPosts(ctx context.Context, authorId ksuid.KSUID, sort d
 	}
 
 	return posts, nil
+}
+
+// Getting total author posts count.
+func (s *PostService) GetTotalCount(ctx context.Context, authorId ksuid.KSUID) (int32, error) {
+	response, err := s.client.GetTotalPostsCount(ctx, &v1.GetTotalPostsCountRequest{
+		AuthorId: authorId.Bytes(),
+	})
+	if err != nil {
+		return 0, err
+	}
+
+	return response.Count, nil
 }

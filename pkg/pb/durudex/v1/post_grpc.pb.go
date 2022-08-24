@@ -28,6 +28,8 @@ type PostServiceClient interface {
 	DeletePost(ctx context.Context, in *DeletePostRequest, opts ...grpc.CallOption) (*DeletePostResponse, error)
 	// Update a post.
 	UpdatePost(ctx context.Context, in *UpdatePostRequest, opts ...grpc.CallOption) (*UpdatePostResponse, error)
+	// Getting total posts count.
+	GetTotalPostsCount(ctx context.Context, in *GetTotalPostsCountRequest, opts ...grpc.CallOption) (*GetTotalPostsCountResponse, error)
 }
 
 type postServiceClient struct {
@@ -83,6 +85,15 @@ func (c *postServiceClient) UpdatePost(ctx context.Context, in *UpdatePostReques
 	return out, nil
 }
 
+func (c *postServiceClient) GetTotalPostsCount(ctx context.Context, in *GetTotalPostsCountRequest, opts ...grpc.CallOption) (*GetTotalPostsCountResponse, error) {
+	out := new(GetTotalPostsCountResponse)
+	err := c.cc.Invoke(ctx, "/durudex.v1.PostService/GetTotalPostsCount", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
@@ -97,6 +108,8 @@ type PostServiceServer interface {
 	DeletePost(context.Context, *DeletePostRequest) (*DeletePostResponse, error)
 	// Update a post.
 	UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error)
+	// Getting total posts count.
+	GetTotalPostsCount(context.Context, *GetTotalPostsCountRequest) (*GetTotalPostsCountResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -118,6 +131,9 @@ func (UnimplementedPostServiceServer) DeletePost(context.Context, *DeletePostReq
 }
 func (UnimplementedPostServiceServer) UpdatePost(context.Context, *UpdatePostRequest) (*UpdatePostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePost not implemented")
+}
+func (UnimplementedPostServiceServer) GetTotalPostsCount(context.Context, *GetTotalPostsCountRequest) (*GetTotalPostsCountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTotalPostsCount not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 
@@ -222,6 +238,24 @@ func _PostService_UpdatePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetTotalPostsCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTotalPostsCountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetTotalPostsCount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/durudex.v1.PostService/GetTotalPostsCount",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetTotalPostsCount(ctx, req.(*GetTotalPostsCountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -248,6 +282,10 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdatePost",
 			Handler:    _PostService_UpdatePost_Handler,
+		},
+		{
+			MethodName: "GetTotalPostsCount",
+			Handler:    _PostService_GetTotalPostsCount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

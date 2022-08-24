@@ -110,6 +110,16 @@ func (r *postConnectionResolver) PageInfo(ctx context.Context, obj *domain.PostC
 	return &domain.PageInfo{StartCursor: &start, EndCursor: &end}, nil
 }
 
+// TotalCount is the resolver for the totalCount field.
+func (r *postConnectionResolver) TotalCount(ctx context.Context, obj *domain.PostConnection) (int, error) {
+	count, err := r.service.Post.GetTotalCount(ctx, ctx.Value(domain.AuthorCtx).(ksuid.KSUID))
+	if err != nil {
+		return 0, err
+	}
+
+	return int(count), nil
+}
+
 // Post is the resolver for the post field.
 func (r *queryResolver) Post(ctx context.Context, id ksuid.KSUID) (*domain.Post, error) {
 	// Getting a post.
